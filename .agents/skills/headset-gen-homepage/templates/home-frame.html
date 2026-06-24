@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Headset device</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
     <!-- Paths below are written so THIS template renders correctly when previewed IN PLACE
          (relative to .agents/skills/headset-gen-homepage/templates/). The headset-gen-homepage
          skill rewrites them to the model-output depth on copy — see that skill's SKILL.md.
@@ -38,19 +39,22 @@
                     </div>
                 </div>
                 <div class="device-image-place" data-property="device-image"></div>
-                <!-- Control Zone: COPY the snippet matching connectionType — never write one. -->
+                <!-- Control Zone: COPY the connection snippet (+ Unpair for paired modes) — never write one. -->
                 <div class="control-zone" data-slot="control-zone"
                      data-instruction="Do NOT write a connection block from the connectionType keyword.
-                       COPY .agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html VERBATIM into this div, then fill its
-                       value slots (e.g. data-property=battery-level from manifest.battery; if absent leave —% and flag).
-                       If .agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html does NOT exist, STOP and ask the user —
-                       never invent a connection block or a new mode. Emit only the one needed mode."></div>
+                       1) COPY .agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html VERBATIM into this div,
+                          then fill its value slots (e.g. data-property=battery-level from manifest.battery; if absent leave —% and flag).
+                          If that file does NOT exist, STOP and ask the user — never invent a connection block or a new mode.
+                       2) If the copied snippet says the mode is paired (e.g. bluetooth), ALSO copy
+                          .agents/skills/headset-gen-homepage/templates/connection/unpair.html right after the tag (HOME page only).
+                          Wired/unpaired modes get NO Unpair. Emit only the one needed mode."></div>
             </div>
             <!-- Feature Zone: COPY the feature-button snippet once per features[] item — never write one. -->
             <div class="feature-zone" data-slot="feature-zone"
                  data-instruction="Do NOT write button markup. For each item in manifest.features[], COPY
-                   .agents/skills/headset-gen-homepage/templates/feature-button.html into this div and fill
-                   {label}/{icon}/{link} from the item; if the item has no icon, delete the <img> line.
+                   .agents/skills/headset-gen-homepage/templates/feature-button.html into this div, fill {label}/{link},
+                   and for the icon insert .agents/skills/headset-gen-homepage/templates/icons/<feature.icon>.svg into
+                   the .feature-icon div (no icon -> delete that div; unknown icon id -> STOP and ask).
                    N items -> N buttons. Do not hardcode specific headset features — they come from the manifest."></div>
         </div>
     </div>

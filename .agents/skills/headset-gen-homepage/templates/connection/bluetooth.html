@@ -1,15 +1,23 @@
 <!-- Connection block: BLUETOOTH — canonical snippet. COPY VERBATIM into the home page's
-     .control-zone. Strongly-related parts are kept together so none can go missing:
-     bluetooth tag + battery indicator + Unpair.
+     .control-zone. This is the bluetooth tag + battery ONLY.
+     UNPAIR IS SEPARATE: bluetooth is a paired mode, so on the HOME page also copy
+     connection/unpair.html into the .control-zone right after this tag. Sub-pages OMIT Unpair
+     (do not render it hidden — simply don't copy it).
      Fill data-property="battery-level" from manifest.battery; if absent, leave "—%" and flag it.
      Do NOT hand-write this block from the word "bluetooth" — copy this file. -->
-<div class="bluetooth-connection-tag">
-    <img src="https://www.figma.com/api/mcp/asset/349ea706-276c-4e0f-a9f5-129160b67b85" alt="Bluetooth" class="connection-icon">
+<div class="connection-tag">
+    <div class="bluetooth-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M12.1799 4.9L7.27995 0V6.55L4.51995 4L3.81995 4.76L7.27995 8L3.81995 11.25L4.51995 12.01L7.27995 9.45V16L12.1799 11.1L8.83995 8L12.1799 4.9ZM8.31995 2.51L10.6899 4.87L8.31995 7.07V2.51ZM10.6899 11.13L8.31995 13.49V8.93L10.6899 11.13Z" fill="#0E0E0E"/>
+        </svg>
+    </div>
     <div class="battery-indicator">
-        <img src="https://www.figma.com/api/mcp/asset/4d184d8b-72f8-4d9a-bcff-37fbf9636d2f" alt="Battery" class="battery-icon">
+        <div class="battery-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M16 14L16 7L2 7L2 14L16 14Z" fill="#7AA809"/>
+                <path d="M18.125 15.422L18.125 12.9745L19.375 12.9745C19.75 12.9745 20 12.7099 20 12.313L20 8.34398C20 7.94708 19.75 7.68248 19.375 7.68248L18.125 7.68248L18.125 5.23495C18.125 4.7719 17.75 4.375 17.3125 4.375L0.812501 4.375C0.375001 4.375 8.56879e-07 4.7719 8.36638e-07 5.23495L3.91348e-07 15.422C3.71108e-07 15.885 0.375 16.2819 0.8125 16.2819L17.3125 16.2819C17.75 16.2819 18.125 15.885 18.125 15.422ZM1.25 14.9589L1.25 5.69799L16.875 5.69799L16.875 14.9589L1.25 14.9589Z" fill="#0E0E0E"/>
+            </svg>
+        </div>
         <span class="battery-text" data-property="battery-level">—%</span>
     </div>
 </div>
-<button class="unpair-button">
-    <span class="unpair-text">Unpair</span>
-</button>

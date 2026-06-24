@@ -19,7 +19,17 @@ block from the keyword.
 - Use `data-property="<name>"` for model-specific values (e.g. `battery-level`). The skill fills
   these from the manifest; structure is fixed by the snippet, only values are filled.
 
+## Unpair is a separate snippet
+
+`unpair.html` is **not** part of any connection tag. It is copied separately, on the **home page
+only**, after the tag, for **paired** modes (bluetooth and future wireless modes). Wired modes get
+no Unpair. Sub-pages never include Unpair — they simply omit it (never `display`-hide).
+
 ## Confirmed modes
 
-- `bluetooth.html` — bluetooth tag + battery (`data-property="battery-level"`) + Unpair.
-- `wired.html` — USB-C tag (no value slots).
+| mode | snippet | paired? (gets Unpair on home) | value slots |
+|------|---------|-------------------------------|-------------|
+| bluetooth | `bluetooth.html` | yes → also copy `unpair.html` | `battery-level` |
+| wired | `wired.html` | no | none |
+
+`unpair.html` — standalone Unpair button (home only, paired modes only).

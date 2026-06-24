@@ -1,8 +1,15 @@
 <!-- Feature button — canonical snippet. COPY ONCE PER manifest.features[] item into the
-     home page's .feature-zone, replacing {label} / {icon} / {link} with that item's values.
-     If the item has NO icon, DELETE the <img> line (text-only button) — never invent an icon.
-     Do NOT hand-write this markup from a pattern — copy this file. -->
+     home page's .feature-zone, then fill:
+       {label} ← feature label;  {link} ← feature link (sub-page filename).
+     ICON: replace the inner of <div class="feature-icon"> with the contents of
+       .agents/skills/headset-gen-homepage/templates/icons/<icon-id>.svg
+       (icon-id = manifest feature.icon).
+       - If the feature has NO icon, DELETE the whole <div class="feature-icon"> line.
+       - If icon-id has no file in icons/, STOP and ask — never draw/invent an icon.
+     Do NOT hand-write this markup — copy this file. -->
 <a class="feature-button" href="{link}">
-    <img class="feature-icon" src="{icon}" alt="{label}">
-    <span class="feature-text">{label}</span>
+    <div class="button-content">
+        <div class="feature-icon"><!-- insert icons/<icon-id>.svg, or delete this div if no icon --></div>
+        <span class="feature-text">{label}</span>
+    </div>
 </a>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+        }
+
+        .frame {
+            width: 1378px;
+            height: 735px;
+            background: white;
+            border: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 16px;
+        }
+
+        .content-zone {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            padding: 0 16px 16px 64px;
+        }
+
+        .devices-image-zone {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 36px;
+        }
+
+        .device-image-place {
+            height: 495px;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .device-image-place img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .control-zone {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #e6f3ff;
+            gap: 8px;
+        }
+
+        .connection-button {
+            background: #193962;
+            border: 1px solid #132f54;
+            border-radius: 2px;
+            height: 40px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0px 0px 10px rgba(5, 14, 60, 0.15);
+            cursor: pointer;
+        }
+
+        .connection-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .connection-text {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 24px;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .wired-connection-tag {
+            background: #193962;
+            border: 1px solid #132f54;
+            border-radius: 2px;
+            height: 40px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0px 0px 10px rgba(5, 14, 60, 0.15);
+        }
+
+        .wired-text {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 17px;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .bluetooth-connection-tag {
+            background: #193962;
+            border: 1px solid #132f54;
+            border-radius: 2px;
+            height: 40px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0px 0px 10px rgba(5, 14, 60, 0.15);
+        }
+
+        .battery-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .battery-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .battery-text {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 24px;
+            color: white;
+        }
+
+        .unpair-button {
+            background: transparent;
+            border: 1px solid #0063b8;
+            border-radius: 2px;
+            height: 40px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .unpair-text {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 24px;
+            color: #0063b8;
+            white-space: nowrap;
+        }
+
+        .feature-zone {
+            display: flex;
+            width: 212px;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            gap: 8px;
+            align-self: stretch;
+            background: #ffe6e6;
+        }
+
+        .feature-button {
+            background: #193962;
+            border: 2px solid #132f54;
+            border-radius: 16px;
+            height: 64px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0px 0px 10px rgba(5, 14, 60, 0.15);
+            cursor: pointer;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .feature-text {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 19.68px;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .primary-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-title {
+            font-family: 'Roboto', sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 24px;
+            line-height: 32px;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .secondary-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 40px;
+        }
+
+        .model-number {
+            font-family: 'Roboto', sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 20px;
+            line-height: 28px;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .firmware-icon {
+            width: 16px;
+            height: 16px;
+            filter: brightness(0) saturate(100%) invert(20%) sepia(8%) saturate(637%) hue-rotate(175deg) brightness(95%) contrast(89%);
+        }
+
+        .firmware-tooltip-component {
+            position: relative;
+            display: inline-block;
+        }
+
+        .firmware-tooltip {
+            position: absolute;
+            background: white;
+            border: 1px solid #e1e1e1;
+            border-radius: 4px;
+            padding: 16px 12px;
+            min-width: 110px;
+            max-width: 450px;
+            min-height: 52px;
+            left: 8px;
+            top: 19px;
+            box-shadow: 0px 4px 2px rgba(0, 0, 0, 0.18), 0px 2px 1px rgba(0, 0, 0, 0.14);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .firmware-tooltip-text {
+            font-family: 'Roboto', sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 20px;
+            color: #0e0e0e;
+            letter-spacing: 0.06px;
+        }
+
+        .firmware-tooltip-component:hover .firmware-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .masthead {
+            height: 64px;
+            display: flex;
+            padding: 16px 16px;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-shrink: 0;
+            align-self: stretch;
+        }
+
+        .masthead-controls {
+            display: flex;
+            gap: 24px;
+        }
+
+        .control-button {
+            width: 12px;
+            height: 12px;
+            background: #ccc;
+            border: none;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="frame">
+        <div class="masthead">
+            <div class="masthead-controls">
+                <button class="control-button"></button>
+                <button class="control-button"></button>
+                <button class="control-button"></button>
+            </div>
+        </div>
+        <div class="content-zone">
+            <div class="devices-image-zone">
+                <div class="page-header">
+                    <div class="primary-header">
+                        <h1 class="page-title" data-property="device-marketing-name">Device Name</h1>
+                    </div>
+                    <div class="secondary-header">
+                        <span class="model-number" data-property="device-model-number">Model Number</span>
+                        <div class="firmware-tooltip-component">
+                    <img src="https://www.figma.com/api/mcp/asset/6f0b89ee-7b00-4a3f-9869-e84329cc2025" alt="Firmware" class="firmware-icon">
+                    <div class="firmware-tooltip">
+                        <span class="firmware-tooltip-text">Firmware Version <span data-property="firmware-version">x.x.x.x</span></span>
+                        <span class="firmware-tooltip-text" data-property="device-ppid" style="display: none;">PPID: XXXXXX</span>
+                    </div>
+                </div>
+                    </div>
+                </div>
+                <div class="device-image-place" data-property="device-image"></div>
+                <!-- Wired Connection Button (for wired devices) -->
+                <div class="control-zone" style="display: none;" data-property="connection-type-wired">
+                    <div class="wired-connection-tag">
+                        <img src="https://www.figma.com/api/mcp/asset/28b7c1d2-8767-4e45-bc39-413348d1a1d8" alt="USB" class="connection-icon">
+                        <span class="wired-text">USB-C</span>
+                    </div>
+                </div>
+                <!-- Bluetooth Connection Controls (for bluetooth devices) -->
+                <div class="control-zone" style="display: none;" data-property="connection-type-bluetooth">
+                    <div class="bluetooth-connection-tag">
+                        <img src="https://www.figma.com/api/mcp/asset/349ea706-276c-4e0f-a9f5-129160b67b85" alt="Bluetooth" class="connection-icon">
+                        <div class="battery-indicator">
+                            <img src="https://www.figma.com/api/mcp/asset/4d184d8b-72f8-4d9a-bcff-37fbf9636d2f" alt="Battery" class="battery-icon">
+                            <span class="battery-text">100%</span>
+                        </div>
+                    </div>
+                    <button class="unpair-button">
+                        <span class="unpair-text">Unpair</span>
+                    </button>
+                </div>
+            </div>
+            <div class="feature-zone" data-property="device-features">
+                <!-- Device-specific features will be dynamically populated based on device type -->
+                <!-- Mouse features (hidden by default) -->
+                <div class="feature-button" style="display: none;" data-property="mouse-feature-settings">
+                    <img src="https://www.figma.com/api/mcp/asset/22b5439e-b363-42ef-9b9b-a70718c685d1" alt="Cursor" class="feature-icon">
+                    <span class="feature-text">Mouse Settings</span>
+                </div>
+                <div class="feature-button" style="display: none;" data-property="mouse-feature-customization">
+                    <img src="https://www.figma.com/api/mcp/asset/c0a562ce-c919-4c01-befe-73bc291a909f" alt="Mouse" class="feature-icon">
+                    <span class="feature-text">Button Customization</span>
+                </div>
+                <!-- Keyboard features (hidden by default) - to be added -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -37,6 +37,10 @@ If a relevant skill exists but was not used, that is a violation — redo it thr
   content is presence/absence — generate only the block the model needs.
 - **Share styles:** every page links `../../../shared/tokens.css` then `../../headset.css`.
   No inline `<style>` blocks; promote reusable styles to `headset.css`.
+- **No dev zone tints in product pages:** the pale blue (control-zone) / pink (feature-zone)
+  backgrounds are template-only affordances, scoped to `[data-slot]` in `headset.css`. Finished
+  product pages strip `data-slot` (step 6), so the tints disappear automatically — they render
+  clean. Never add a zone background to a generated product page or re-introduce the tint.
 - **Real routing:** feature entries are real `<a href>` links; every sub-page links back to
   `index.html`.
 - **Connection blocks are copied, not written:** the connection block is COPIED verbatim from a

@@ -67,7 +67,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--color-zone-control);
   gap: 8px;
 }
 
@@ -173,7 +172,6 @@ body {
   align-items: stretch;
   gap: 8px;
   align-self: stretch;
-  background: var(--color-zone-feature);
 }
 
 .feature-button {
@@ -369,13 +367,17 @@ body {
 }
 
 /* ------------------------------------------------------------
-   Slot affordance — only meaningful in template.html, where
-   empty [data-slot] regions get a faint dashed outline so the
-   author can see where generated content goes. Finished model
-   pages carry no [data-slot], so this rule never applies there.
+   Slot affordance — TEMPLATE-ONLY. Empty [data-slot] regions get
+   a faint dashed outline + pale dev zone tint so the author can
+   see where generated content goes. Finished product pages STRIP
+   data-slot (see the gen skills), so none of this applies there —
+   product pages render clean, with no blue/pink zone backgrounds.
    ------------------------------------------------------------ */
 [data-slot] {
   outline: 1px dashed var(--color-border-muted);
   outline-offset: 2px;
   min-height: 40px;
 }
+
+.control-zone[data-slot] { background: var(--color-zone-control); }   /* dev tint — template only */
+.feature-zone[data-slot] { background: var(--color-zone-feature); }   /* dev tint — template only */

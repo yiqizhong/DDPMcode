@@ -60,12 +60,15 @@ skill at a time. So skill COUNT is cheap; what matters is that descriptions are:
   skill only after it recurs in real manifests (§9.4). Until then it renders via
   `<category>-control-generic`.
 
-### Physical grouping is deferred, not adopted
+### Physical grouping does NOT work — flat is settled (tested 2026-06-24)
 
-§9.7.3 suggests grouping skills in sub-directories. Whether Devin discovers a grouped path
-like `.agents/skills/<group>/<skill>/SKILL.md` is **undocumented** — do not assume it works.
-The flat-root + naming convention above is the supported approach. Adopt physical grouping
-only after empirically confirming Devin discovers a nested SKILL.md.
+§9.7.3 suggests grouping skills in sub-directories. This was tested empirically with probe
+skills at depth 1 and depth 2, run through Devin: Devin discovers
+`.agents/skills/<skill-name>/SKILL.md` (depth 1) but **does NOT discover**
+`.agents/skills/<group>/<skill-name>/SKILL.md` (depth 2 / nested) — the nested probe came back
+"skill not found" while the flat one resolved. So skills **must be exactly one level deep**;
+the flat-root + `<category>-` naming convention above is the permanent grouping mechanism, not
+a temporary default. Do not re-litigate this without re-running the probe.
 
 ## Working rules
 

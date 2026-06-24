@@ -34,6 +34,11 @@ body {
   padding-bottom: 16px;
 }
 
+/* Homepage canvas background (light blue); sub-page frames stay default. */
+.frame-home {
+  background: var(--color-homepage-bg);
+}
+
 .content-zone {
   flex: 1;
   display: flex;

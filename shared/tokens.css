@@ -18,6 +18,7 @@
   --color-bg-page: #f0f0f0;
   --color-surface: #ffffff;
   --color-surface-muted: #f5f5f5;
+  --color-homepage-bg: #e5f1fc;         /* homepage canvas background (light blue) */
   --color-border: #e1e1e1;
   --color-border-muted: #cccccc;
   --color-border-light: #f0f0f0;        /* white-theme component borders (connection tag, feature button) */

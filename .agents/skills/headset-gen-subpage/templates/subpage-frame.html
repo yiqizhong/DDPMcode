@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-property="subpage-title">Subpage</title>
+    <!-- Paths below are written so THIS template renders correctly when previewed IN PLACE
+         (relative to .agents/skills/headset-gen-subpage/templates/). The headset-gen-subpage
+         skill rewrites them to the model-output depth on copy — see that skill's SKILL.md.
+         Do not "fix" these by hand. -->
+    <link rel="stylesheet" href="../../../../shared/tokens.css">
+    <link rel="stylesheet" href="../../../../headset/headset.css">
+</head>
+<body>
+    <div class="frame">
+        <div class="masthead">
+            <div class="masthead-controls">
+                <button class="control-button"></button>
+                <button class="control-button"></button>
+                <button class="control-button"></button>
+            </div>
+        </div>
+        <div class="content-zone" style="flex-direction: column; padding: 0 16px 16px 64px;">
+            <div class="page-header">
+                <div class="primary-header">
+                    <a class="back-link" href="index.html">&larr; Back</a>
+                </div>
+                <div class="primary-header">
+                    <h1 class="page-title" data-property="subpage-title">Subpage Title</h1>
+                </div>
+            </div>
+            <!-- Control list: render one control per manifest.controls[] item. -->
+            <div data-slot="controls"
+                 data-instruction="For each item in manifest.controls[], render its control:
+                   if a matching headset-control-<id> skill exists, use @skills:headset-control-<id>;
+                   otherwise use @skills:headset-control-generic. Do NOT invent controls — render only
+                   what the manifest lists. If controls[] is empty, leave the placeholder note below.">
+                <p class="placeholder-note">Sub-feature content TBD — to be filled from the manifest.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

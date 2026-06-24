@@ -1,0 +1,372 @@
+/* ============================================================
+   Category-template layer — headset layout + single-part styles.
+   References the design-token layer (../shared/tokens.css) via
+   var().
+
+   NOTE: This is a STARTING skeleton carried over from the shared
+   prototype layout. The frame/header/masthead/zone structure is
+   generic and reusable. The connection component styles
+   (.wired-connection-tag, .bluetooth-connection-tag,
+   .battery-indicator, .unpair-button) are provided as a starter
+   component library — adjust or replace them to match the
+   headset's ACTUAL connection modes once a real spec exists. Do
+   not assume a headset has the same connection UI as a mouse.
+   ============================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--color-bg-page);
+}
+
+.frame {
+  width: var(--canvas-width);
+  height: var(--canvas-height);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-muted);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 16px;
+}
+
+.content-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding: 0 16px 16px 64px;
+}
+
+.devices-image-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 36px;
+}
+
+.device-image-place {
+  height: 495px;
+  background: var(--color-surface-muted);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.device-image-place img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.control-zone {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--color-zone-control);
+  gap: 8px;
+}
+
+/* --- Connection component starter library (tailor to real headset spec) --- */
+.connection-button {
+  background: var(--color-brand);
+  border: 1px solid var(--color-brand-border);
+  border-radius: var(--radius-sm);
+  height: 40px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-button);
+  cursor: pointer;
+}
+
+.connection-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.connection-text {
+  font-family: var(--font-family);
+  font-weight: var(--fw-medium);
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--color-surface);
+  white-space: nowrap;
+}
+
+.wired-connection-tag {
+  background: var(--color-brand);
+  border: 1px solid var(--color-brand-border);
+  border-radius: var(--radius-sm);
+  height: 40px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-button);
+}
+
+.wired-text {
+  font-family: var(--font-family);
+  font-weight: var(--fw-medium);
+  font-size: 14px;
+  line-height: 17px;
+  color: var(--color-surface);
+  white-space: nowrap;
+}
+
+.bluetooth-connection-tag {
+  background: var(--color-brand);
+  border: 1px solid var(--color-brand-border);
+  border-radius: var(--radius-sm);
+  height: 40px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-button);
+}
+
+.battery-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.battery-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.battery-text {
+  font-family: var(--font-family);
+  font-weight: var(--fw-medium);
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--color-surface);
+}
+
+.unpair-button {
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  height: 40px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.unpair-text {
+  font-family: var(--font-family);
+  font-weight: var(--fw-medium);
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+/* --- Feature zone (list) --- */
+.feature-zone {
+  display: flex;
+  width: 212px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 8px;
+  align-self: stretch;
+  background: var(--color-zone-feature);
+}
+
+.feature-button {
+  background: var(--color-brand);
+  border: 2px solid var(--color-brand-border);
+  border-radius: var(--radius-lg);
+  height: 64px;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-button);
+  cursor: pointer;
+  /* feature buttons are real <a> links — neutralize anchor defaults. */
+  text-decoration: none;
+  color: inherit;
+}
+
+.feature-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.feature-text {
+  font-family: var(--font-family);
+  font-weight: var(--fw-bold);
+  font-size: 14px;
+  line-height: 19.68px;
+  color: var(--color-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Header --- */
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.primary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-title {
+  font-family: var(--font-family);
+  font-style: normal;
+  font-weight: var(--fw-regular);
+  font-size: 24px;
+  line-height: 32px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.secondary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+}
+
+.model-number {
+  font-family: var(--font-family);
+  font-style: normal;
+  font-weight: var(--fw-regular);
+  font-size: 20px;
+  line-height: 28px;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.firmware-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(20%) sepia(8%) saturate(637%) hue-rotate(175deg) brightness(95%) contrast(89%);
+}
+
+.firmware-tooltip-component {
+  position: relative;
+  display: inline-block;
+}
+
+.firmware-tooltip {
+  position: absolute;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 12px;
+  min-width: 110px;
+  max-width: 450px;
+  min-height: 52px;
+  left: 8px;
+  top: 19px;
+  box-shadow: var(--shadow-tooltip);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.firmware-tooltip-text {
+  font-family: var(--font-family);
+  font-style: normal;
+  font-weight: var(--fw-regular);
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--color-text-strong);
+  letter-spacing: 0.06px;
+}
+
+.firmware-tooltip-component:hover .firmware-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* --- Masthead --- */
+.masthead {
+  height: 64px;
+  display: flex;
+  padding: 16px 16px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.masthead-controls {
+  display: flex;
+  gap: 24px;
+}
+
+.control-button {
+  width: 12px;
+  height: 12px;
+  background: var(--color-border-muted);
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+/* Sub-page back link — real <a>, styled in the accent color. */
+.back-link {
+  font-family: var(--font-family);
+  font-weight: var(--fw-medium);
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--color-accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* Sub-page placeholder note. */
+.placeholder-note {
+  font-family: var(--font-family);
+  font-weight: var(--fw-regular);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text);
+}
+
+/* ------------------------------------------------------------
+   Slot affordance — only meaningful in template.html, where
+   empty [data-slot] regions get a faint dashed outline so the
+   author can see where generated content goes. Finished model
+   pages carry no [data-slot], so this rule never applies there.
+   ------------------------------------------------------------ */
+[data-slot] {
+  outline: 1px dashed var(--color-border-muted);
+  outline-offset: 2px;
+  min-height: 40px;
+}

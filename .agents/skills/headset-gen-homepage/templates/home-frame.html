@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headset device</title>
+    <!-- Paths below are written so THIS template renders correctly when previewed IN PLACE
+         (relative to .agents/skills/headset-gen-homepage/templates/). The headset-gen-homepage
+         skill rewrites them to the model-output depth on copy — see that skill's SKILL.md.
+         Do not "fix" these by hand. -->
+    <link rel="stylesheet" href="../../../../shared/tokens.css">
+    <link rel="stylesheet" href="../../../../headset/headset.css">
+</head>
+<body>
+    <div class="frame">
+        <div class="masthead">
+            <div class="masthead-controls">
+                <button class="control-button"></button>
+                <button class="control-button"></button>
+                <button class="control-button"></button>
+            </div>
+        </div>
+        <div class="content-zone">
+            <div class="devices-image-zone">
+                <div class="page-header">
+                    <div class="primary-header">
+                        <h1 class="page-title" data-property="device-marketing-name">Device Name</h1>
+                    </div>
+                    <div class="secondary-header">
+                        <span class="model-number" data-property="device-model-number">Model Number</span>
+                        <div class="firmware-tooltip-component">
+                            <img src="https://www.figma.com/api/mcp/asset/6f0b89ee-7b00-4a3f-9869-e84329cc2025" alt="Firmware" class="firmware-icon">
+                            <div class="firmware-tooltip">
+                                <span class="firmware-tooltip-text">Firmware Version <span data-property="firmware-version">x.x.x.x</span></span>
+                                <span class="firmware-tooltip-text" data-property="device-ppid">PPID: XXXXXX</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="device-image-place" data-property="device-image"></div>
+                <!-- Control Zone: generate exactly ONE connection block from the manifest. -->
+                <div class="control-zone" data-slot="control-zone"
+                     data-instruction="Generate exactly one connection block based on manifest.connectionType.
+                       The valid connectionType values for a headset, and what each block contains, are
+                       DEFINED BY THE MANIFEST — do not assume mouse modes (wired/bluetooth/Unpair) carry over.
+                       Package the mode's strongly-related parts into one indivisible block.
+                       Generate ONLY the needed mode; never pre-embed all modes and hide."></div>
+            </div>
+            <!-- Feature Zone: generate ONE <a> button per manifest.features[] item. -->
+            <div class="feature-zone" data-slot="feature-zone"
+                 data-instruction="For each item in manifest.features[], generate
+                   <a class='feature-button' href='{link}'><img class='feature-icon' src='{icon}'>
+                   <span class='feature-text'>{label}</span></a>.
+                   N items -> N buttons. Do not hardcode specific headset features — they come from the manifest."></div>
+        </div>
+    </div>
+</body>
+</html>

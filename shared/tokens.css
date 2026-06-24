@@ -1,0 +1,46 @@
+/* ============================================================
+   Design-token layer — shared visual constants.
+   Rarely changes. Linked by every page (category stylesheets
+   reference these via var()). Do NOT duplicate <style> blocks;
+   share this file instead.
+   ============================================================ */
+:root {
+  /* Brand */
+  --color-brand: #193962;
+  --color-brand-border: #132f54;
+  --color-accent: #0063b8;            /* links, Unpair */
+
+  /* Text */
+  --color-text: #333333;
+  --color-text-strong: #0e0e0e;
+
+  /* Surfaces */
+  --color-bg-page: #f0f0f0;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f5f5f5;
+  --color-border: #e1e1e1;
+  --color-border-muted: #cccccc;
+
+  /* Zone highlights — DEV ARTIFACT, candidate for removal; kept to preserve current look */
+  --color-zone-control: #e6f3ff;
+  --color-zone-feature: #ffe6e6;
+
+  /* Typography */
+  --font-family: 'Roboto', sans-serif;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-bold: 700;
+
+  /* Radii */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 16px;
+
+  /* Elevation */
+  --shadow-button: 0px 0px 10px rgba(5, 14, 60, 0.15);
+  --shadow-tooltip: 0px 4px 2px rgba(0, 0, 0, 0.18), 0px 2px 1px rgba(0, 0, 0, 0.14);
+
+  /* Canvas */
+  --canvas-width: 1378px;
+  --canvas-height: 735px;
+}

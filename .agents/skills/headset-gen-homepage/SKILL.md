@@ -34,17 +34,30 @@ Invoke: `@skills:headset-gen-homepage <MODEL>` (e.g. `@skills:headset-gen-homepa
 3. Fill the single-value `data-property` slots from the manifest:
    `device-marketing-name`, `device-model-number`, `firmware-version`, `device-ppid`, and the
    `device-image` container (`<img src="images/...">`). Omit the PPID line if absent.
-4. **Control Zone** (`data-slot="control-zone"`): generate exactly ONE connection block for
-   `connectionType`. Package strongly-related parts into one indivisible block. The valid modes
-   come from the manifest — do not assume mouse modes. Never pre-embed multiple modes and hide.
-5. **Feature Zone** (`data-slot="feature-zone"`): for each `features[]` item emit
-   `<a class="feature-button" href="{link}"><img class="feature-icon" src="{icon}">
-   <span class="feature-text">{label}</span></a>`. N items → N buttons. Generate each link
-   target via `@skills:headset-gen-subpage $1 <subpage>`.
+4. **Control Zone** (`data-slot="control-zone"`): do NOT write a block from the keyword. **Copy**
+   `.agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html` verbatim into
+   the `.control-zone`, then fill its value slots (`data-property="battery-level"` ←
+   `manifest.battery`; if absent, leave `—%` and flag it). **If
+   `.agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html` does not
+   exist, STOP and ask the
+   user — never invent a connection block or a new mode.** Emit only the one needed mode.
+5. **Feature Zone** (`data-slot="feature-zone"`): do NOT write button markup. For each
+   `features[]` item, **copy**
+   `.agents/skills/headset-gen-homepage/templates/feature-button.html` into the `.feature-zone`
+   and fill `{label}`/`{icon}`/`{link}` from the item (if the item has no icon, delete the
+   `<img>` line — never invent one). N items → N buttons. Generate each link target via
+   `@skills:headset-gen-subpage $1 <subpage>`.
 6. Strip `data-slot`/`data-instruction` from the output; keep the frame's classes/markup intact.
 
 ## Hard rules
 
+- **Connection blocks are COPIED from
+  `.agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html`, never
+  written from the connectionType keyword.** Unknown connectionType → halt and ask, never
+  fabricate a block or a new mode. This is what stops a weak model from hallucinating a block.
+- **Feature buttons are COPIED from
+  `.agents/skills/headset-gen-homepage/templates/feature-button.html` (one per `features[]`
+  item, values filled), never written from an inline pattern.**
 - No `display`-hidden or pre-embedded-and-hidden variants in the output.
 - No inline `<style>`; the frame links `shared/tokens.css` + `headset.css` only.
 - After the copy, the output's CSS links must be `../../../shared/tokens.css` and

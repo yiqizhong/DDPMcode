@@ -38,19 +38,19 @@
                     </div>
                 </div>
                 <div class="device-image-place" data-property="device-image"></div>
-                <!-- Control Zone: generate exactly ONE connection block from the manifest. -->
+                <!-- Control Zone: COPY the snippet matching connectionType — never write one. -->
                 <div class="control-zone" data-slot="control-zone"
-                     data-instruction="Generate exactly one connection block based on manifest.connectionType.
-                       The valid connectionType values for a headset, and what each block contains, are
-                       DEFINED BY THE MANIFEST — do not assume mouse modes (wired/bluetooth/Unpair) carry over.
-                       Package the mode's strongly-related parts into one indivisible block.
-                       Generate ONLY the needed mode; never pre-embed all modes and hide."></div>
+                     data-instruction="Do NOT write a connection block from the connectionType keyword.
+                       COPY .agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html VERBATIM into this div, then fill its
+                       value slots (e.g. data-property=battery-level from manifest.battery; if absent leave —% and flag).
+                       If .agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html does NOT exist, STOP and ask the user —
+                       never invent a connection block or a new mode. Emit only the one needed mode."></div>
             </div>
-            <!-- Feature Zone: generate ONE <a> button per manifest.features[] item. -->
+            <!-- Feature Zone: COPY the feature-button snippet once per features[] item — never write one. -->
             <div class="feature-zone" data-slot="feature-zone"
-                 data-instruction="For each item in manifest.features[], generate
-                   <a class='feature-button' href='{link}'><img class='feature-icon' src='{icon}'>
-                   <span class='feature-text'>{label}</span></a>.
+                 data-instruction="Do NOT write button markup. For each item in manifest.features[], COPY
+                   .agents/skills/headset-gen-homepage/templates/feature-button.html into this div and fill
+                   {label}/{icon}/{link} from the item; if the item has no icon, delete the <img> line.
                    N items -> N buttons. Do not hardcode specific headset features — they come from the manifest."></div>
         </div>
     </div>

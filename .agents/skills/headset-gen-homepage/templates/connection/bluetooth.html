@@ -1,0 +1,15 @@
+<!-- Connection block: BLUETOOTH — canonical snippet. COPY VERBATIM into the home page's
+     .control-zone. Strongly-related parts are kept together so none can go missing:
+     bluetooth tag + battery indicator + Unpair.
+     Fill data-property="battery-level" from manifest.battery; if absent, leave "—%" and flag it.
+     Do NOT hand-write this block from the word "bluetooth" — copy this file. -->
+<div class="bluetooth-connection-tag">
+    <img src="https://www.figma.com/api/mcp/asset/349ea706-276c-4e0f-a9f5-129160b67b85" alt="Bluetooth" class="connection-icon">
+    <div class="battery-indicator">
+        <img src="https://www.figma.com/api/mcp/asset/4d184d8b-72f8-4d9a-bcff-37fbf9636d2f" alt="Battery" class="battery-icon">
+        <span class="battery-text" data-property="battery-level">—%</span>
+    </div>
+</div>
+<button class="unpair-button">
+    <span class="unpair-text">Unpair</span>
+</button>

@@ -70,6 +70,24 @@ skills at depth 1 and depth 2, run through Devin: Devin discovers
 the flat-root + `<category>-` naming convention above is the permanent grouping mechanism, not
 a temporary default. Do not re-litigate this without re-running the probe.
 
+## Markup is copied from snippets, never generated from a description
+
+A weak model handed a keyword ("bluetooth connection") or an inline markup pattern will happily
+fabricate the HTML — wrong icons, missing parts, an invented mode. So **any non-trivial markup
+is copied verbatim from a pre-written snippet file, never generated**, in two forms:
+
+- **Variant** (pick 1 of N by an enum) — e.g. connection blocks. The skill picks the snippet whose
+  filename matches the manifest's enum value (`connection/<connectionType>.html`) and fills its
+  value slots. **If the enum value has no snippet, the skill HALTS and asks** — never invents the
+  shape or a new enum value.
+- **List item** (repeat one shape N times with different data) — e.g. feature buttons
+  (`feature-button.html`). The skill copies the one snippet once per `features[]` item and fills
+  `{label}`/`{icon}`/`{link}`; it never writes the button markup from a pattern.
+
+Free-form generation is a last resort (the `*-control-generic` fallback) and even then is
+constrained to manifest-provided values. This is §9.7.4's "copy, don't create" — the structural
+defense against markup hallucination.
+
 ## Working rules
 
 - When working inside a category, read that category's `AGENTS.md` first (plus this file),

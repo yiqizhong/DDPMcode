@@ -39,6 +39,12 @@ If a relevant skill exists but was not used, that is a violation — redo it thr
   No inline `<style>` blocks; promote reusable styles to `headset.css`.
 - **Real routing:** feature entries are real `<a href>` links; every sub-page links back to
   `index.html`.
+- **Connection blocks are copied, not written:** the connection block is COPIED verbatim from a
+  predefined snippet
+  (`.agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html`) and then
+  value-filled — never generated from the connectionType keyword. If the mode has no snippet,
+  HALT and ask; never fabricate. (This is what stops a weak model from hallucinating a block out
+  of a word like "bluetooth".)
 - **Invent nothing:** all content comes from the model manifest. Headset connection modes and
   features are defined by the manifest, not assumed from the mouse pilot.
 

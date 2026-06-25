@@ -1,0 +1,18 @@
+<!-- Canonical headset function module — ONE setting/feature on a sub-page (EQ, sidetone, mic gain…).
+     COPY this whole block once per manifest functions[] item; never write it from the function name.
+     A function with a bespoke design instead lives at
+     headset-gen-subpage/templates/functions/<id>.html and is copied directly (this is the no-snapshot path). -->
+<div class="function-module" data-slot="function"
+     data-instruction="Fill function-label from the manifest function's label; fill function-description
+       from its description (DELETE the .function-description element if the manifest has none).
+       Build the affordance inside .function-control STRICTLY from the function's params
+       (toggle / slider / dropdown / stepper) — invent no ranges/options/defaults.
+       Strip data-slot/data-instruction/data-property on output.">
+  <div class="function-info">
+    <span class="function-label" data-property="function-label">Function</span>
+    <span class="function-description" data-property="function-description">Short description</span>
+  </div>
+  <div class="function-control">
+    <!-- affordance goes here: toggle / slider / dropdown / stepper, built from the manifest params -->
+  </div>
+</div>

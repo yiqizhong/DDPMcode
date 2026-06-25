@@ -12,21 +12,22 @@ this first.
 > only the folder location differs.
 
 > **Status: pilot skeleton.** Framework skills (`headset-gen-homepage`,
-> `headset-gen-subpage`, `headset-control-generic`) and `headset.css` exist; there is **no
-> model data yet** and **no dedicated `headset-control-<id>` skills yet**. Control skills grow
-> organically from real manifests (methodology §9.4) — do not pre-create them speculatively.
+> `headset-gen-subpage`, `headset-function`) and `headset.css` exist; there is **no model data
+> yet** and **no dedicated `headset-function-<id>` skills or function snapshots yet**. Function
+> skills/snapshots grow organically from real manifests (methodology §9.4) — do not pre-create
+> them speculatively.
 
 ## Routing — generation MUST go through skills (do not hand-write)
 
 - Generate a model **home page** → `@skills:headset-gen-homepage <MODEL>` (copy its frame,
   fill from the model manifest). **Never** hand-write `index.html`.
 - Generate **any sub-page** (settings / configuration / any feature page, whatever it is
-  called) → `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`, with the title + control list
+  called) → `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`, with the title + function list
   from the manifest. **Never** hand-write sub-page HTML, and **never** create a
   sub-page-specific skill.
-- Render a **control** inside a sub-page → **copy**
-  `headset-gen-subpage/templates/controls/<id>.html` if it exists; otherwise (no snippet)
-  `@skills:headset-control-generic`. **Never** hand-roll an ad-hoc control from a description.
+- Render a **function** inside a sub-page → **copy**
+  `headset-gen-subpage/templates/functions/<id>.html` if it exists; otherwise (no snapshot)
+  `@skills:headset-function`. **Never** hand-roll an ad-hoc function from a description.
 
 If a relevant skill exists but was not used, that is a violation — redo it through the skill.
 
@@ -56,7 +57,7 @@ If a relevant skill exists but was not used, that is a violation — redo it thr
 
 ## Self-check (after generating)
 
-- Did every step go through its skill (no hand-written home/sub-page/control)?
+- Did every step go through its skill (no hand-written home/sub-page/function)?
 - Every feature entry a real `<a href>` whose target sub-page exists, and every sub-page links
   back to `index.html`?
 - Any `display`-hidden or pre-embedded-and-hidden variant? (There must be none.)
@@ -67,8 +68,8 @@ If a relevant skill exists but was not used, that is a violation — redo it thr
 ```
 .agents/skills/                # repo ROOT — Devin discovers skills here (folders with a SKILL.md)
   headset-gen-homepage/        # SKILL.md + templates/home-frame.html
-  headset-gen-subpage/         # SKILL.md + templates/subpage-frame.html + templates/controls/
-  headset-control-generic/     # SKILL.md — fallback for controls with no dedicated snippet
+  headset-gen-subpage/         # SKILL.md + templates/subpage-frame.html + templates/functions/
+  headset-function/            # SKILL.md + templates/function-frame.html — no-snapshot function generator
   headset-shared/              # NOT a skill — snippets shared by both gen skills:
                                #   connection/ · icons/ · feature-button.html (collapsed = +.feature-button--collapsed class)
 headset/

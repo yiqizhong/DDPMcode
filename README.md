@@ -27,9 +27,9 @@ the isolation intent is preserved via naming; only the folder location differs. 
 ## Pilot
 
 `headset/` is the current pilot category. It has the framework skills (`headset-gen-homepage`,
-`headset-gen-subpage`, `headset-control-generic`), layout, and category rules, but **no model
-data yet** and **no dedicated `headset-control-<id>` skills yet** — those grow from real
-manifests (methodology §9.4). Add models under `headset/models/` (see
+`headset-gen-subpage`, `headset-function`), layout, and category rules, but **no model
+data yet** and **no dedicated `headset-function-<id>` skills or function snapshots yet** — those
+grow from real manifests (methodology §9.4). Add models under `headset/models/` (see
 `headset/models/README.md`). Other device categories get their own isolated folder later,
 sharing only `shared/tokens.css`.
 
@@ -43,9 +43,10 @@ sharing only `shared/tokens.css`.
   headset-gen-subpage/
     SKILL.md
     templates/subpage-frame.html      # slot-based sub-page frame (holds any sub-page)
-    templates/controls/               # sub-page control snippet registry
-  headset-control-generic/
-    SKILL.md                          # fallback renderer for controls with no snippet
+    templates/functions/              # sub-page bespoke-function snapshot registry
+  headset-function/
+    SKILL.md
+    templates/function-frame.html     # function module generator (no-snapshot path; copy + fill)
   headset-shared/                     # NOT a skill — snippets shared by both gen skills:
     connection/  icons/  feature-button.html
 shared/

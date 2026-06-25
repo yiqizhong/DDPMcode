@@ -99,12 +99,13 @@
                         <h2 class="feature-title" data-property="subpage-title">Feature Name</h2>
                     </div>
                     <!-- Content area — feature components, stacked vertically (8px gap). -->
-                    <div class="content-area" data-slot="controls"
-                         data-instruction="Do NOT write control markup. For each item in manifest.controls[]:
-                           COPY .agents/skills/headset-gen-subpage/templates/controls/<control.id>.html into this region and
-                           fill its data-property value slots from the control's params.
-                           If controls/<control.id>.html does NOT exist, fall back to @skills:headset-control-generic
-                           (render strictly from manifest params — invent nothing). If controls[] is empty, leave the note below.">
+                    <div class="content-area" data-slot="functions"
+                         data-instruction="Do NOT write function markup. For each item in manifest.functions[]:
+                           COPY .agents/skills/headset-gen-subpage/templates/functions/<function.id>.html into this region and
+                           fill its data-property value slots from the function's params.
+                           If functions/<function.id>.html does NOT exist, fall back to @skills:headset-function
+                           (it copies function-frame.html and fills strictly from manifest params — invent nothing).
+                           If functions[] is empty, leave the note below.">
                         <p class="placeholder-note">Sub-feature content TBD — to be filled from the manifest.</p>
                     </div>
                 </div>

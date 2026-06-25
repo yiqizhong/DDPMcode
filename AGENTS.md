@@ -34,12 +34,12 @@ style suggestions (methodology §9.7.1 / §9.7.3).
 
 - `<category>` — the device category (`headset`, `mouse`, …). Always first, so the root
   list sorts into per-category clusters (`headset-*` together, then `mouse-*`, …).
-- `<role>` — `gen` (page framework) or `control` (a sub-page control).
-- `<name>` — for `gen`: `homepage` | `subpage`. For `control`: `generic` (the fallback) or a
-  specific control id (`dpi`, `eq`, …).
+- `<role>` — `gen` (page framework) or `function` (a sub-page function/setting module).
+- `<name>` — for `gen`: `homepage` | `subpage`. For `function`: omitted for the template-backed
+  generator (`headset-function`), or a specific function id (`eq`, `mic`, …) for a bespoke one.
 
-Examples: `headset-gen-homepage`, `headset-gen-subpage`, `headset-control-generic`,
-`headset-control-eq`. Sorting alone then clusters category → role → name; the flat list reads
+Examples: `headset-gen-homepage`, `headset-gen-subpage`, `headset-function`,
+`headset-function-eq`. Sorting alone then clusters category → role → name; the flat list reads
 like nested folders without needing nesting.
 
 ### Description rules (this is what prevents "too many skills" from confusing the agent)
@@ -59,9 +59,9 @@ skill at a time. So skill COUNT is cheap; what matters is that descriptions are:
 
 - **Sub-pages never get their own skill** — one `<category>-gen-subpage` holds all of them
   (§9.3). Adding a sub-page = a new manifest, never a new skill.
-- **Don't pre-create control skills speculatively** — a control earns a `<category>-control-<id>`
-  skill only after it recurs in real manifests (§9.4). Until then it renders via
-  `<category>-control-generic`.
+- **Don't pre-create function skills speculatively** — a function earns a `<category>-function-<id>`
+  skill or a `templates/functions/<id>.html` snapshot only after it recurs in real manifests (§9.4).
+  Until then it renders via `<category>-function` (which copies the `function-frame.html` shell).
 
 ### Physical grouping does NOT work — flat is settled (tested 2026-06-24)
 
@@ -87,9 +87,9 @@ is copied verbatim from a pre-written snippet file, never generated**, in two fo
   (`feature-button.html`). The skill copies the one snippet once per `features[]` item and fills
   `{label}`/`{icon}`/`{link}`; it never writes the button markup from a pattern.
 
-Free-form generation is a last resort (the `*-control-generic` fallback) and even then is
-constrained to manifest-provided values. This is §9.7.4's "copy, don't create" — the structural
-defense against markup hallucination.
+Free-form affordance generation is a last resort (the `*-function` no-snapshot path, which still
+copies the `function-frame.html` shell) and even then is constrained to manifest-provided values.
+This is §9.7.4's "copy, don't create" — the structural defense against markup hallucination.
 
 ## Working rules
 
@@ -102,5 +102,5 @@ defense against markup hallucination.
 ## Categories
 
 - `headset/` — **pilot** category. See `headset/AGENTS.md`. Framework skills + rules only
-  (`headset-gen-homepage`, `headset-gen-subpage`, `headset-control-generic`); no model data
-  and no dedicated `headset-control-<id>` skills yet (those grow from real manifests).
+  (`headset-gen-homepage`, `headset-gen-subpage`, `headset-function`); no model data and no
+  dedicated `headset-function-<id>` skills or function snapshots yet (those grow from real manifests).

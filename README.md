@@ -36,15 +36,18 @@ sharing only `shared/tokens.css`.
 ## Layout
 
 ```
-.agents/skills/                       # repo ROOT — Devin discovers skills here
+.agents/skills/                       # repo ROOT — Devin discovers skills here (folders with SKILL.md)
   headset-gen-homepage/
     SKILL.md
     templates/home-frame.html         # slot-based home-page frame (copy + fill)
   headset-gen-subpage/
     SKILL.md
-    templates/subpage-frame.html      # generic sub-page frame (holds any sub-page)
+    templates/subpage-frame.html      # slot-based sub-page frame (holds any sub-page)
+    templates/controls/               # sub-page control snippet registry
   headset-control-generic/
-    SKILL.md                          # fallback renderer for controls with no dedicated skill
+    SKILL.md                          # fallback renderer for controls with no snippet
+  headset-shared/                     # NOT a skill — snippets shared by both gen skills:
+    connection/  icons/  feature-button.html
 shared/
   tokens.css                          # design-token layer
 headset/

@@ -87,9 +87,11 @@
                      data-instruction="For each manifest.features[] item (the SAME features as the homepage
                        feature zone), COPY .agents/skills/headset-shared/feature-button.html into this nav and
                        ADD the 'feature-button--collapsed' class to it. Fill {label}/{link} and insert
-                       .agents/skills/headset-shared/icons/<feature.icon>.svg into the .feature-icon
-                       (unknown id -> STOP and ask). The label IS filled (same label as the homepage) — it is
-                       hidden when collapsed and revealed on hover. ICON SYNC: same icon as the homepage."></div>
+                       .agents/skills/headset-shared/icons/<feature.icon>.svg into the .feature-icon.
+                       An icon is REQUIRED here (the collapsed state is icon-only) — if a feature has no
+                       icon, or the icon id has no file, STOP and ask; never leave an empty collapsed box.
+                       The label IS filled (same label as the homepage) — hidden when collapsed, shown on
+                       hover. ICON SYNC: same icon as the homepage."></div>
                 <!-- Feature content (528px, light-gray bg, 16px radius) = Feature header (40px) + content area. -->
                 <div class="feature-content">
                     <!-- Feature header — the feature/function name; 20px #0E0E0E. -->

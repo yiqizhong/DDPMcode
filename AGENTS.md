@@ -1,5 +1,8 @@
 # DDPM — agent map
 
+> Full methodology (reference): [`docs/methodology.md`](docs/methodology.md). It is reference
+> only — **this repo wins on any conflict** (the doc's §x.x references resolve there).
+
 Product-UI pages are generated in **three layers**, with each device **category
 isolated** from the others:
 

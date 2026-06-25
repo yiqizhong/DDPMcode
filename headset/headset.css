@@ -51,10 +51,16 @@ body {
 
 .device-image-place {
   height: 495px;
-  background: var(--color-surface-muted);
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* Placeholder gray — TEMPLATE ONLY. The empty image area is gray while it carries the
+   data-property marker; production strips data-property (see the gen skills), so the gray
+   disappears whether or not the model has an image. Same logic as the [data-slot] dev tints. */
+.device-image-place[data-property] {
+  background: var(--color-surface-muted);
 }
 
 .device-image-place img {
@@ -194,13 +200,50 @@ body {
   align-self: stretch;
 }
 
-/* Content area inside the feature zone — 528px, holds the controls (stacked). */
+/* Feature content — the far-right ~528px block; light-gray bg always, 16px radius.
+   Auto-layout: column, 8px gap (header -> content area). Padding: top 24, left/right 16, bottom 0. */
 .feature-content {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 528px;
   flex-shrink: 0;
+  background: var(--color-feature-content-bg);
+  border-radius: var(--radius-lg);
+  padding: 24px 16px 0 16px;
+  overflow: hidden;   /* clip the scrolling content to the 16px rounded corners */
+}
+
+/* Feature header — fixed 40px; the feature/function name, left, vertically centered. */
+.feature-header {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.feature-title {
+  font-family: var(--font-family);
+  font-style: normal;
+  font-weight: var(--fw-regular);   /* 400 */
+  font-size: 20px;
+  line-height: 28px;                /* 140% */
+  color: var(--color-text-strong);  /* #0E0E0E */
+  white-space: nowrap;              /* needed for the ellipsis to work on one line */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Content area — feature components stacked vertically, 8px between each.
+   Scrolls inside the feature-content when the components exceed its height (5–10+ items);
+   the feature header stays fixed above. Bottom has no padding, so content sits flush. */
+.content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;        /* let it shrink below content size so overflow-y can scroll */
+  overflow-y: auto;
 }
 
 .feature-button {
@@ -442,5 +485,26 @@ body {
   min-height: 40px;
 }
 
-.control-zone[data-slot] { background: var(--color-zone-control); }   /* dev tint — template only */
-.feature-zone[data-slot] { background: var(--color-zone-feature); }   /* dev tint — template only */
+.control-zone[data-slot] { background: var(--color-zone-control); }     /* dev tint — template only */
+.feature-zone[data-slot] { background: var(--color-zone-feature); }     /* dev tint — template only */
+.content-area[data-slot] { background: var(--color-zone-feature); }     /* dev tint — template only */
+
+/* ------------------------------------------------------------
+   Uniform scrollbar — everywhere: 4px wide, light gray, 8px radius.
+   Thumb height auto-adapts to content; track is transparent.
+   ------------------------------------------------------------ */
+* {
+  scrollbar-width: thin;                                  /* Firefox (closest to 4px) */
+  scrollbar-color: var(--color-border-muted) transparent;
+}
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border-muted);
+  border-radius: 8px;
+}

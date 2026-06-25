@@ -51,7 +51,8 @@ Invoke: `@skills:headset-gen-homepage <MODEL>` (e.g. `@skills:headset-gen-homepa
    div. If the item has no icon, delete the `.feature-icon` div; **if `<feature.icon>.svg` does not
    exist, STOP and ask — never draw an icon.** N items → N buttons. Generate each link target via
    `@skills:headset-gen-subpage $1 <subpage>`.
-6. Strip `data-slot`/`data-instruction` from the output; keep the frame's classes/markup intact.
+6. Strip `data-slot`/`data-instruction`/`data-property` from the output (no template markers in
+   production — this also removes the device-image placeholder gray); keep classes/markup intact.
 
 ## Hard rules
 

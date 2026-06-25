@@ -87,14 +87,21 @@
                        into this nav, fill {link}, and insert
                        .agents/skills/headset-gen-homepage/templates/icons/<feature.icon>.svg into the .feature-icon
                        (no icon -> leave empty; unknown id -> STOP and ask). Icon-only, no text."></div>
-                <!-- Content area (528px) — holds the controls. -->
-                <div class="feature-content" data-slot="controls"
-                     data-instruction="Do NOT write control markup. For each item in manifest.controls[]:
-                       COPY .agents/skills/headset-gen-subpage/templates/controls/<control.id>.html into this region and
-                       fill its data-property value slots from the control's params.
-                       If controls/<control.id>.html does NOT exist, fall back to @skills:headset-control-generic
-                       (render strictly from manifest params — invent nothing). If controls[] is empty, leave the note below.">
-                    <p class="placeholder-note">Sub-feature content TBD — to be filled from the manifest.</p>
+                <!-- Feature content (528px, light-gray bg, 16px radius) = Feature header (40px) + content area. -->
+                <div class="feature-content">
+                    <!-- Feature header — the feature/function name; 20px #0E0E0E. -->
+                    <div class="feature-header">
+                        <h2 class="feature-title" data-property="subpage-title">Feature Name</h2>
+                    </div>
+                    <!-- Content area — feature components, stacked vertically (8px gap). -->
+                    <div class="content-area" data-slot="controls"
+                         data-instruction="Do NOT write control markup. For each item in manifest.controls[]:
+                           COPY .agents/skills/headset-gen-subpage/templates/controls/<control.id>.html into this region and
+                           fill its data-property value slots from the control's params.
+                           If controls/<control.id>.html does NOT exist, fall back to @skills:headset-control-generic
+                           (render strictly from manifest params — invent nothing). If controls[] is empty, leave the note below.">
+                        <p class="placeholder-note">Sub-feature content TBD — to be filled from the manifest.</p>
+                    </div>
                 </div>
             </div>
         </div>

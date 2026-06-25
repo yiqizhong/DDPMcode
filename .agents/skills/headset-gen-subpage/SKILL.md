@@ -40,7 +40,8 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
      from manifest params — invent nothing). When such a control recurs, promote it to a snippet.
    N controls → N rendered controls. If `controls[]` is empty, keep the placeholder note.
 5. Keep the back link `<a class="back-link" href="index.html">` so the page returns home.
-6. Strip `data-slot`/`data-instruction` from the output.
+6. Strip `data-slot`/`data-instruction`/`data-property` from the output (no template markers in
+   production — this also removes the device-image placeholder gray).
 
 ## Hard rules
 

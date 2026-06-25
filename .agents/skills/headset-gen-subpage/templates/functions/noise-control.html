@@ -1,0 +1,51 @@
+<!-- Noise Control function card — canonical snapshot (Layer-1 known function).
+     COPY into a sub-page's Content Area via headset-gen-subpage; fill the data-property value
+     slots from the model manifest.
+     - Controls are native + interactive: toggles = <input type=checkbox> switches (zero JS);
+       slider = styled <input type=range> with a one-line inline `oninput` for the value bubble.
+     - The ⓘ info icon is OPTIONAL (a property): render a `.info-tooltip` only when the manifest
+       provides info text for that function/sub-control; omit it otherwise. Whenever present it MUST
+       carry the hover tooltip (same behavior as the homepage firmware ⓘ).
+     - Sub-function dependency (a property): a `.subfn-group` wraps a parent toggle (`.subfn-toggle`)
+       with its dependent controls (`.subfn-child`). Toggle OFF greys the children (pure CSS :has()).
+       Here: Mic Noise Cancellation OFF greys its strength slider.
+     Styles live in headset.css (NO inline <style>). -->
+<div class="function-container">
+  <div class="function-top-section">
+    <div>
+      <div class="function-header">
+        <div class="function-title">
+          <p class="function-title-text">Noise Control</p>
+        </div>
+        <div class="function-icons">
+        </div>
+      </div>
+      <div class="function-content">
+        <div class="subfn-group">
+          <div class="function-header">
+            <div class="function-title">
+              <p class="function-label">Mic Noise Cancellation</p>
+            </div>
+            <div class="function-icons">
+            </div>
+            <label class="switch">
+              <input type="checkbox" class="switch-input subfn-toggle" data-property="mic-noise-cancellation-state" aria-label="Mic Noise Cancellation">
+              <span class="switch-state"></span>
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+          <div class="slider-row subfn-child">
+            <p class="slider-label">1</p>
+            <div class="slider-input-wrap" style="--min:1;--max:3;--val:2;">
+              <input type="range" class="slider-input" min="1" max="3" step="1" value="2"
+                     data-property="mic-noise-cancellation-strength" aria-label="Mic Noise Cancellation strength"
+                     oninput="this.parentNode.style.setProperty('--val',this.value);this.nextElementSibling.textContent=this.value;">
+              <p class="slider-value">2</p>
+            </div>
+            <p class="slider-label">3</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

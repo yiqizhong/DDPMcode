@@ -303,6 +303,18 @@ Collaboration 卡已按本架构从 Figma 导出**完整建出 + 逐项验证**(
 
 ---
 
+### 6.8 弱模型验证(Haiku 4.5,2026-06-25)
+
+把"建一张新卡"的活交给 **Haiku 4.5**(冷启动子 agent,只给 `headset-function` skill + `subcontrols/` 积木 + 卡壳 + 一张参考卡 `collaboration.html`),需求:一个 Noise Control 卡 = Mic Noise Cancellation 开关 + 强度 slider(1–3),开关 OFF 时 slider 置灰。
+
+**结果:通过。** Haiku 全靠**复制**卡壳 + `toggle-row` + `slider` 装出 `functions/noise-control.html`——`.subfn-group` 联动接对(开关 `.subfn-toggle`、slider `.subfn-child`)、原生控件、零内联样式、零瞎编;浏览器实测渲染正确,灰/恢复(opacity 0.4↔1)正确。**证明"copy-not-generate + 可复用积木"对弱模型友好**——这是整套架构最想要的性质。
+
+小毛病(无害):多建了个 `_preview-*`(已 gitignore);没 info 的 `.function-icons` 留成空 div 没删。
+
+> 注:此 `noise-control.html` 是**简化测试版**(开关 + 强度),与 Figma 真 Noise Control 的三选一 segmented(ANC/Transparency/Off)不同;**保留中**,名字待真 segmented 版出现时再处理。
+
+---
+
 ## 7. 控件选型:什么时候 toggle / slider / dropdown(写死 vs 推断)
 
 **你的输入(大意)**:LLM 有时需要基于逻辑的合理推断。比如 on/off 用什么 UI、子功能怎么显示、切模式怎么布局、Sidetone 5 模式用 dropdown 还是 slider……有些逻辑可以写死(Sidetone→slider),有些不能写死就得让大模型推。到底什么时候用 toggle/dropdown/slider?
@@ -468,6 +480,8 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 | D14 | 纯前端、不入库、刷新回默认 | 8.2/8.5 | 用户确认两次 | 生效 |
 | D15 | 收敛为"递归槽位列表"单一原语 | 5.5 | 用户"槽位"心智 | **当前模型** |
 | D16 | **preset-first**:每个功能 ID 一份固定预设组成,默认占绝大多数,覆盖是例外;预设存成数据 | 6.6 | 用户背景:"对应到 ID 几乎都有预设、雷打不动" | 生效(坐实 D6/D8,非反转) |
+| D17 | **快照=派生产物 + "改原子→重建快照"纪律**;暂不建 build 机器(只 2 张卡,方法论接受复制)。快照由卡壳+原子装配而来,`headset-function` 的装配逻辑是未来 build 步骤的种子;卡多了再上"spec→装配→快照"自动化 | F 分析 | drift 真实(B 清 ⓘ SVG 时被迫改片段+3 份烤死副本演示了)但现在便宜 | 生效:纪律立、机器 defer |
+| D18 | **生成期极简**:manifest = 子页标题 + **功能 id 列表(+ 罕见覆盖)**;gen-subpage 对 function 只"复制快照 + 剥标记",per-function 填值近乎空操作(已知卡里几乎没有按机型变的值);不建复杂填值引擎 | G 分析 | 冻结快照里几乎一切都烤死;真正按机型变的是"有哪些功能"这个列表 | 生效:待真跑 gen-subpage 验证 |
 
 ---
 

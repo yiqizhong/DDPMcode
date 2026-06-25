@@ -553,6 +553,10 @@ body {
   flex-shrink: 0;
 }
 
+/* Auto-collapse empty icon slots — models sometimes leave .function-icons in the DOM with no
+   child. :not(:has(*)) matches even whitespace-only divs (unlike :empty). */
+.function-icons:not(:has(*)) { display: none; }
+
 .function-info-icon {
   width: 16px;
   height: 16px;

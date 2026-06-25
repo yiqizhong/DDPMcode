@@ -1,22 +1,23 @@
 ---
 name: headset-control-generic
-description: Render a sub-page control that has no dedicated headset-control-* skill yet, built from the design tokens. Use as the fallback for any unknown/new control — don't hand-roll controls.
+description: Render a sub-page control that has no snippet in the controls registry yet, built from the design tokens. Use as the LAST-RESORT fallback for any unknown/new control — don't hand-roll controls.
 argument-hint: <control-id>
 ---
 
 # headset-control-generic
 
-The catch-all for controls that do not yet have a dedicated `headset-control-<id>` skill. It is
-not tied to any specific control; it only defines HOW to build a compliant control from the
-design system, so an unfamiliar control still renders consistently.
+The last-resort generator for controls that do not yet have a snippet in the registry
+(`headset-gen-subpage/templates/controls/<id>.html`). It is not tied to any specific control; it
+only defines HOW to build a compliant control from the design system, so an unfamiliar control
+still renders consistently.
 
-Invoke: `@skills:headset-control-generic <control-id>` (usually called by `headset-gen-subpage`
-while rendering a sub-page's control list).
+Invoke: `@skills:headset-control-generic <control-id>` (called by `headset-gen-subpage` only when
+a control has no snippet in the registry).
 
-> **Growth rule (methodology §9.4):** known, repeated controls graduate into their own
-> `headset-control-<id>` skill with a preset template. Until a control has earned its own skill,
-> it renders through here. Do not pre-create headset control skills speculatively — let them
-> grow from real manifests.
+> **Growth rule (methodology §9.4):** known, repeated controls graduate into a snippet
+> `headset-gen-subpage/templates/controls/<id>.html` (copied, not generated). Until a control has
+> a snippet, it renders through here. Do not pre-create control snippets speculatively — let them
+> grow from real manifests/designs.
 
 ## Inputs
 

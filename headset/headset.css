@@ -27,16 +27,11 @@ body {
 .frame {
   width: var(--canvas-width);
   height: var(--canvas-height);
-  background: var(--color-surface);
+  background: var(--color-canvas-bg);
   border: 1px solid var(--color-border-muted);
   display: flex;
   flex-direction: column;
   padding-bottom: 16px;
-}
-
-/* Homepage canvas background (light blue); sub-page frames stay default. */
-.frame-home {
-  background: var(--color-homepage-bg);
 }
 
 .content-zone {
@@ -179,6 +174,11 @@ body {
   align-self: stretch;
 }
 
+/* Sub-page feature zone is wider than the homepage's (528 vs 212). */
+.feature-zone--subpage {
+  width: 528px;
+}
+
 .feature-button {
   display: flex;
   box-sizing: border-box;
@@ -232,15 +232,18 @@ body {
 }
 
 /* --- Header --- */
+/* Row: [back arrow] [16px] [text column]. align-items:flex-start so the arrow sits on the title row. */
 .page-header {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
 }
 
-.primary-header {
+/* Title + model stacked, left-aligned (model aligns to the title, NOT the back arrow). */
+.header-text {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
 }
 
@@ -269,7 +272,7 @@ body {
   font-weight: var(--fw-regular);
   font-size: 20px;
   line-height: 28px;
-  color: var(--color-text);
+  color: var(--color-brand);
   white-space: nowrap;
 }
 
@@ -281,7 +284,8 @@ body {
 
 .firmware-tooltip-component {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 
 .firmware-tooltip {
@@ -324,7 +328,7 @@ body {
 .masthead {
   height: 64px;
   display: flex;
-  padding: 16px 16px;
+  padding: 16px 24px;
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
@@ -339,27 +343,41 @@ body {
 }
 
 .control-button {
-  width: 12px;
-  height: 12px;
-  background: var(--color-border-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
   border: none;
   cursor: pointer;
-  border-radius: var(--radius-sm);
+}
+
+.control-button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
 /* Sub-page back link — real <a>, styled in the accent color. */
+/* Back link — 16px left-arrow icon, sits left of the title. The box is the title's
+   line-height (32px) tall so the arrow vertically centers on the title row. */
 .back-link {
-  font-family: var(--font-family);
-  font-weight: var(--fw-medium);
-  font-size: 14px;
-  line-height: 24px;
-  color: var(--color-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 32px;
+  flex-shrink: 0;
+  color: var(--color-text-strong);
   text-decoration: none;
-  white-space: nowrap;
 }
 
-.back-link:hover {
-  text-decoration: underline;
+.back-link svg {
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
 /* Sub-page placeholder note. */

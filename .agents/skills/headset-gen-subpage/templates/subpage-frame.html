@@ -16,26 +16,72 @@
     <div class="frame">
         <div class="masthead">
             <div class="masthead-controls">
-                <button class="control-button"></button>
-                <button class="control-button"></button>
-                <button class="control-button"></button>
+                <button class="control-button" type="button" aria-label="Minimize">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M2.5 7.39001H13.5V8.61001H2.5V7.39001Z" fill="#0E0E0E"/>
+                    </svg>
+                </button>
+                <button class="control-button" type="button" aria-label="Maximize">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M16 2V14H0V2H16ZM1 13H15V3H1V13Z" fill="#0E0E0E"/>
+                    </svg>
+                </button>
+                <button class="control-button" type="button" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <g clip-path="url(#clip0_24_166)">
+                            <path d="M16 0.82L15.18 0L8 7.2L0.82 0.05L0 0.87L7.15 8L0.05 15.13L0.87 16L8 8.85L15.13 16L15.95 15.18L8.8 8L16 0.82Z" fill="#0E0E0E"/>
+                        </g>
+                        <defs>
+                            <clipPath id="clip0_24_166">
+                                <rect width="16" height="16" fill="white"/>
+                            </clipPath>
+                        </defs>
+                    </svg>
+                </button>
             </div>
         </div>
-        <div class="content-zone" style="flex-direction: column; padding: 0 16px 16px 64px;">
-            <div class="page-header">
-                <div class="primary-header">
-                    <a class="back-link" href="index.html">&larr; Back</a>
+        <div class="content-zone">
+            <div class="devices-image-zone">
+                <!-- Header mirrors the homepage header; the ONLY addition is a back link to
+                     the LEFT of the title. Model number + firmware tooltip are identical. -->
+                <div class="page-header">
+                    <a class="back-link" href="index.html" aria-label="Back">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M16 7.46995H2.23L8.49 1.99995L7.79 1.19995L0 7.99995L7.79 14.79L8.49 13.99L2.23 8.52995H16V7.46995Z" fill="#0E0E0E"/>
+                        </svg>
+                    </a>
+                    <!-- Title + model stacked, left-aligned with each other (model aligns to the title, not the back arrow). -->
+                    <div class="header-text">
+                        <h1 class="page-title" data-property="device-marketing-name">Device Name</h1>
+                        <div class="secondary-header">
+                            <span class="model-number" data-property="device-model-number">Model Number</span>
+                            <div class="firmware-tooltip-component">
+                                <img src="https://www.figma.com/api/mcp/asset/6f0b89ee-7b00-4a3f-9869-e84329cc2025" alt="Firmware" class="firmware-icon">
+                                <div class="firmware-tooltip">
+                                    <span class="firmware-tooltip-text">Firmware Version <span data-property="firmware-version">x.x.x.x</span></span>
+                                    <span class="firmware-tooltip-text" data-property="device-ppid">PPID: XXXXXX</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="primary-header">
-                    <h1 class="page-title" data-property="subpage-title">Subpage Title</h1>
-                </div>
+                <!-- Device image — same position as the homepage. -->
+                <div class="device-image-place" data-property="device-image"></div>
+                <!-- Control Zone — same position/snippet as the homepage, but SUB-PAGES GET NO UNPAIR. -->
+                <div class="control-zone" data-slot="control-zone"
+                     data-instruction="Do NOT write a connection block from the connectionType keyword.
+                       COPY .agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html VERBATIM into this div,
+                       then fill its value slots (data-property=battery-level from manifest.battery; if absent leave —% and flag).
+                       If that file does NOT exist, STOP and ask. SUB-PAGES GET NO UNPAIR — do not copy unpair.html here.
+                       Emit only the one needed mode."></div>
             </div>
-            <!-- Control list: render one control per manifest.controls[] item. -->
-            <div data-slot="controls"
-                 data-instruction="For each item in manifest.controls[], render its control:
-                   if a matching headset-control-<id> skill exists, use @skills:headset-control-<id>;
-                   otherwise use @skills:headset-control-generic. Do NOT invent controls — render only
-                   what the manifest lists. If controls[] is empty, leave the placeholder note below.">
+            <!-- Sub-page feature zone — wider than the homepage's (528px) — holds the controls. -->
+            <div class="feature-zone feature-zone--subpage" data-slot="controls"
+                 data-instruction="Do NOT write control markup. For each item in manifest.controls[]:
+                   COPY .agents/skills/headset-gen-subpage/templates/controls/<control.id>.html into this region and
+                   fill its data-property value slots from the control's params.
+                   If controls/<control.id>.html does NOT exist, fall back to @skills:headset-control-generic
+                   (render strictly from manifest params — invent nothing). If controls[] is empty, leave the note below.">
                 <p class="placeholder-note">Sub-feature content TBD — to be filled from the manifest.</p>
             </div>
         </div>

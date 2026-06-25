@@ -24,8 +24,9 @@ this first.
   called) → `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`, with the title + control list
   from the manifest. **Never** hand-write sub-page HTML, and **never** create a
   sub-page-specific skill.
-- Render a **control** inside a sub-page → if a `headset-control-<id>` skill exists, use it;
-  otherwise `@skills:headset-control-generic`. **Never** hand-roll an ad-hoc control.
+- Render a **control** inside a sub-page → **copy**
+  `headset-gen-subpage/templates/controls/<id>.html` if it exists; otherwise (no snippet)
+  `@skills:headset-control-generic`. **Never** hand-roll an ad-hoc control from a description.
 
 If a relevant skill exists but was not used, that is a violation — redo it through the skill.
 

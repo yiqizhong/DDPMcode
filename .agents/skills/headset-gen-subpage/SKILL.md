@@ -33,15 +33,21 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
    Do not otherwise rewrite the frame.
 2. Read `headset/models/$1/$2.manifest`.
 3. Fill `data-property="subpage-title"` (the `<title>` and the `<h1>`) from `title`.
-4. **Controls** (`data-slot="controls"`): for each `controls[]` item, render it via the control
-   layer — if a `headset-control-<id>` skill exists, call `@skills:headset-control-<id>`;
-   otherwise call `@skills:headset-control-generic`. N controls → N rendered controls. If
-   `controls[]` is empty, keep the placeholder note (do not fabricate controls).
+4. **Controls** (`data-slot="controls"`): do NOT write control markup. For each `controls[]` item:
+   - If `.agents/skills/headset-gen-subpage/templates/controls/<control.id>.html` exists, **copy**
+     it into the controls region and fill its `data-property` value slots from the control's params.
+   - Otherwise fall back to `@skills:headset-control-generic` (last-resort generation, strictly
+     from manifest params — invent nothing). When such a control recurs, promote it to a snippet.
+   N controls → N rendered controls. If `controls[]` is empty, keep the placeholder note.
 5. Keep the back link `<a class="back-link" href="index.html">` so the page returns home.
 6. Strip `data-slot`/`data-instruction` from the output.
 
 ## Hard rules
 
+- **Controls are COPIED from
+  `.agents/skills/headset-gen-subpage/templates/controls/<id>.html`** (registry), never written
+  from a description. Only when no snippet exists does `headset-control-generic` generate one
+  (strictly from manifest params). This is the same copy-not-generate defense as the homepage snippets.
 - Invent nothing: title and controls come from the manifest. Never fabricate EQ presets,
   sidetone/mic controls, ANC toggles, or any control the manifest does not list.
 - Every sub-page MUST keep the back link to `index.html`.
@@ -51,7 +57,8 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
 ## Self-check
 
 - Title filled from the manifest (not guessed)?
-- Each listed control rendered via a `headset-control-*` skill (known) or
-  `headset-control-generic` (unknown)?
+- Each listed control COPIED from
+  `.agents/skills/headset-gen-subpage/templates/controls/<id>.html` (known) or, if none,
+  rendered via `headset-control-generic` (unknown)?
 - Back link to `index.html` present?
 - No fabricated controls; empty `controls[]` left as the placeholder note?

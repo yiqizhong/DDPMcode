@@ -1,0 +1,102 @@
+<!-- Collaboration function card — canonical snapshot (Layer-1 known function).
+     COPY into a sub-page's Content Area via headset-gen-subpage; fill the data-property value
+     slots from the model manifest.
+     - Controls are native + interactive: toggles = <input type=checkbox> switches (zero JS);
+       slider = styled <input type=range> with a one-line inline `oninput` for the value bubble.
+     - The ⓘ info icon is OPTIONAL (a property): render a `.info-tooltip` only when the manifest
+       provides info text for that function/sub-control; omit it otherwise. Whenever present it MUST
+       carry the hover tooltip (same behavior as the homepage firmware ⓘ).
+     - Sub-function dependency (a property): a `.subfn-group` wraps a parent toggle (`.subfn-toggle`)
+       with its dependent controls (`.subfn-child`). Toggle OFF greys the children (pure CSS :has()).
+       Here: Sidetone OFF greys its level slider.
+     Styles live in headset.css (NO inline <style>). -->
+<div class="function-container">
+  <div class="function-top-section">
+    <div>
+      <div class="function-header">
+        <div class="function-title">
+          <p class="function-title-text">Collaboration</p>
+        </div>
+        <div class="function-icons">
+          <span class="info-tooltip" data-property="collaboration-info">
+            <span class="function-info-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <g clip-path="url(#clip_info)">
+                  <path d="M8 0C6.41775 0 4.87103 0.469192 3.55544 1.34824C2.23985 2.22729 1.21447 3.47672 0.608967 4.93853C0.00346625 6.40034 -0.15496 8.00887 0.153721 9.56072C0.462403 11.1126 1.22433 12.538 2.34315 13.6569C3.46197 14.7757 4.88743 15.5376 6.43928 15.8463C7.99113 16.155 9.59966 15.9965 11.0615 15.391C12.5233 14.7855 13.7727 13.7602 14.6518 12.4446C15.5308 11.129 16 9.58225 16 8C16 5.87827 15.1571 3.84344 13.6569 2.34315C12.1566 0.842855 10.1217 0 8 0ZM8 14.93C6.62938 14.93 5.28953 14.5236 4.1499 13.7621C3.01027 13.0006 2.12203 11.9183 1.59752 10.652C1.073 9.3857 0.935766 7.99231 1.20316 6.64802C1.47056 5.30374 2.13058 4.06893 3.09975 3.09975C4.06893 2.13057 5.30374 1.47055 6.64803 1.20316C7.99232 0.935762 9.38571 1.073 10.652 1.59751C11.9183 2.12203 13.0006 3.01027 13.7621 4.1499C14.5236 5.28953 14.93 6.62938 14.93 8C14.9274 9.83714 14.1964 11.5983 12.8973 12.8973C11.5983 14.1964 9.83714 14.9274 8 14.93Z" fill="#0E0E0E"/>
+                  <path d="M7.36 3.36H8.64V4.64H7.36V3.36Z" fill="#0E0E0E"/>
+                  <path d="M7.36 6.24H8.64V12.64H7.36V6.24Z" fill="#0E0E0E"/>
+                </g>
+                <defs><clipPath id="clip_info"><rect width="16" height="16" fill="white"/></clipPath></defs>
+              </svg>
+            </span>
+            <span class="info-tooltip-pop"><span class="info-tooltip-text">Reduce distractions during calls and meetings.</span></span>
+          </span>
+        </div>
+      </div>
+      <div class="function-content">
+        <div class="function-header">
+          <div class="function-title">
+            <p class="function-label">Mic Noise Cancellation</p>
+          </div>
+          <div class="function-icons">
+            <span class="info-tooltip" data-property="mic-noise-cancellation-info">
+              <span class="function-info-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <g clip-path="url(#clip_info)">
+                    <path d="M8 0C6.41775 0 4.87103 0.469192 3.55544 1.34824C2.23985 2.22729 1.21447 3.47672 0.608967 4.93853C0.00346625 6.40034 -0.15496 8.00887 0.153721 9.56072C0.462403 11.1126 1.22433 12.538 2.34315 13.6569C3.46197 14.7757 4.88743 15.5376 6.43928 15.8463C7.99113 16.155 9.59966 15.9965 11.0615 15.391C12.5233 14.7855 13.7727 13.7602 14.6518 12.4446C15.5308 11.129 16 9.58225 16 8C16 5.87827 15.1571 3.84344 13.6569 2.34315C12.1566 0.842855 10.1217 0 8 0ZM8 14.93C6.62938 14.93 5.28953 14.5236 4.1499 13.7621C3.01027 13.0006 2.12203 11.9183 1.59752 10.652C1.073 9.3857 0.935766 7.99231 1.20316 6.64802C1.47056 5.30374 2.13058 4.06893 3.09975 3.09975C4.06893 2.13057 5.30374 1.47055 6.64803 1.20316C7.99232 0.935762 9.38571 1.073 10.652 1.59751C11.9183 2.12203 13.0006 3.01027 13.7621 4.1499C14.5236 5.28953 14.93 6.62938 14.93 8C14.9274 9.83714 14.1964 11.5983 12.8973 12.8973C11.5983 14.1964 9.83714 14.9274 8 14.93Z" fill="#0E0E0E"/>
+                    <path d="M7.36 3.36H8.64V4.64H7.36V3.36Z" fill="#0E0E0E"/>
+                    <path d="M7.36 6.24H8.64V12.64H7.36V6.24Z" fill="#0E0E0E"/>
+                  </g>
+                  <defs><clipPath id="clip_info"><rect width="16" height="16" fill="white"/></clipPath></defs>
+                </svg>
+              </span>
+              <span class="info-tooltip-pop"><span class="info-tooltip-text">Suppress background noise picked up by your microphone.</span></span>
+            </span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" class="switch-input" data-property="mic-noise-cancellation-state" aria-label="Mic Noise Cancellation">
+            <span class="switch-state"></span>
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+        <div class="subfn-group">
+          <div class="function-header">
+            <div class="function-title">
+              <p class="function-label">Sidetone</p>
+            </div>
+            <div class="function-icons">
+              <span class="info-tooltip" data-property="sidetone-info">
+                <span class="function-info-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <g clip-path="url(#clip_info)">
+                      <path d="M8 0C6.41775 0 4.87103 0.469192 3.55544 1.34824C2.23985 2.22729 1.21447 3.47672 0.608967 4.93853C0.00346625 6.40034 -0.15496 8.00887 0.153721 9.56072C0.462403 11.1126 1.22433 12.538 2.34315 13.6569C3.46197 14.7757 4.88743 15.5376 6.43928 15.8463C7.99113 16.155 9.59966 15.9965 11.0615 15.391C12.5233 14.7855 13.7727 13.7602 14.6518 12.4446C15.5308 11.129 16 9.58225 16 8C16 5.87827 15.1571 3.84344 13.6569 2.34315C12.1566 0.842855 10.1217 0 8 0ZM8 14.93C6.62938 14.93 5.28953 14.5236 4.1499 13.7621C3.01027 13.0006 2.12203 11.9183 1.59752 10.652C1.073 9.3857 0.935766 7.99231 1.20316 6.64802C1.47056 5.30374 2.13058 4.06893 3.09975 3.09975C4.06893 2.13057 5.30374 1.47055 6.64803 1.20316C7.99232 0.935762 9.38571 1.073 10.652 1.59751C11.9183 2.12203 13.0006 3.01027 13.7621 4.1499C14.5236 5.28953 14.93 6.62938 14.93 8C14.9274 9.83714 14.1964 11.5983 12.8973 12.8973C11.5983 14.1964 9.83714 14.9274 8 14.93Z" fill="#0E0E0E"/>
+                      <path d="M7.36 3.36H8.64V4.64H7.36V3.36Z" fill="#0E0E0E"/>
+                      <path d="M7.36 6.24H8.64V12.64H7.36V6.24Z" fill="#0E0E0E"/>
+                    </g>
+                    <defs><clipPath id="clip_info"><rect width="16" height="16" fill="white"/></clipPath></defs>
+                  </svg>
+                </span>
+                <span class="info-tooltip-pop"><span class="info-tooltip-text">Hear your own voice through the headset while talking.</span></span>
+              </span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" class="switch-input subfn-toggle" data-property="sidetone-state" aria-label="Sidetone">
+              <span class="switch-state"></span>
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+            </label>
+          </div>
+          <div class="slider-row subfn-child">
+            <p class="slider-label">1</p>
+            <div class="slider-input-wrap" style="--min:1;--max:3;--val:2;">
+              <input type="range" class="slider-input" min="1" max="3" step="1" value="2"
+                     data-property="slider-value" aria-label="Sidetone level"
+                     oninput="this.parentNode.style.setProperty('--val',this.value);this.nextElementSibling.textContent=this.value;">
+              <p class="slider-value">2</p>
+            </div>
+            <p class="slider-label">3</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

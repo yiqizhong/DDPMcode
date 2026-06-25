@@ -1,0 +1,19 @@
+<!-- Toggle sub-control — the standard labeled row: name (+ optional ⓘ) on the left, a native
+     on/off switch on the right. COPY per a function's on/off control; fill {label} and the
+     {id}-state property (the manifest adds `checked` to the <input> when the initial state is ON).
+     ⓘ is OPTIONAL: if the control has info text, COPY subcontrols/info-tooltip.html into the
+     .function-icons div; otherwise delete the whole .function-icons div.
+     Styles: headset.css .function-header / .function-title / .function-label / .switch*. -->
+<div class="function-header">
+  <div class="function-title">
+    <p class="function-label">{label}</p>
+  </div>
+  <div class="function-icons">
+    <!-- optional: COPY subcontrols/info-tooltip.html here if this control has info; else delete this div -->
+  </div>
+  <label class="switch">
+    <input type="checkbox" class="switch-input" data-property="{id}-state" aria-label="{label}">
+    <span class="switch-state"></span>
+    <span class="switch-track"><span class="switch-thumb"></span></span>
+  </label>
+</div>

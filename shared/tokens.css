@@ -23,6 +23,7 @@
   --color-border: #e1e1e1;
   --color-border-muted: #cccccc;
   --color-border-light: #f0f0f0;        /* white-theme component borders (connection tag, feature button) */
+  --color-control-inactive: #d2d2d2;    /* inactive control gray (slider track/labels/value, off states) */
 
   /* Status */
   --color-battery: #7aa809;             /* battery indicator green */
@@ -40,6 +41,7 @@
   /* Radii */
   --radius-sm: 2px;
   --radius-md: 4px;
+  --radius-card: 8px;                    /* function card surface */
   --radius-lg: 16px;
 
   /* Elevation */

@@ -278,6 +278,31 @@
 
 ---
 
+### 6.7 Collaboration 参考实现(已建并验证 2026-06-25)
+
+Collaboration 卡已按本架构从 Figma 导出**完整建出 + 逐项验证**(浏览器实测渲染、computed 颜色/尺寸、交互状态)。第一张走通"快照"全链路的卡,并产出可复用 building blocks。
+
+**可复用件(已建):**
+- 卡壳 `headset-function/templates/function-frame.html`(标题 + 可选 ⓘ 槽 + 子控件 body 槽)。
+- 子控件 `headset-shared/subcontrols/`:`toggle-row.html` / `slider.html` / `info-tooltip.html` + README。
+- 样式全在 `headset.css`;新增 token `--color-control-inactive`、`--radius-card`。
+- `headset-function`(Layer-2)SKILL 改成"卡壳 + 复制子控件"装配模型。
+
+**成品样板:** `functions/collaboration.html` = 卡壳 + 2×toggle-row(Mic Noise Cancellation / Sidetone)+ 1×slider;Sidetone 行 + slider 包在 `.subfn-group`;每行带可选 ⓘ。纯 HTML + data-property,无内联样式,交互全靠原生控件 + CSS(仅 slider 一行 `oninput`)。
+
+**review 决策(已落地):**
+| 项 | 决定 |
+|---|---|
+| 外壳面板底色 | 保持原灰;一度改白后**撤回**,模版零原色改动 |
+| 控件 | 原生 checkbox 开关(`:checked` 驱动)、range slider(蓝填充 `--color-accent` + 一行 oninput 气泡) |
+| ⓘ | 可选 property,有 info 才渲染;必带 hover tooltip |
+| tooltip | firmware ⓘ 与卡片 ⓘ **合并成一套** `.info-tooltip*`;位置同 firmware;**min 220 / max 250px** |
+| 联动 | toggle 关 → 旗下子功能置灰,`.subfn-group` + `:has()` 纯 CSS(Sidetone 关→slider 灰) |
+
+**验证手段:** 一次性预览宿主页 `headset/_preview-collaboration.html`(fetch 注入片段 + link 真 CSS),用 `preview_screenshot/inspect/eval` 实测。dev 产物(预览页 + `.claude/launch.json`)已 gitignore。
+
+---
+
 ## 7. 控件选型:什么时候 toggle / slider / dropdown(写死 vs 推断)
 
 **你的输入(大意)**:LLM 有时需要基于逻辑的合理推断。比如 on/off 用什么 UI、子功能怎么显示、切模式怎么布局、Sidetone 5 模式用 dropdown 还是 slider……有些逻辑可以写死(Sidetone→slider),有些不能写死就得让大模型推。到底什么时候用 toggle/dropdown/slider?
@@ -448,13 +473,19 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 
 ## 11. 待办 / 未决
 
-- [ ] **commit D2 那批改名**(`headset-function` 迁移)——目前 `git add` 了但未提交。
-- [ ] **把 function 形态从单行(v1)升级成"卡片 + 子控件槽"**:重做 `function-frame.html` 和 `.function-module` 等样式(目前还是改名那轮的单行版,与 D9 不符)。
-- [ ] **新增 `headset-shared/subcontrols/`**(或等价位置):`segmented.html`、`toggle-row.html`、`slider.html`、`preset-grid.html` 等原生控件片段,按需生长。
-- [ ] **把控件选型的三张表写进 `AGENTS.md`**(D10 载体):①形状→家族;②家族内呈现选择(Segmented/Dropdown 的数量阈值、Button/Hyperlink 的语义);③领域约定表。只在编写期用,生成期不查。
-- [ ] **建 Audio Settings 参考实现**:Content Area 三个槽(Noise Control/Collaboration/Multimedia),Noise Control 选 ANC 时从条件槽冒出子功能;原生交互 + CSS 显隐;配最小 `home.manifest` + `audio-settings.manifest`;跑 `gen-subpage` 出真页对照,并特意出一个"删 Sidetone + Noise Control 只留 2 模式 + 条件子功能"的偏离款验证。
-- [ ] **已知功能"默认组成"的存放形式**敲定(数据片段 / 注册表条目)与 `gen-subpage` 的覆盖合并逻辑。
-- [ ] `headset/models/` 仍无真实 manifest;icons 仅 `audio.svg`——参考实现会补齐需要的图标/数据。
+**已完成(2026-06-25):**
+- [x] `headset-function` 改名迁移已 commit(130da31)。
+- [x] function 形态从单行升级成卡片:`function-frame.html` 重做成卡壳;`.function-*` 卡片样式落地(§6.7)。
+- [x] 新增 `headset-shared/subcontrols/`:`toggle-row` / `slider` / `info-tooltip`(§6.7);`segmented` / `dropdown` / `preset-grid` 等按需再加。
+- [x] Collaboration 卡建出并逐项验证;firmware ⓘ 与卡片 ⓘ 合并成一套 tooltip(§6.7)。
+
+**未做:**
+- [ ] **把控件选型的三张表写进 `AGENTS.md`**(D10):①形状→家族;②家族内呈现(Segmented/Dropdown 数量阈值、Button/Hyperlink 语义);③领域约定。只在编写期用。
+- [ ] **跑 `gen-subpage` 出一个真子页**:配最小 `home.manifest` + `audio-settings.manifest`,验证"复制快照 + 填槽 + 剥标记"整条链(目前只验证过预览宿主页,没真跑 gen-subpage)。
+- [ ] **下一张卡:Noise Control**(引出 `segmented` archetype)+ Multimedia(`preset-grid`);条件子功能(选 ANC 冒出)用 §8 的显隐机制。
+- [ ] **偏离款验证**:出一个"删 Sidetone / Noise Control 只留 2 模式"的机型,证明改数据不碰素材。
+- [ ] **已知功能"默认组成"的存放形式** + `gen-subpage` 的覆盖合并逻辑(覆盖路径)。
+- [ ] `headset/models/` 仍无真实 manifest;icons 仅 `audio.svg`。
 
 ---
 

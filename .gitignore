@@ -1,1 +1,5 @@
 .DS_Store
+
+# dev-only preview artifacts
+.claude/launch.json
+headset/_preview-*.html

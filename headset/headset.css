@@ -397,47 +397,7 @@ body {
   filter: brightness(0) saturate(100%) invert(20%) sepia(8%) saturate(637%) hue-rotate(175deg) brightness(95%) contrast(89%);
 }
 
-.firmware-tooltip-component {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-.firmware-tooltip {
-  position: absolute;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 16px 12px;
-  min-width: 110px;
-  max-width: 450px;
-  min-height: 52px;
-  left: 8px;
-  top: 19px;
-  box-shadow: var(--shadow-tooltip);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.firmware-tooltip-text {
-  font-family: var(--font-family);
-  font-style: normal;
-  font-weight: var(--fw-regular);
-  font-size: 12px;
-  line-height: 20px;
-  color: var(--color-text-strong);
-  letter-spacing: 0.06px;
-}
-
-.firmware-tooltip-component:hover .firmware-tooltip {
-  opacity: 1;
-  visibility: visible;
-}
+/* The firmware ⓘ tooltip now uses the SHARED .info-tooltip* component (defined below). */
 
 /* --- Masthead --- */
 .masthead {
@@ -504,55 +464,355 @@ body {
   color: var(--color-text);
 }
 
-/* --- Sub-page function module (one item inside .content-area) ---
-   A self-contained setting/feature (EQ, sidetone, mic gain…). Labeled row: name (+ optional
-   description) on the left, the affordance on the right. Copied from
-   headset-function/templates/function-frame.html; values via data-property, and the affordance
-   inside .function-control is built from the manifest's function params. */
-.function-module {
+/* ============================================================
+   Function card — one card in a sub-page Content Area (one per
+   functions[] item). Shell = title (+ ⓘ) over a vertical body
+   that stacks sub-controls; each sub-control row reuses the
+   .function-header layout (label/title left, icons + control
+   right). Copied as a snapshot from
+   .agents/skills/headset-gen-subpage/templates/functions/<id>.html;
+   values via data-property.
+   INTERIM: the toggle/slider below are still the Figma STATIC
+   forms (image switch + div slider). The native-interactive swap
+   (checkbox/range) is tracked in docs/function-card-architecture.md §11.
+   ============================================================ */
+.function-container {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 56px;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-light);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.function-top-section {
+  width: 100%;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-surface);
   background: var(--color-surface);
-  box-shadow: var(--shadow-connection-tag);
   flex-shrink: 0;
 }
 
-.function-info {
+.function-top-section > div {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  width: 100%;
+  flex-shrink: 0;
 }
 
-.function-label {
+/* Shared row: label/title on the left, icons + control on the right. */
+.function-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 40px;
+  width: 100%;
+  gap: 8px;
+}
+
+.function-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.function-title-text {
   font-family: var(--font-family);
-  font-weight: var(--fw-medium);
-  font-size: 14px;
-  line-height: 20px;
+  font-weight: var(--fw-regular);
+  font-size: 20px;
+  line-height: 28px;
   color: var(--color-text-strong);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0;
 }
 
-.function-description {
+.function-label {
+  font-family: var(--font-family);
+  font-weight: var(--fw-regular);
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.5px;
+  color: var(--color-text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.function-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 8px;
+  flex-shrink: 0;
+}
+
+.function-info-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.function-info-icon svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Info (ⓘ) tooltip — SHARED component used by BOTH the homepage firmware ⓘ and the function-card ⓘ.
+   OPTIONAL on cards (a property): render only when there's info text; omit otherwise. Whenever the
+   icon is shown, this hover tooltip is its mandatory bound behavior. */
+.info-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.info-tooltip-pop {
+  position: absolute;
+  left: 8px;            /* relative position matches the homepage firmware ⓘ */
+  top: 19px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 12px;
+  min-width: 220px;
+  max-width: 250px;
+  min-height: 52px;
+  box-shadow: var(--shadow-tooltip);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 1000;
+}
+
+.info-tooltip-text {
   font-family: var(--font-family);
   font-weight: var(--fw-regular);
   font-size: 12px;
-  line-height: 18px;
-  color: var(--color-text);
+  line-height: 20px;
+  letter-spacing: 0.06px;
+  color: var(--color-text-strong);
 }
 
-.function-control {
+.info-tooltip:hover .info-tooltip-pop {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Card body — sub-controls stack vertically here. */
+.function-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* --- Toggle sub-control — native <input type=checkbox> styled as a switch ---
+   Zero JS: :checked drives the OFF/ON label, track colour, and thumb position.
+   Initial state comes from the manifest (data-property on the input → add `checked` when ON). */
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;          /* push the control to the right of the row */
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* the real checkbox — visually hidden but focusable/accessible */
+.switch-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  margin: 0;
+}
+
+.switch-state {
+  font-family: var(--font-family);
+  font-weight: var(--fw-regular);
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.5px;
+  color: var(--color-text-strong);
+  text-align: right;
+  white-space: nowrap;
+  margin-right: 9px;
+}
+.switch-state::after { content: "OFF"; }
+.switch-input:checked ~ .switch-state::after { content: "ON"; }
+
+.switch-track {
+  position: relative;
+  width: 34px;
+  height: 17px;
+  border-radius: 100px;
+  background: var(--color-control-inactive);
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  transition: transform 0.2s ease;
+}
+
+.switch-input:checked ~ .switch-track { background: var(--color-accent); }
+.switch-input:checked ~ .switch-track .switch-thumb { transform: translateX(17px); }
+
+/* keyboard focus ring (native control stays keyboard-operable) */
+.switch-input:focus-visible ~ .switch-track {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* --- Slider sub-control — native <input type=range> styled to match the design ---
+   Drag + keyboard come free from the browser. The value bubble above the thumb is the one
+   spot that needs JS: a one-line inline `oninput` updates --val (drives the track fill + bubble
+   position) and the bubble text. Per-instance min/max/value live on BOTH the <input> attrs
+   (behaviour) and the wrap's --min/--max/--val (visuals); the manifest fills both.
+   --frac is the 0..1 position derived from those. */
+.slider-row {
   display: flex;
   align-items: center;
+  gap: 8px;
+  padding-top: 16px;
+  width: 100%;
   flex-shrink: 0;
+}
+
+.slider-label {
+  font-family: var(--font-family);
+  font-weight: var(--fw-regular);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-control-inactive);
+  text-align: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.slider-input-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 80px;
+  height: 14px;
+  --thumb: 14px;
+  --frac: calc((var(--val) - var(--min)) / (var(--max) - var(--min)));   /* 0..1 */
+}
+
+.slider-input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* WebKit: track with computed two-tone fill + circular thumb */
+.slider-input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 100px;
+  background: linear-gradient(to right,
+    var(--color-accent) calc(var(--frac) * 100%),
+    var(--color-border) calc(var(--frac) * 100%));
+}
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: -5px;                 /* center the 14px thumb on the 4px track */
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-control-inactive);
+}
+
+/* Firefox: track + native progress fill + thumb */
+.slider-input::-moz-range-track {
+  height: 4px;
+  border-radius: 100px;
+  background: var(--color-border);
+}
+.slider-input::-moz-range-progress {
+  height: 4px;
+  border-radius: 100px;
+  background: var(--color-accent);
+}
+.slider-input::-moz-range-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 1px solid var(--color-control-inactive);
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.slider-input:focus-visible {
+  outline: none;
+}
+.slider-input:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Value bubble — centered over the thumb, above the track. */
+.slider-value {
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: calc(var(--frac) * (100% - var(--thumb)) + var(--thumb) / 2);
+  transform: translateX(-50%);
+  font-family: var(--font-family);
+  font-weight: var(--fw-regular);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-control-inactive);
+  text-align: center;
+  white-space: nowrap;
+  margin: 0;
+  pointer-events: none;
+}
+
+/* --- Sub-function dependency: a function's toggle OFF greys out its sub-functions ---
+   The relationship is DATA expressed by structure: a .subfn-group wraps the parent toggle
+   (.subfn-toggle) together with its dependent controls (.subfn-child). When the toggle is OFF,
+   the children grey out + go non-interactive. Pure CSS via :has(), zero JS. */
+.subfn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.subfn-group:has(.subfn-toggle:not(:checked)) .subfn-child {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 /* ------------------------------------------------------------

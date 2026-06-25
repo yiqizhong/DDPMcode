@@ -44,8 +44,11 @@ If a relevant skill exists but was not used, that is a violation — redo it thr
   scoped to `[data-slot]` / `[data-property]` in `headset.css`. Finished product pages strip
   those markers (step 6), so every placeholder disappears automatically — they render clean.
   Never re-introduce a placeholder background on a generated product page.
-- **Real routing:** feature entries are real `<a href>` links; every sub-page links back to
-  `index.html`.
+- **Real routing (build contract):** feature entries are real `<a href>` links **whose target
+  sub-page is actually built**. Declaring a `features[]` entry **obligates generating** its `link`
+  sub-page via `@skills:headset-gen-subpage` — not just rendering the button. A button pointing at
+  a page that was not built (dangling route / 404) is a violation, not a TODO. Every sub-page links
+  back to `index.html`.
 - **Connection blocks are copied, not written:** the connection block is COPIED verbatim from a
   predefined snippet
   (`.agents/skills/headset-shared/connection/<connectionType>.html`) and then
@@ -58,8 +61,8 @@ If a relevant skill exists but was not used, that is a violation — redo it thr
 ## Self-check (after generating)
 
 - Did every step go through its skill (no hand-written home/sub-page/function)?
-- Every feature entry a real `<a href>` whose target sub-page exists, and every sub-page links
-  back to `index.html`?
+- Every feature entry a real `<a href>` whose target sub-page was **actually built this run**
+  (not left as a dangling route / TODO), and every sub-page links back to `index.html`?
 - Any `display`-hidden or pre-embedded-and-hidden variant? (There must be none.)
 - Any content hand-written that should have come from the manifest? If so, redo from the manifest.
 

@@ -49,10 +49,14 @@ Invoke: `@skills:headset-gen-homepage <MODEL>` (e.g. `@skills:headset-gen-homepa
    fill `{label}`/`{link}`, and for the icon **insert**
    `.agents/skills/headset-shared/icons/<feature.icon>.svg` into the `.feature-icon`
    div. If the item has no icon, delete the `.feature-icon` div; **if `<feature.icon>.svg` does not
-   exist, STOP and ask — never draw an icon.** N items → N buttons. Generate each link target via
-   `@skills:headset-gen-subpage $1 <subpage>`.
+   exist, STOP and ask — never draw an icon.** N items → N buttons.
 6. Strip `data-slot`/`data-instruction`/`data-property` from the output (no template markers in
    production — this also removes the device-image placeholder gray); keep classes/markup intact.
+7. **Build every feature's target page — no dangling routes.** A `features[]` entry is a build
+   obligation, not just a button. For **each** feature, generate its `link` target sub-page via
+   `@skills:headset-gen-subpage $1 <subpage>`. The home page is **NOT done** until every feature
+   button navigates to a sub-page that actually exists; a button whose target was not built (404 /
+   dangling route) is a **failure, not a TODO**. Declaring `features[]` = building their pages.
 
 ## Hard rules
 
@@ -63,6 +67,9 @@ Invoke: `@skills:headset-gen-homepage <MODEL>` (e.g. `@skills:headset-gen-homepa
 - **Feature buttons are COPIED from
   `.agents/skills/headset-shared/feature-button.html` (one per `features[]`
   item, values filled), never written from an inline pattern.**
+- **Every `features[]` entry obligates a built, routed sub-page.** Generate each feature's `link`
+  target via `@skills:headset-gen-subpage` (step 7); a feature button whose target page does not
+  exist (dangling route / 404) is a violation. Declaring features = building their pages.
 - **Unpair is a standalone snippet**
   (`.agents/skills/headset-shared/connection/unpair.html`), copied on the home page
   for paired modes only — never embedded inside the connection tag, never on sub-pages, never hidden.
@@ -79,5 +86,5 @@ Invoke: `@skills:headset-gen-homepage <MODEL>` (e.g. `@skills:headset-gen-homepa
 
 - All header slots filled (or PPID legitimately omitted)?
 - Exactly one connection block, matching `connectionType`?
-- Every feature button a real `<a href>` whose target sub-page exists?
+- Every feature button a real `<a href>` whose target sub-page was **actually built this run** (step 7), not left dangling?
 - Zero `display`-hidden variants, zero inline `<style>`?

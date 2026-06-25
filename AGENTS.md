@@ -98,6 +98,12 @@ This is §9.7.4's "copy, don't create" — the structural defense against markup
 - Every page links `shared/tokens.css` then the category stylesheet. **Never duplicate a
   full `<style>` block across files** — share the tokens instead.
 - Categories are isolated: a change in one category must not require editing another.
+- **Features are a build contract, not just buttons.** The moment a model's requirement /
+  manifest declares `features[]`, every feature is one **built, routed sub-page** — not merely a
+  home-page button. Generating the home page is **incomplete** until each feature's `link` target
+  sub-page actually exists and the button navigates to it. A feature button whose target page was
+  not built (a dangling route / 404) is a **violation, not a TODO**. (methodology §6.3: feature
+  count = home-page button count = sub-pages to generate; the manifest is the product's page map.)
 
 ## Categories
 

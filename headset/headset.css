@@ -174,9 +174,33 @@ body {
   align-self: stretch;
 }
 
-/* Sub-page feature zone is wider than the homepage's (528 vs 212). */
+/* Sub-page feature zone = collapsed nav + content area, side by side as ONE region. */
 .feature-zone--subpage {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+/* Collapsed feature nav — 64px strip of icon-only buttons, left of the content area
+   (the 8px gap comes from the .feature-zone--subpage gap). */
+.feature-nav-collapsed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 64px;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+/* Content area inside the feature zone — 528px, holds the controls (stacked). */
+.feature-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   width: 528px;
+  flex-shrink: 0;
 }
 
 .feature-button {
@@ -196,6 +220,22 @@ body {
   /* feature buttons are real <a> links — neutralize anchor defaults. */
   text-decoration: none;
   color: inherit;
+}
+
+/* Collapsed variant (sub-page nav) — 64x64, icon only, centered, blue-glow shadow. */
+.feature-button--collapsed {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-connection-tag);
+}
+
+/* center the icon: the base .button-content is width:100% (left-aligns); shrink it here. */
+.feature-button--collapsed .button-content {
+  width: auto;
 }
 
 .button-content {

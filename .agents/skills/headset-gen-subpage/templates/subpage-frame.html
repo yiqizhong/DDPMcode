@@ -67,22 +67,35 @@
                 </div>
                 <!-- Device image — same position as the homepage. -->
                 <div class="device-image-place" data-property="device-image"></div>
-                <!-- Control Zone — same position/snippet as the homepage, but SUB-PAGES GET NO UNPAIR. -->
+                <!-- Control Zone — connection MUST match the homepage; only difference: NO Unpair on sub-pages. -->
                 <div class="control-zone" data-slot="control-zone"
                      data-instruction="Do NOT write a connection block from the connectionType keyword.
                        COPY .agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html VERBATIM into this div,
                        then fill its value slots (data-property=battery-level from manifest.battery; if absent leave —% and flag).
-                       If that file does NOT exist, STOP and ask. SUB-PAGES GET NO UNPAIR — do not copy unpair.html here.
+                       If that file does NOT exist, STOP and ask.
+                       CONNECTION SYNC (mandatory): connectionType AND battery MUST match the homepage — both read the same
+                       manifest.connectionType / manifest.battery, so the connection block is identical on both pages.
+                       The ONLY sub-page difference is NO UNPAIR — do not copy unpair.html here.
                        Emit only the one needed mode."></div>
             </div>
-            <!-- Sub-page feature zone — wider than the homepage's (528px) — holds the controls. -->
-            <div class="feature-zone feature-zone--subpage" data-slot="controls"
-                 data-instruction="Do NOT write control markup. For each item in manifest.controls[]:
-                   COPY .agents/skills/headset-gen-subpage/templates/controls/<control.id>.html into this region and
-                   fill its data-property value slots from the control's params.
-                   If controls/<control.id>.html does NOT exist, fall back to @skills:headset-control-generic
-                   (render strictly from manifest params — invent nothing). If controls[] is empty, leave the note below.">
-                <p class="placeholder-note">Sub-feature content TBD — to be filled from the manifest.</p>
+            <!-- Sub-page feature zone = collapsed nav + content area, side by side as ONE region (Figma 19:403). -->
+            <div class="feature-zone--subpage">
+                <!-- Collapsed feature nav (Figma 27:612) — homepage feature buttons in 64px icon-only form. -->
+                <div class="feature-nav-collapsed" data-slot="feature-nav-collapsed"
+                     data-instruction="For each manifest.features[] item (the SAME features as the homepage
+                       feature zone), COPY .agents/skills/headset-gen-homepage/templates/feature-button-collapsed.html
+                       into this nav, fill {link}, and insert
+                       .agents/skills/headset-gen-homepage/templates/icons/<feature.icon>.svg into the .feature-icon
+                       (no icon -> leave empty; unknown id -> STOP and ask). Icon-only, no text."></div>
+                <!-- Content area (528px) — holds the controls. -->
+                <div class="feature-content" data-slot="controls"
+                     data-instruction="Do NOT write control markup. For each item in manifest.controls[]:
+                       COPY .agents/skills/headset-gen-subpage/templates/controls/<control.id>.html into this region and
+                       fill its data-property value slots from the control's params.
+                       If controls/<control.id>.html does NOT exist, fall back to @skills:headset-control-generic
+                       (render strictly from manifest params — invent nothing). If controls[] is empty, leave the note below.">
+                    <p class="placeholder-note">Sub-feature content TBD — to be filled from the manifest.</p>
+                </div>
             </div>
         </div>
     </div>

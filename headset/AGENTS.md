@@ -38,15 +38,16 @@ If a relevant skill exists but was not used, that is a violation — redo it thr
   content is presence/absence — generate only the block the model needs.
 - **Share styles:** every page links `../../../shared/tokens.css` then `../../headset.css`.
   No inline `<style>` blocks; promote reusable styles to `headset.css`.
-- **No dev zone tints in product pages:** the pale blue (control-zone) / pink (feature-zone)
-  backgrounds are template-only affordances, scoped to `[data-slot]` in `headset.css`. Finished
-  product pages strip `data-slot` (step 6), so the tints disappear automatically — they render
-  clean. Never add a zone background to a generated product page or re-introduce the tint.
+- **No template placeholders in product pages:** the dev tints (pale blue control-zone; pink
+  feature-zone / content-area) and the gray image placeholder are template-only affordances,
+  scoped to `[data-slot]` / `[data-property]` in `headset.css`. Finished product pages strip
+  those markers (step 6), so every placeholder disappears automatically — they render clean.
+  Never re-introduce a placeholder background on a generated product page.
 - **Real routing:** feature entries are real `<a href>` links; every sub-page links back to
   `index.html`.
 - **Connection blocks are copied, not written:** the connection block is COPIED verbatim from a
   predefined snippet
-  (`.agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html`) and then
+  (`.agents/skills/headset-shared/connection/<connectionType>.html`) and then
   value-filled — never generated from the connectionType keyword. If the mode has no snippet,
   HALT and ask; never fabricate. (This is what stops a weak model from hallucinating a block out
   of a word like "bluetooth".)
@@ -64,10 +65,12 @@ If a relevant skill exists but was not used, that is a violation — redo it thr
 ## Tree
 
 ```
-.agents/skills/                # repo ROOT — Devin discovers skills here
+.agents/skills/                # repo ROOT — Devin discovers skills here (folders with a SKILL.md)
   headset-gen-homepage/        # SKILL.md + templates/home-frame.html
-  headset-gen-subpage/         # SKILL.md + templates/subpage-frame.html
-  headset-control-generic/     # SKILL.md — fallback for controls with no dedicated skill
+  headset-gen-subpage/         # SKILL.md + templates/subpage-frame.html + templates/controls/
+  headset-control-generic/     # SKILL.md — fallback for controls with no dedicated snippet
+  headset-shared/              # NOT a skill — snippets shared by both gen skills:
+                               #   connection/ · icons/ · feature-button.html (collapsed = +.feature-button--collapsed class)
 headset/
   AGENTS.md                    # this map
   headset.css                  # category layout (references shared/tokens.css)

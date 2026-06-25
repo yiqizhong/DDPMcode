@@ -232,6 +232,7 @@ body {
   white-space: nowrap;              /* needed for the ellipsis to work on one line */
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;                     /* flex item — allow it to shrink so the ellipsis triggers */
 }
 
 /* Content area — feature components stacked vertically, 8px between each.
@@ -265,20 +266,51 @@ body {
   color: inherit;
 }
 
-/* Collapsed variant (sub-page nav) — 64x64, icon only, centered, blue-glow shadow. */
+/* Collapsed variant (sub-page nav) — icon-only 64x64 by default; on HOVER it expands LEFTWARD back
+   to the default feature-button look (icon + label). The label stays in the DOM (same markup as the
+   default button) and is collapsed via max-width/opacity — NOT display:none — so it can animate open.
+   It grows to the LEFT: width goes 64 -> 212 while margin-left goes 0 -> -148, so the right edge
+   stays put and (margin-left + width) stays 64 — the outer box is still 64px, so the popped-out part
+   OVERLAYS the neighbour and never reflows the layout (the overflow does not occupy space). */
 .feature-button--collapsed {
   width: 64px;
-  height: 64px;
   padding: 0;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
+  align-items: center;       /* center the icon while collapsed */
   box-shadow: var(--shadow-connection-tag);
+  position: relative;
+  overflow: hidden;
+  transition: width 0.2s ease, margin-left 0.2s ease, padding 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* center the icon: the base .button-content is width:100% (left-aligns); shrink it here. */
+.feature-button--collapsed:hover {
+  width: 212px;
+  margin-left: -148px;       /* 64 - 212: grow left, right edge fixed; outer size stays 64 → no reflow */
+  padding: 15px 20px;
+  align-items: flex-start;   /* restore the default (icon-left) layout */
+  box-shadow: var(--shadow-button);
+  z-index: 2;                /* overlay the neighbour while expanded */
+}
+
+/* button-content: collapsed = centered icon only (no gap/label); hover = default row. */
 .feature-button--collapsed .button-content {
   width: auto;
+  gap: 0;
+  transition: gap 0.2s ease;
+}
+.feature-button--collapsed:hover .button-content {
+  width: 100%;
+  gap: 16px;
+}
+
+/* the label: zero-width + transparent when collapsed, revealed on hover (no display:none). */
+.feature-button--collapsed .feature-text {
+  max-width: 0;
+  opacity: 0;
+  transition: max-width 0.2s ease, opacity 0.2s ease;
+}
+.feature-button--collapsed:hover .feature-text {
+  max-width: 200px;
+  opacity: 1;
 }
 
 .button-content {
@@ -443,8 +475,8 @@ body {
   height: 16px;
 }
 
-/* Sub-page back link — real <a>, styled in the accent color. */
-/* Back link — 16px left-arrow icon, sits left of the title. The box is the title's
+/* Back link — 16px left-arrow icon, sits left of the title (used on BOTH pages: a real <a>
+   on sub-pages, a static <span> on the home page). The box is the title's
    line-height (32px) tall so the arrow vertically centers on the title row. */
 .back-link {
   display: inline-flex;
@@ -487,7 +519,7 @@ body {
 
 .control-zone[data-slot] { background: var(--color-zone-control); }     /* dev tint — template only */
 .feature-zone[data-slot] { background: var(--color-zone-feature); }     /* dev tint — template only */
-.content-area[data-slot] { background: var(--color-zone-feature); }     /* dev tint — template only */
+.content-area[data-slot] { background: var(--color-zone-feature); min-height: 0; }  /* dev tint — template only; keep the scroll min-height */
 
 /* ------------------------------------------------------------
    Uniform scrollbar — everywhere: 4px wide, light gray, 8px radius.

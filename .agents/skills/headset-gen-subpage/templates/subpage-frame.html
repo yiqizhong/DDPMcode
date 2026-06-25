@@ -42,8 +42,9 @@
         </div>
         <div class="content-zone">
             <div class="devices-image-zone">
-                <!-- Header mirrors the homepage header; the ONLY addition is a back link to
-                     the LEFT of the title. Model number + firmware tooltip are identical. -->
+                <!-- Header is identical to the homepage header. The only difference is this back
+                     link is a real <a href="index.html"> (the homepage's is a static, non-clickable
+                     <span>). Device name + model + firmware tooltip are the same. -->
                 <div class="page-header">
                     <a class="back-link" href="index.html" aria-label="Back">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -70,7 +71,7 @@
                 <!-- Control Zone — connection MUST match the homepage; only difference: NO Unpair on sub-pages. -->
                 <div class="control-zone" data-slot="control-zone"
                      data-instruction="Do NOT write a connection block from the connectionType keyword.
-                       COPY .agents/skills/headset-gen-homepage/templates/connection/<connectionType>.html VERBATIM into this div,
+                       COPY .agents/skills/headset-shared/connection/<connectionType>.html VERBATIM into this div,
                        then fill its value slots (data-property=battery-level from manifest.battery; if absent leave —% and flag).
                        If that file does NOT exist, STOP and ask.
                        CONNECTION SYNC (mandatory): connectionType AND battery MUST match the homepage — both read the same
@@ -80,13 +81,15 @@
             </div>
             <!-- Sub-page feature zone = collapsed nav + content area, side by side as ONE region (Figma 19:403). -->
             <div class="feature-zone--subpage">
-                <!-- Collapsed feature nav (Figma 27:612) — homepage feature buttons in 64px icon-only form. -->
+                <!-- Collapsed feature nav (Figma 27:612) — the SAME feature-button.html as the homepage,
+                     with the feature-button--collapsed class: icon-only 64px, expands to icon+label on hover. -->
                 <div class="feature-nav-collapsed" data-slot="feature-nav-collapsed"
                      data-instruction="For each manifest.features[] item (the SAME features as the homepage
-                       feature zone), COPY .agents/skills/headset-gen-homepage/templates/feature-button-collapsed.html
-                       into this nav, fill {link}, and insert
-                       .agents/skills/headset-gen-homepage/templates/icons/<feature.icon>.svg into the .feature-icon
-                       (no icon -> leave empty; unknown id -> STOP and ask). Icon-only, no text."></div>
+                       feature zone), COPY .agents/skills/headset-shared/feature-button.html into this nav and
+                       ADD the 'feature-button--collapsed' class to it. Fill {label}/{link} and insert
+                       .agents/skills/headset-shared/icons/<feature.icon>.svg into the .feature-icon
+                       (unknown id -> STOP and ask). The label IS filled (same label as the homepage) — it is
+                       hidden when collapsed and revealed on hover. ICON SYNC: same icon as the homepage."></div>
                 <!-- Feature content (528px, light-gray bg, 16px radius) = Feature header (40px) + content area. -->
                 <div class="feature-content">
                     <!-- Feature header — the feature/function name; 20px #0E0E0E. -->

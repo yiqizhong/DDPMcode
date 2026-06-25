@@ -10,20 +10,25 @@ One framework that holds ANY headset sub-page. It does not know or care what the
 called or contains — name and controls come from the manifest. There is intentionally NO
 per-sub-page skill: the name is content, so it lives in the manifest, not in a skill name.
 
+A sub-page SHARES the model's device identity, connection, and feature list with the home page
+(single source of truth: `home.manifest`). Only the title + controls are sub-page-specific.
+
 Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
 (e.g. `@skills:headset-gen-subpage HS1234 mic-settings`).
 
 ## Inputs
 
 - `$1` — model folder under `headset/models/`. `$2` — sub-page file stem.
-- Manifest: `headset/models/$1/$2.manifest` — a `title` and a `controls[]` list (each control
-  = an `id` + parameters). `controls[]` may be empty.
+- **Sub-page manifest**: `headset/models/$1/$2.manifest` — a `title` and a `controls[]` list
+  (each control = an `id` + parameters). `controls[]` may be empty.
+- **Model manifest**: `headset/models/$1/home.manifest` — device identity (marketing-name,
+  model-number, firmware, PPID), device image, `connectionType` (+ battery), and `features[]`
+  (each `label` + `icon` + `link`). The sub-page reuses these so it stays in sync with the home page.
 
 ## Procedure
 
 1. **Copy the frame** to the model folder, rewriting the two stylesheet links from
-   preview-relative (4 levels up, so the template renders in place) to output-relative. Run
-   from the repo root:
+   preview-relative to output-relative. Run from the repo root:
    ```
    sed -e 's|href="../../../../shared/tokens.css"|href="../../../shared/tokens.css"|' \
        -e 's|href="../../../../headset/headset.css"|href="../../headset.css"|' \
@@ -31,35 +36,54 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
        > headset/models/$1/$2.html
    ```
    Do not otherwise rewrite the frame.
-2. Read `headset/models/$1/$2.manifest`.
-3. Fill `data-property="subpage-title"` (the `<title>` and the `<h1>`) from `title`.
-4. **Controls** (`data-slot="controls"`): do NOT write control markup. For each `controls[]` item:
-   - If `.agents/skills/headset-gen-subpage/templates/controls/<control.id>.html` exists, **copy**
-     it into the controls region and fill its `data-property` value slots from the control's params.
-   - Otherwise fall back to `@skills:headset-control-generic` (last-resort generation, strictly
-     from manifest params — invent nothing). When such a control recurs, promote it to a snippet.
-   N controls → N rendered controls. If `controls[]` is empty, keep the placeholder note.
-5. Keep the back link `<a class="back-link" href="index.html">` so the page returns home.
-6. Strip `data-slot`/`data-instruction`/`data-property` from the output (no template markers in
+2. Read BOTH `headset/models/$1/$2.manifest` (this sub-page) AND `headset/models/$1/home.manifest`
+   (the model's device identity / connection / features).
+3. **Device identity** (from `home.manifest` — the SAME values as the home page): fill
+   `device-marketing-name` (the `<h1>`), `device-model-number`, `firmware-version`, `device-ppid`
+   (omit the PPID line if absent), and the `device-image` container (`<img src="images/...">`).
+4. **Feature title** (from the sub-page manifest): fill `subpage-title` — both the `<title>` and the
+   `.feature-title` `<h2>` — from `title`.
+5. **Control Zone** (`data-slot="control-zone"`): **copy**
+   `.agents/skills/headset-shared/connection/<home.manifest.connectionType>.html`
+   and fill battery from `home.manifest.battery`. **CONNECTION SYNC:** connectionType + battery MUST
+   equal the home page (same `home.manifest`). **Sub-pages get NO Unpair** — never copy `unpair.html`.
+   Halt if the connection snippet does not exist.
+6. **Collapsed feature nav** (`data-slot="feature-nav-collapsed"`): for each `home.manifest.features[]`
+   item, **copy** `.agents/skills/headset-shared/feature-button.html` (the SAME file as the home page)
+   and **add the `feature-button--collapsed` class** to it. Fill `{label}`/`{link}` and insert
+   `.agents/skills/headset-shared/icons/<feature.icon>.svg` into its `.feature-icon`. The label IS
+   filled (same as the home page) — it shows icon-only and reveals the label on hover. **ICON SYNC:**
+   the same icon as the home page's feature button. Halt on a missing/unknown icon.
+7. **Controls** (`data-slot="controls"`): for each `controls[]` item, **copy**
+   `.agents/skills/headset-gen-subpage/templates/controls/<control.id>.html` and fill its
+   `data-property` value slots; if no snippet exists, fall back to `@skills:headset-control-generic`
+   (strictly from manifest params — invent nothing). Empty `controls[]` → keep the placeholder note.
+8. Keep the back link `<a class="back-link" href="index.html">` so the page returns home.
+9. Strip `data-slot`/`data-instruction`/`data-property` from the output (no template markers in
    production — this also removes the device-image placeholder gray).
 
 ## Hard rules
 
+- **Device identity, connection block, and feature icons come from `home.manifest` and MUST match
+  the home page** (single source of truth — never re-enter or change them on the sub-page). The only
+  sub-page differences are: the title (feature name), the controls, the back link, the collapsed
+  (icon-only) feature nav, and NO Unpair.
 - **Controls are COPIED from
-  `.agents/skills/headset-gen-subpage/templates/controls/<id>.html`** (registry), never written
-  from a description. Only when no snippet exists does `headset-control-generic` generate one
-  (strictly from manifest params). This is the same copy-not-generate defense as the homepage snippets.
-- Invent nothing: title and controls come from the manifest. Never fabricate EQ presets,
-  sidetone/mic controls, ANC toggles, or any control the manifest does not list.
-- Every sub-page MUST keep the back link to `index.html`.
+  `.agents/skills/headset-gen-subpage/templates/controls/<id>.html`** (registry), never written from
+  a description. Only when no snippet exists does `headset-control-generic` generate one.
+- **Connection blocks / feature buttons / icons are COPIED** from the shared snippets in headset-shared,
+  never written from a keyword. Unknown connection mode or icon id → halt and ask.
+- Invent nothing: every value comes from a manifest.
+- Every sub-page MUST keep the back link to `index.html`. NO Unpair on sub-pages.
 - No inline `<style>`; link `shared/tokens.css` + `headset.css` only.
 - One framework for all sub-pages — never create a sub-page-specific skill.
 
 ## Self-check
 
-- Title filled from the manifest (not guessed)?
-- Each listed control COPIED from
-  `.agents/skills/headset-gen-subpage/templates/controls/<id>.html` (known) or, if none,
-  rendered via `headset-control-generic` (unknown)?
-- Back link to `index.html` present?
-- No fabricated controls; empty `controls[]` left as the placeholder note?
+- Device identity (name/model/firmware/PPID/image) filled from `home.manifest` and identical to the
+  home page?
+- Feature title filled from the sub-page manifest (the `<title>` and the `<h2>`)?
+- Connection block copied for `home.manifest.connectionType` (synced with home), with NO Unpair?
+- Collapsed nav: one icon-only button per `home.manifest.features[]`, each icon synced with the home page?
+- Each control COPIED from `controls/<id>.html` (known) or via `headset-control-generic` (unknown)?
+- Back link to `index.html` present? Nothing fabricated? `data-slot`/`data-instruction`/`data-property` stripped?

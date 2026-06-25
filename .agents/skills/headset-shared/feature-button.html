@@ -1,9 +1,11 @@
-<!-- Feature button — canonical snippet. COPY ONCE PER manifest.features[] item into the
-     home page's .feature-zone, then fill:
+<!-- Feature button — THE canonical snippet for both pages (one file = both variants):
+       • Home page feature zone: copy as-is (always expanded: icon + label).
+       • Sub-page collapsed nav: copy AND add the `feature-button--collapsed` class
+         (icon-only by default, expands to icon+label on hover — CSS only, see headset.css).
+     COPY ONCE PER manifest.features[] item, then fill:
        {label} ← feature label;  {link} ← feature link (sub-page filename).
      ICON: replace the inner of <div class="feature-icon"> with the contents of
-       .agents/skills/headset-gen-homepage/templates/icons/<icon-id>.svg
-       (icon-id = manifest feature.icon).
+       .agents/skills/headset-shared/icons/<icon-id>.svg  (icon-id = manifest feature.icon).
        - If the feature has NO icon, DELETE the whole <div class="feature-icon"> line.
        - If icon-id has no file in icons/, STOP and ask — never draw/invent an icon.
      Do NOT hand-write this markup — copy this file. -->

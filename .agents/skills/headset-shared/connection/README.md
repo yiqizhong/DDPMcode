@@ -1,9 +1,9 @@
 # Connection block snippets (closed set)
 
-One file per **confirmed** connection mode, named `<connectionType>.html`. The
-`headset-gen-homepage` skill **copies** the file matching `manifest.connectionType` verbatim
-into the home page's `.control-zone`, then fills value slots. It never writes a connection
-block from the keyword.
+One file per **confirmed** connection mode, named `<connectionType>.html`. The home and
+sub-page skills **copy** the file matching `manifest.connectionType` verbatim into the
+`.control-zone`, then fill value slots. Neither skill ever writes a connection block from
+the keyword.
 
 ## Rules (this is the anti-hallucination mechanism)
 

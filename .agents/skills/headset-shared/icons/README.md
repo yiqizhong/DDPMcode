@@ -1,7 +1,7 @@
 # Feature-icon registry (closed set)
 
 One SVG per icon id, named `<id>.svg`. A manifest feature references an icon by id
-(`icon: audio`); `headset-gen-homepage` inserts `<id>.svg` into the feature button's
+(`icon: audio`); the home and sub-page skills insert `<id>.svg` into the feature button's
 `.feature-icon` slot.
 
 ## Rules (same anti-hallucination mechanism as connection snippets)

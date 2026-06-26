@@ -69,6 +69,12 @@ titled "Sound Environment" or "Hear-through Mode" triggers the rule just as much
 "Noise Control"; a card titled "Noise Gate" (a mic threshold control, not an acoustic-environment
 choice) does not.
 
+**Icon lookup — use the segment-icon registry (never search dds2/ directly):**
+When icons are required, copy each icon from `.agents/skills/headset-shared/segment-icons/<value>.svg`
+where `<value>` is the option's `value` field from the manifest. The registry README has the full
+value → file mapping (including aliases like `transparency` → `hear-through.svg`). If the value has
+no file in `segment-icons/` → HALT and ask; never pull from `dds2/` directly or invent an icon.
+
 ## How an atom is used
 
 - **Building a function snapshot** (`headset-gen-subpage/templates/functions/<id>.html`): assemble the

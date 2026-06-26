@@ -50,6 +50,10 @@ function's name. Build only the affordance values from the manifest.
    manifest (per docs/function-card-architecture.md §7 / `headset/AGENTS.md` Control Selection) — copy
    it as written; do not re-derive. If an archetype has no snippet yet, build it from `headset.css`
    per §9.4 (then it can be promoted to `subcontrols/<archetype>.html`).
+   **Segmented icons:** when a `segmented` subcontrol has `icons: true`, copy each option's icon from
+   `.agents/skills/headset-shared/segment-icons/<value>.svg` (key = the option's `value` field).
+   See `.agents/skills/headset-shared/ICON-INDEX.md` Registry 2 for the full value → file mapping and alias rules.
+   If the value has no file → HALT and ask; never pull from `dds2/` directly or invent an icon.
 4. **Conditional reveals** (`reveals` on a selector subcontrol — segmented | preset-grid): keep the
    snippet's `.segment-panels` block with **one `.segment-panel` per option, in option order** (panel
    count = option count; an option with no `reveals` entry → empty panel). Into panel N put the slot

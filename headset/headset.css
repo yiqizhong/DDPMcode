@@ -1125,30 +1125,54 @@ body {
 details[open] > .dropdown-trigger .dropdown-chevron { transform: rotate(180deg); }
 
 .dropdown-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 8px 3px;
+  gap: 4px;
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-  min-width: 100%;
-  background: var(--color-surface);
-  border: 1px solid #d2d2d2;
+  width: 182px;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   z-index: 20;
   list-style: none;
-  padding: 8px 0;
   margin: 0;
+  box-sizing: border-box;
 }
 
 .dropdown-item {
-  padding: 12px 24px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 8px 16px;
+  gap: 10px;
+  width: 176px;
+  height: 36px;
+  box-sizing: border-box;
   font-family: var(--font-family);
+  font-weight: var(--fw-regular);
   font-size: 14px;
-  line-height: 24px;
+  line-height: 20px;
+  letter-spacing: 0.005em;
   color: var(--color-text-strong);
   cursor: pointer;
+  flex: none;
+  flex-grow: 0;
 }
-.dropdown-item:hover { background: var(--color-border-light); }
+.dropdown-item:hover { background: var(--color-border-light); border-radius: var(--radius-sm); }
 .dropdown-item--selected { color: var(--color-accent); }
+
+/* optional leading icon slot inside a dropdown item (display:none by default) */
+.dropdown-item-icon {
+  display: none;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  flex-grow: 0;
+}
 
 /* ------------------------------------------------------------
    Uniform scrollbar — everywhere: 4px wide, light gray, 8px radius.

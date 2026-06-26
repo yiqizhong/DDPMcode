@@ -1,8 +1,23 @@
-<!-- Toggle sub-control — the standard labeled row: name (+ optional ⓘ) on the left, a native
-     on/off switch on the right. COPY per a function's on/off control; fill {label} and the
-     {id}-state property (the manifest adds `checked` to the <input> when the initial state is ON).
-     ⓘ is OPTIONAL: if the control has info text, COPY subcontrols/info-tooltip.html into the
-     .function-icons div; otherwise delete the whole .function-icons div.
+<!-- Toggle sub-control — the standard labeled row: name (+ optional ⓘ) on the left, a control
+     widget on the right. COPY per a function's sub-control; fill {label} and {id}.
+
+     PROPERTIES
+     ──────────
+     {label}         The control label string.
+
+     ⓘ (optional block)
+                     If the control has info text, COPY subcontrols/info-tooltip.html into the
+                     .function-icons div; otherwise delete the whole .function-icons div.
+
+     CONTROL START / CONTROL END (structural slot)
+                     The right-side widget is SWAPPABLE. Default is a toggle switch. Replace
+                     the entire block with a different control widget from another sub-control
+                     template when the manifest specifies a non-toggle control. The widget MUST
+                     carry margin-left:auto (.switch already does; add inline if swapping).
+
+     {id}-state      (attribute, only when control = switch)
+                     Manifest adds `checked` to .switch-input for ON; absent = OFF.
+
      Styles: headset.css .function-header / .function-title / .function-label / .switch*. -->
 <div class="function-header">
   <div class="function-title">
@@ -11,9 +26,11 @@
   <div class="function-icons">
     <!-- optional: COPY subcontrols/info-tooltip.html here if this control has info; else delete this div -->
   </div>
+  <!-- CONTROL START — replace entire block with a different widget when needed -->
   <label class="switch">
     <input type="checkbox" class="switch-input" data-property="{id}-state" aria-label="{label}">
     <span class="switch-state"></span>
     <span class="switch-track"><span class="switch-thumb"></span></span>
   </label>
+  <!-- CONTROL END -->
 </div>

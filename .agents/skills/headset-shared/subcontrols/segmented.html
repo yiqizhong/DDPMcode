@@ -27,6 +27,11 @@
      UPPER LIMIT: options + conditional panels combined must not exceed 6. headset.css only maps
      positional :has() rules up to nth-child(6); a 7th panel will never be revealed.
 
+     NAMED SUB-FUNCTION TITLE: if this control is a named sub-function (has a `label` and is not the
+     card's sole control — i.e. it sits in a reveal `.segment-panel` or a toggle's `.subfn-child`),
+     render `<p class="subfn-label">{label}</p>` as the first child of that wrapper, above this group.
+     A sole top-level control omits it (the card title labels it). See subcontrols/README.md.
+
      Icon source: COPY from `.agents/skills/headset-shared/segment-icons/<value>.svg` where
      <value> is the option's `value` field from the manifest (e.g. value="anc" → anc.svg).
      See `.agents/skills/headset-shared/ICON-INDEX.md` (Registry 2) for the full value → file mapping and alias rules.

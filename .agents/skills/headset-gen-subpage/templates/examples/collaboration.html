@@ -82,15 +82,17 @@
               <span class="switch-track"><span class="switch-thumb"></span></span>
             </label>
           </div>
-          <div class="slider-row subfn-child">
-            <p class="slider-label">1</p>
-            <div class="slider-input-wrap" style="--min:1;--max:3;--val:2;">
-              <input type="range" class="slider-input" min="1" max="3" step="1" value="2"
-                     data-property="slider-value"
-                     oninput="this.parentNode.style.setProperty('--val',this.value);this.nextElementSibling.textContent=this.value;">
-              <p class="slider-value">2</p>
+          <div class="subfn-child">
+            <div class="slider-row">
+              <p class="slider-label">1</p>
+              <div class="slider-input-wrap" style="--min:1;--max:3;--val:2;">
+                <input type="range" class="slider-input" min="1" max="3" step="1" value="2"
+                       data-property="slider-value"
+                       oninput="this.parentNode.style.setProperty('--val',this.value);this.nextElementSibling.textContent=this.value;">
+                <p class="slider-value">2</p>
+              </div>
+              <p class="slider-label">3</p>
             </div>
-            <p class="slider-label">3</p>
           </div>
         </div>
       </div>

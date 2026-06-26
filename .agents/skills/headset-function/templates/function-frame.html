@@ -21,9 +21,11 @@
       </div>
       <div class="function-content" data-slot="subcontrols"
            data-instruction="COPY one headset-shared/subcontrols/<archetype>.html per sub-control here
-             (control-row / slider / …), in order, filling each one's value slots. A toggle that owns
-             dependent sub-controls: wrap them in a .subfn-group (the parent <input> gets .subfn-toggle,
-             the dependents get .subfn-child) so they grey out when it is OFF.">
+             (control-row / slider / …), in order, filling each one's value slots. A control-row with a
+             `dependents` field: wrap the toggle row AND its dependents in one .subfn-group (toggle
+             <input> gets .subfn-toggle); wrap EACH dependent in a .subfn-child so it greys out when the
+             toggle is OFF. A named full-width dependent (label + segmented/slider/preset-grid) gets a
+             <p class='subfn-label'>{label}</p> first in its .subfn-child.">
       </div>
     </div>
   </div>

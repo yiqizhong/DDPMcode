@@ -545,6 +545,19 @@ body {
   margin: 0;
 }
 
+/* Title heading for a NAMED full-width sub-control (segmented / slider / preset-grid) that is not
+   the card's sole control — i.e. one sitting in a reveal panel (.segment-panel) or a toggle
+   dependent (.subfn-child). Both containers are flex-column gap:8px, so this sits above its control
+   with correct spacing. A sole top-level control omits it (the card title labels it). */
+.subfn-label {
+  font-family: var(--font-family);
+  font-weight: var(--fw-regular);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--color-text-strong);
+  margin: 0;
+}
+
 .function-icons {
   display: flex;
   align-items: center;
@@ -881,9 +894,18 @@ body {
 
 /* --- Sub-function dependency: a function's toggle OFF greys out its sub-functions ---
    The relationship is DATA expressed by structure: a .subfn-group wraps the parent toggle
-   (.subfn-toggle) together with its dependent controls (.subfn-child). When the toggle is OFF,
-   the children grey out + go non-interactive. Pure CSS via :has(), zero JS. */
+   (.subfn-toggle) together with its dependent controls. Each dependent is a .subfn-child WRAPPER
+   (holds an optional .subfn-label heading + the control). When the toggle is OFF, the children grey
+   out + go non-interactive. Pure CSS via :has(), zero JS. */
 .subfn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Each dependent is a wrapper: optional .subfn-label heading stacked above its control. */
+.subfn-child {
   display: flex;
   flex-direction: column;
   gap: 8px;

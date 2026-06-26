@@ -2,8 +2,10 @@
      COPY per a function's ranged control; fill {min}/{max}/{val} in BOTH the <input> attrs AND the
      wrap's --min/--max/--val (the manifest fills both). The one-line inline `oninput`
      drives the value bubble + track fill (the only JS in the card; see docs §8).
-     If this slider is a sub-function of a toggle, wrap it with that toggle in a .subfn-group and add
-     the .subfn-child class here so it greys out when the toggle is OFF (see subcontrols/README.md).
+     If this slider is a toggle's dependent (manifest `dependents`), wrap it in a `.subfn-child` div
+     inside the toggle's `.subfn-group` so it greys out when the toggle is OFF. If it is a NAMED
+     sub-function (has a `label` and is not the card's sole control — whether a dependent or revealed),
+     add `<p class="subfn-label">{label}</p>` as the first child of its wrapper. See subcontrols/README.md.
      Styles: headset.css .slider-row / .slider-input / .slider-value. -->
 <div class="slider-row">
   <p class="slider-label">{min}</p>

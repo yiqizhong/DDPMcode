@@ -111,21 +111,40 @@ not exist; conditional content lives under the selector's `reveals`.
 **Reveal vs grey-out are different:** `reveals` shows/hides a panel on option select; the
 `.subfn-group` below greys a still-visible dependent when a toggle is OFF. Do not conflate them.
 
-## Sub-function dependency (toggle OFF → grey out its sub-functions)
+## Sub-function dependency (toggle OFF → grey out its sub-functions) — the `dependents` field
 
-A function's toggle can own dependent sub-controls. Express it by structure (it is data):
+A `control-row` toggle can own dependent sub-controls that STAY VISIBLE but grey out when it is OFF.
+In the manifest this is the toggle's **`dependents`** field (ordered slot list, same slot shape as
+`reveals` — a `{ archetype, … }` sub-control or a `{ function: <id> }`). It is the toggle counterpart
+of a selector's `reveals`: `dependents` greys (stays visible), `reveals` shows/hides. `dependents`
+goes ONLY on a `control-row`; `reveals` ONLY on a selector — never swap them.
+
+Generation expresses it by structure: ONE `.subfn-group` wraps the toggle row AND its dependents; the
+toggle `<input>` carries `.subfn-toggle`; each dependent is wrapped in a `.subfn-child`:
 
 ```html
 <div class="subfn-group">
-  <!-- the parent toggle row; its switch <input> carries the .subfn-toggle class -->
   <div class="function-header"> … <input class="switch-input subfn-toggle" …> … </div>
-  <!-- its dependent sub-controls carry .subfn-child -->
-  <div class="slider-row subfn-child"> … </div>
+  <div class="subfn-child">
+    <p class="subfn-label">Canceling Strength</p>   <!-- see title rule below -->
+    <div class="segmented-group"> … </div>
+  </div>
 </div>
 ```
 
 When the `.subfn-toggle` is OFF, every `.subfn-child` in the group greys out + goes
 non-interactive — pure CSS `:has()`, zero JS (see `headset.css`).
+
+**Title slot for a named full-width sub-control (`.subfn-label`) — the canonical rule.** A full-width
+sub-control (`segmented` / `slider` / `preset-grid`) renders its `label` as a
+`<p class="subfn-label">{label}</p>` heading above it **whenever it is NOT the card's sole control** —
+i.e. it sits in a reveal `.segment-panel` (e.g. ANC → "ANC Strength") OR in a toggle's `.subfn-child`
+(e.g. Mic Noise Canceling → "Canceling Strength") OR is a non-sole stacked control. The heading is the
+first child of that wrapper (both `.segment-panel` and `.subfn-child` are flex-column gap:8px, so it
+stacks above the control). A top-level *sole* control omits it — the card title covers it (that is why
+ANC/OFF and the multimedia preset grid render headingless). This holds across BOTH `reveals` and
+`dependents`; a `label` with no rendering slot is dropped data (the BUG-002 Failure-4 class) — never
+drop it.
 
 ## Reference assembly
 

@@ -66,10 +66,16 @@ function's name. Build only the affordance values from the manifest.
    pure positional CSS (`.segment-panels` `:has(...:checked)`); add no JS, hand-embed no panel.
    A subcontrol must NOT carry a flat `condition:` field — that is the pre-schema form; its content
    belongs under the selector's `reveals`.
-5. **Sub-function dependency (greying, not reveal)**: if a toggle owns dependent sub-controls that stay
-   visible but grey out when OFF, wrap them in a `.subfn-group` — parent switch `<input>` gets
-   `.subfn-toggle`, dependents get `.subfn-child` (pure CSS, see `headset.css`). (This is greying;
-   `reveals` is show/hide. Different mechanisms — do not conflate.)
+5. **Toggle dependents (greying, not reveal)** — driven by a `control-row`'s `dependents` field: its
+   dependents STAY VISIBLE but grey out when the toggle is OFF. Wrap the control-row's `.function-header`
+   AND its dependents together in ONE `.subfn-group`; add `.subfn-toggle` to the toggle `<input>`; wrap
+   EACH dependent in its own `.subfn-child`. Copy each dependent's `subcontrols/<archetype>.html` (or
+   `{ function: <id> }`, recursive) into its `.subfn-child`. If a dependent is a full-width sub-control
+   (segmented/slider/preset-grid) that carries a `label`, render that label as
+   `<p class="subfn-label">{label}</p>` at the TOP of its `.subfn-child` — this is the title slot for a
+   named full-width sub-function (the card title only covers the card's sole control). Pure CSS, no JS.
+   (This is greying; `reveals` is show/hide — different mechanisms, do not conflate. `reveals` never
+   goes on a `control-row`; `dependents` never goes on a selector.)
 6. Strip `data-slot`/`data-instruction`/`data-property` markers on output.
 
 ## Hard rules

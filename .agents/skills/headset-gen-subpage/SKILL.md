@@ -45,13 +45,21 @@ functions:                            # ordered; the page renders EXACTLY these,
             - <slot>                  # ordered list of revealed slots; each slot is either:
             ...                       #   a sub-control:  { archetype: <enum>, ...value slots }
                                       #   a nested card:  { function: <function-id> }
+        dependents:                   # OPTIONAL — ONLY on a control-row (toggle)
+          - <slot>                    # ordered slot list (same shape as a reveals slot) that GREYS
+            ...                       #   OUT (stays visible, non-interactive) when the toggle is OFF
 ```
 
-**`reveals` is the conditional-reveal / recursive-slot primitive** (architecture §6.5 / §8 / §9.1).
-It replaces any flat `condition:` field — a subcontrol must NEVER carry `condition:`; conditional
-content belongs under its selector's `reveals`. A revealed slot may itself be a selector with its
-own `reveals` (recursion). This is the ONLY legal way to express "select X → show Y"; do not
-hand-embed conditional panels in the output.
+**Two distinct conditional mechanisms — do not conflate:**
+- **`reveals`** — the conditional-reveal / recursive-slot primitive (architecture §6.5 / §8 / §9.1).
+  ONLY on a selector (segmented | preset-grid). A selected option SHOWS/HIDES a `.segment-panel`. A
+  revealed slot may itself be a selector with its own `reveals` (recursion). The ONLY legal way to
+  express "select X → show Y". It replaces any flat `condition:` field (a subcontrol must NEVER carry
+  `condition:`). Do not hand-embed conditional panels.
+- **`dependents`** — the toggle grey-out (`.subfn-group`) relationship. ONLY on a `control-row`
+  (toggle). Its dependents STAY VISIBLE but grey out + go non-interactive when the toggle is OFF.
+  Use this — not `reveals` — whenever a toggle owns dependent controls (e.g. Mic Noise Canceling →
+  Canceling Strength).
 
 ## Validation (run BEFORE emitting — HALT and ask on any failure)
 
@@ -60,7 +68,9 @@ paper over. HALT (do not guess, do not hand-fix the HTML) when:
 
 - `archetype` is not in the enum {control-row, slider, segmented, preset-grid, dropdown}.
 - A subcontrol carries a legacy `condition:` field → tell the author to migrate it to the selector's `reveals`.
-- `reveals` appears on a non-selector archetype, or a `reveals` key matches no option `value` of its selector.
+- `reveals` appears on a non-selector archetype (incl. a `control-row`) → HALT; for a toggle's
+  grey-out dependents use `dependents` (reveals is selector-only). Or a `reveals` key matches no option `value`.
+- `dependents` appears on any archetype other than `control-row` (toggle) → HALT.
 - A selector's `options` + revealed `.segment-panel`s combined exceed **6** (headset.css positional
   `:has()` only maps to `nth-child(6)`; a 7th panel never shows).
 - Two options in one selector share the same `value` (or the same `label`) — a data error; ask which is correct.
@@ -110,7 +120,10 @@ paper over. HALT (do not guess, do not hand-fix the HTML) when:
    preset-grid) has `reveals`, emit its `.segment-panels` block — **one `.segment-panel` per option,
    in option order** (panel count MUST equal option count; an option with no `reveals` entry gets an
    empty panel). Fill panel N with the slot list for option N's `value`: a **sub-control** slot →
-   copy `subcontrols/<archetype>.html`; a **`function:` slot** → render that function id by the same
+   copy `subcontrols/<archetype>.html` — and if that sub-control is a full-width control
+   (segmented/slider/preset-grid) carrying a `label`, render `<p class="subfn-label">{label}</p>` as
+   the panel's first child, above the control (a revealed control is never the card's sole control, so
+   its `label` always renders — `.subfn-label` title rule: subcontrols/README.md); a **`function:` slot** → render that function id by the same
    two-path rule above (snapshot e.g. `eq-audio`, else assembled) **but UNWRAPPED**: the panel is
    already inside the parent card's body, so drop the nested card's outer shell
    (`.function-container` > `.function-top-section` > its anonymous `<div>`) and place only its inner

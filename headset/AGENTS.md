@@ -64,7 +64,7 @@ runtime: it renders the explicit archetype/id already frozen into the manifest (
 | Acoustic environment modes (ANC / Transparency / hear-through / similar) | Icon Segmented |
 | On/off | Toggle |
 
-**Conditional behavior ("when the user picks X, show Y")**
+**Conditional behavior ("when the user picks X, show Y" / "when this toggle is OFF, grey Y")**
 
 Decide this at authoring and freeze it as data — never leave it for generation to infer, and never
 hand-patch it into the output. A selector option that should reveal more controls is written as the
@@ -72,6 +72,11 @@ selector's **`reveals`** map (key = option `value` → ordered slot list; a slot
 nested `{ function: <id> }`, recursively). There is no `condition:` field. Full schema:
 `.agents/skills/headset-gen-subpage/SKILL.md` → Manifest schema; mechanism:
 `.agents/skills/headset-shared/subcontrols/README.md` → Conditional reveals.
+
+A toggle dependency is different: a `control-row` toggle whose child controls should stay visible
+but grey out when OFF uses **`dependents`** (ordered slot list, same slot shape as `reveals`). It
+renders as one `.subfn-group` containing the toggle row and `.subfn-child` dependents. Do not put
+`reveals` on a `control-row`.
 
 > A full equalizer is the `eq-audio` **function** (`functions/eq-audio.html`), not a `slider`
 > sub-control. When a requirement mentions an EQ / equalizer / EQ curve, route it to the `eq-audio`
@@ -85,8 +90,10 @@ do not duplicate that full rule here.
 
 - **Manifest is the contract; validate before emitting.** Generation is deterministic and invents
   nothing (D8). HALT and ask on any out-of-contract manifest — unknown `archetype` or function `id`,
-  a stray `condition:` field, a `reveals` key that matches no option, options+panels > 6, or duplicate
-  option values. Do not paper over an authoring bug by hand-editing the HTML (see gen-subpage Validation).
+  a stray `condition:` field, `reveals` on a `control-row` (use `dependents` for toggle grey-out),
+  `dependents` on anything other than `control-row`, a `reveals` key that matches no option,
+  options+panels > 6, or duplicate option values. Do not paper over an authoring bug by hand-editing
+  the HTML (see gen-subpage Validation).
 
 - **Slots:** single value → `data-property="<name>"`; region (variant/list) → `data-slot` +
   `data-instruction`. Names map 1:1 to manifest fields. Fill by name, never by guessing.

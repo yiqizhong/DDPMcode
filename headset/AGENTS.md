@@ -13,8 +13,8 @@ this first.
 
 > **Status: pilot skeleton.** Framework skills (`headset-gen-homepage`,
 > `headset-gen-subpage`, `headset-function`) and `headset.css` exist; there is **no model data
-> yet** and **no dedicated `headset-function-<id>` skills or function snapshots yet**. Function
-> skills/snapshots grow organically from real manifests (methodology §9.4) — do not pre-create
+> yet** and **no dedicated `headset-function-<id>` skills**. Function snapshots exist and grow
+> organically from real manifests (methodology §9.4) — do not pre-create
 > them speculatively.
 
 ## Routing — generation MUST go through skills (do not hand-write)
@@ -28,15 +28,56 @@ this first.
 - Render a **function** inside a sub-page → **copy**
   `headset-gen-subpage/templates/functions/<id>.html` if it exists; otherwise (no snapshot)
   `@skills:headset-function`. **Never** hand-roll an ad-hoc function from a description.
+  Function routing only recognizes the manifest's explicit `id` (D8). Keyword tables are
+  authoring-time hints for choosing that id; generation never matches names/descriptions or
+  overrides the manifest id.
 
 If a relevant skill exists but was not used, that is a violation — redo it through the skill.
+
+## Control Selection (Authoring Only)
+
+These rules are for writing manifests and design snippets. Generation does not choose controls at
+runtime: it renders the explicit archetype/id already frozen into the manifest (§7 / D10).
+
+**Data shape → archetype family**
+
+| Data shape | Family |
+|---|---|
+| Boolean 2-state | Toggle |
+| Ordered range / stepped value | Slider |
+| Choose 1 from N unordered items | Select family (segmented/dropdown) |
+| Clickable action / entry | Button family (button/link) |
+| A visible grid of preset cards | Option-grid (preset-grid) |
+
+**Within-family presentation**
+
+| Family | Rule |
+|---|---|
+| Select: segmented vs dropdown | Use Segmented when there are <=5-6 options and they should stay visible, or when icon cards are needed. Use Dropdown when there are more options or space is tight. |
+| Button: button vs link | Use a real hyperlink (`<a href>`, like `feature-button`) for navigation to another page/view. Use a button for in-place actions. |
+
+**Domain conventions**
+
+| Domain | Archetype |
+|---|---|
+| Sidetone | Slider |
+| Acoustic environment modes (ANC / Transparency / hear-through / similar) | Icon Segmented |
+| On/off | Toggle |
+
+Segmented vs preset-grid details live in `.agents/skills/headset-shared/subcontrols/README.md`;
+do not duplicate that full rule here.
 
 ## Non-negotiables (apply to every generated page)
 
 - **Slots:** single value → `data-property="<name>"`; region (variant/list) → `data-slot` +
   `data-instruction`. Names map 1:1 to manifest fields. Fill by name, never by guessing.
-- **No hiding:** never `display`-hide a variant and never pre-embed-and-hide. Conditional
-  content is presence/absence — generate only the block the model needs.
+- **No hiding for cross-model variant axes:** connection blocks, function lists, and other
+  generation-time product/model choices are still presence/absence. Never `display`-hide a
+  not-selected variant or pre-embed-and-hide alternate product variants.
+- **Runtime reveals are allowed inside one device panel:** terminal user interactions such as
+  segmented conditional panels, selected states, sub-function greying, and shallow conditional
+  reveals may pre-embed panel content and reveal it with CSS `:has()` / `:checked`. This is the
+  explicit D11/D12 override for interactive controls, not a license to hide cross-model variants.
 - **Share styles:** every page links `../../../shared/tokens.css` then `../../headset.css`.
   No inline `<style>` blocks; promote reusable styles to `headset.css`.
 - **No template placeholders in product pages:** the dev tints (pale blue control-zone; pink

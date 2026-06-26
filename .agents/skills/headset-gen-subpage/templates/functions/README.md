@@ -11,30 +11,39 @@ built from `headset.css` classes, with each model-specific value marked `data-pr
 
 ## Rules
 
-- **Keyword match** — before id lookup, check if the requirement description matches a keyword
-  pattern in the Known-function matching table below. If it matches, treat the function as the
-  named template id (COPY it). This overrides whatever id the manifest happens to assign.
-- **Bespoke function** (`<id>.html` exists here) → COPY it, fill its `data-property` slots from the
-  function's params. Never hand-write function markup when a snapshot exists.
-- **No snapshot yet** (no `<id>.html`) → `@skills:headset-function` — it copies the canonical
-  `function-frame.html` template and fills it, constrained strictly to manifest params (invent
-  nothing). When such a function recurs and needs a bespoke design, promote it to a snapshot here (§9.4).
+**Generation-time (weak model executing headset-gen-subpage):**
+- **Bespoke function** (`<id>.html` exists here) → COPY the file whose name matches the manifest
+  function's `id` exactly, fill its `data-property` slots from the function's params. Function
+  routing is **id-only** (architecture D8: "身份认 id，不认名字") — the manifest's `id` field is
+  the sole lookup key; no keyword matching or name inference is performed at generation time.
+- **No snapshot yet** (no `<id>.html` matching the manifest `id`) → `@skills:headset-function` —
+  it copies the canonical `function-frame.html` template and fills it, constrained strictly to
+  manifest params (invent nothing). When such a function recurs and needs a bespoke design,
+  promote it to a snapshot here (§9.4).
 - No inline `<style>`; reuse tokens + `headset.css`. New reusable styles go in `headset.css`.
 
-## Known-function matching
+## Known-function reference table (authoring-time only)
 
-Keyword matching is **case-insensitive, partial match** on the requirement description or feature title.
-Match any one keyword in a row to trigger the template.
+> **IMPORTANT — authoring vs. generation:**
+> This table is a **reference for human authors and strong models when writing or reviewing a
+> manifest** — it helps you pick the correct `id` for a function. It is **not executed at
+> generation time**. The weak model generating a sub-page does NOT perform keyword matching;
+> it only looks up `functions/<manifest.id>.html` as described above (D8).
 
-| Keywords (any one triggers) | Template | Notes |
+The keywords below are **whole-word / phrase matches** (case-insensitive). They are not partial
+substring matches — e.g. `equalizer` does not trigger on `frequency` or `request`.
+
+| Authoring keywords (whole-word/phrase) | Correct `id` to use | Notes |
 |---|---|---|
-| `audio equalizer` · `equalizer` · `eq` · `sound eq` · `eq curve` · `frequency eq` | `eq-audio.html` | 5-band interactive EQ curve; 6-stop snap (+3 → −2 dB) |
-| `download dell audio` · `download app` · `promotion` · `qr code` · `mobile app download` | `promotion-download.html` | App icon + description + CTA button; close button dismisses card |
-| *(structural)* function has **exactly one boolean parameter** and no sliders / sub-controls | `single-control.html` | Title left, toggle right in header; no content area below |
+| `audio equalizer` · `equalizer` · `sound eq` · `eq curve` · `frequency eq` | `eq-audio` | 5-band interactive EQ curve; 6-stop snap (+3 → −2 dB) |
+| `download dell audio` · `download app` · `promotion` · `qr code` · `mobile app download` | `promotion-download` | App icon + description + CTA button; close button dismisses card |
+| *(structural)* function has **exactly one boolean parameter** and no sliders / sub-controls | `single-control` | Title left, toggle right in header; no content area below — authoring guidance only, not auto-applied at generation time |
+| `auto power off` · `auto-off` · `power off timer` · `idle timeout` · `standby timer` · `sleep timer` | `auto-power-off` | Single header row; value chosen from a dropdown (worked example of the swappable header slot — switch replaced by `dropdown.html`) |
 
-**How to apply:** when a keyword triggers a match, resolve the template id to the value in the
-Template column, then follow the normal Bespoke-function copy rule. Do not re-derive markup from
-the description — copy the snapshot verbatim.
+**How to use this table (authoring only):** when designing a manifest and you recognise a function
+that matches a keyword pattern, set the manifest function's `id` to the value in the "Correct id"
+column. The generation step will then copy the correct snapshot by that id. Do not re-derive markup
+from the description — copy the snapshot verbatim.
 
 ## Value slots inside a function snapshot
 

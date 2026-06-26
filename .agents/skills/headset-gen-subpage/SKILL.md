@@ -58,6 +58,10 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
    `.agents/skills/headset-gen-subpage/templates/functions/<function.id>.html` and fill its
    `data-property` value slots; if no snapshot exists, fall back to `@skills:headset-function`
    (strictly from manifest params — invent nothing). Empty `functions[]` → keep the placeholder note.
+   **Function routing is id-only (architecture D8):** look up `functions/<id>.html` using the
+   manifest's `id` field exactly as written — do not perform keyword matching, name inference, or
+   description-based lookup. The keyword reference table in `functions/README.md` is an
+   authoring-time guide for choosing the right `id` when writing a manifest; it is not executed here.
 8. Keep the back link `<a class="back-link" href="index.html">` so the page returns home.
 9. Strip `data-slot`/`data-instruction`/`data-property` from the output (no template markers in
    production — this also removes the device-image placeholder gray).

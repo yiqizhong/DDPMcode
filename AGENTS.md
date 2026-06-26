@@ -36,11 +36,14 @@ style suggestions (methodology §9.7.1 / §9.7.3).
   list sorts into per-category clusters (`headset-*` together, then `mouse-*`, …).
 - `<role>` — `gen` (page framework) or `function` (a sub-page function/setting module).
 - `<name>` — for `gen`: `homepage` | `subpage`. For `function`: omitted for the template-backed
-  generator (`headset-function`), or a specific function id (`eq`, `mic`, …) for a bespoke one.
+  generator (`headset-function`). A per-function skill name such as `headset-function-eq` is rare
+  and not the default path.
 
-Examples: `headset-gen-homepage`, `headset-gen-subpage`, `headset-function`,
-`headset-function-eq`. Sorting alone then clusters category → role → name; the flat list reads
-like nested folders without needing nesting.
+Examples: `headset-gen-homepage`, `headset-gen-subpage`, `headset-function`. Known functions
+normally live as snapshots at `templates/functions/<id>.html` (D6/D17/D18); create
+`headset-function-<id>` only when that function genuinely needs generation logic. There are no
+per-function skills currently. Sorting alone then clusters category → role → name; the flat list
+reads like nested folders without needing nesting.
 
 ### Description rules (this is what prevents "too many skills" from confusing the agent)
 
@@ -59,9 +62,11 @@ skill at a time. So skill COUNT is cheap; what matters is that descriptions are:
 
 - **Sub-pages never get their own skill** — one `<category>-gen-subpage` holds all of them
   (§9.3). Adding a sub-page = a new manifest, never a new skill.
-- **Don't pre-create function skills speculatively** — a function earns a `<category>-function-<id>`
-  skill or a `templates/functions/<id>.html` snapshot only after it recurs in real manifests (§9.4).
-  Until then it renders via `<category>-function` (which copies the `function-frame.html` shell).
+- **Don't pre-create function skills speculatively** — a known recurring function normally earns a
+  `templates/functions/<id>.html` snapshot after it recurs in real manifests (§9.4). A
+  `<category>-function-<id>` skill is the rare path for functions that need real generation logic;
+  default to snapshots. Until then it renders via `<category>-function` (which copies the
+  `function-frame.html` shell).
 
 ### Physical grouping does NOT work — flat is settled (tested 2026-06-24)
 
@@ -109,4 +114,4 @@ This is §9.7.4's "copy, don't create" — the structural defense against markup
 
 - `headset/` — **pilot** category. See `headset/AGENTS.md`. Framework skills + rules only
   (`headset-gen-homepage`, `headset-gen-subpage`, `headset-function`); no model data and no
-  dedicated `headset-function-<id>` skills or function snapshots yet (those grow from real manifests).
+  dedicated `headset-function-<id>` skills; known functions default to snapshots that grow from real manifests.

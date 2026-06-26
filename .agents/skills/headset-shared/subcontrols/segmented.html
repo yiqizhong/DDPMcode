@@ -24,7 +24,13 @@
      HEIGHT: default 56px (label-only). When a 24×24 SVG icon is present the segment
      automatically becomes 80px — no modifier needed; headset.css :has(.segment-icon svg) handles it.
 
-     Icon: COPY a 24×24 <svg> into .segment-icon; DELETE the .segment-icon span entirely if not used.
+     UPPER LIMIT: options + conditional panels combined must not exceed 6. headset.css only maps
+     positional :has() rules up to nth-child(6); a 7th panel will never be revealed.
+
+     Icon: COPY a 24×24 <svg> into .segment-icon; DELETE the entire .segment-icon span if not used
+     (do NOT leave an empty span or one containing only whitespace/newlines — it is no longer :empty,
+     so it won't be hidden and renders as a stray 24×24 box that misaligns the 56px label row. The
+     80px height only triggers when a real <svg> is present, not from a whitespace-only span).
      Styles: headset.css .segmented-group / .segmented-control / .segment* / .segment-panel*. -->
 <div class="segmented-group">
 

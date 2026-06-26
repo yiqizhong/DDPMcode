@@ -1,8 +1,8 @@
 <!-- Promotion / download card — canonical snapshot (Layer-1 known function).
      Fixed template: app icon + description + CTA button. Close button dismisses the card.
      Uses the standard function card shell (.function-container / .function-top-section).
-     data-property slots: promo-title, promo-description, promo-cta-label.
-     App icon: replace the inline SVG with <img src="…" data-property="promo-icon-src"> for production.
+     data-property slots: promo-icon-src, promo-title, promo-description, promo-cta-label.
+     App icon: already an <img> with data-property="promo-icon-src"; manifest sets src to override the default.
      Styles: headset.css .promo-body / .promo-icon / .promo-text / .promo-cta / .function-close
      (NO inline <style>). -->
 <div class="function-container">
@@ -25,7 +25,7 @@
         <div class="promo-body">
 
           <div class="promo-icon">
-            <img src="/headset/assets/dell-audio-icon.png" alt="Dell Audio" width="72" height="72">
+            <img src="/headset/assets/dell-audio-icon.png" alt="Dell Audio" width="72" height="72" data-property="promo-icon-src">
           </div>
 
           <p class="promo-text" data-property="promo-description">Download Dell Audio to optimize and personalize your audio devices settings from the convenience of your iPhone or Android device</p>

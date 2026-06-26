@@ -7,15 +7,17 @@
      toggle-title  (value)     The function title string.
 
      toggle-info   (optional block)
-                   Omit the ENTIRE .info-tooltip span when the manifest provides no info text.
-                   When present: fill .info-tooltip-text with the tooltip string.
+                   Rendered in a .function-icons div after the title — the SAME placement as
+                   subcontrols/control-row.html (and collaboration.html). Omit the ENTIRE
+                   .function-icons div when the manifest provides no info text; when present,
+                   fill .info-tooltip-text with the tooltip string.
 
      header-control (structural slot)
-                   The block marked CONTROL START / CONTROL END is a SWAPPABLE WIDGET.
-                   Default is a toggle switch. Replace the entire block with a different
-                   control widget from another template when the manifest specifies a
-                   non-toggle control. The widget MUST carry margin-left:auto (the .switch
-                   class already does; add it inline if swapping to another widget).
+                   The CONTROL START / CONTROL END block is a SWAPPABLE WIDGET. The full swap
+                   rule lives in ONE place — subcontrols/control-row.html — and applies here
+                   verbatim: default toggle switch; swap ONLY to a compact header control
+                   (currently dropdown.html); slider / segmented / preset-grid are full-width
+                   and must NOT go in the header. The widget MUST carry margin-left:auto.
 
      toggle-state  (attribute, only when header-control = switch)
                    Add the `checked` attribute to .switch-input for ON; absent = OFF.
@@ -29,8 +31,10 @@
 
         <div class="function-title">
           <p class="function-title-text" data-property="toggle-title">Function Name</p>
+        </div>
 
-          <!-- OPTIONAL: omit this entire span when manifest provides no info text -->
+        <!-- OPTIONAL ⓘ — same placement as control-row.html; delete this whole div if no info text -->
+        <div class="function-icons">
           <span class="info-tooltip" data-property="toggle-info">
             <span class="function-info-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -45,7 +49,7 @@
           </span>
         </div>
 
-        <!-- CONTROL START — replace entire block with a different widget when needed -->
+        <!-- CONTROL START — swappable header control; see subcontrols/control-row.html for the rule -->
         <label class="switch">
           <input type="checkbox" class="switch-input" data-property="toggle-state" aria-label="Toggle function">
           <span class="switch-state"></span>

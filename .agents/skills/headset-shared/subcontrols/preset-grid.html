@@ -5,7 +5,8 @@
 
      Fill {id}, {label} (aria group name), and per-option {labelN}/{valueN}.
      The manifest adds `checked` to the <input> whose value matches the initial state.
-     Add/remove <label class="segment"> blocks as needed (typical: 4–6 options).
+     Add/remove <label class="segment"> blocks as needed (typical: 4–6 options; upper limit 6 —
+     headset.css positional :has() rules only map up to nth-child(6)).
      Add .segment--span to the last item to make it span the full row width (e.g. "Custom").
 
      PANELS: same positional rule as segmented.html — Nth .segment-panel is shown when

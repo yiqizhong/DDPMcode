@@ -10,10 +10,12 @@
                      .function-icons div; otherwise delete the whole .function-icons div.
 
      CONTROL START / CONTROL END (structural slot)
-                     The right-side widget is SWAPPABLE. Default is a toggle switch. Replace
-                     the entire block with a different control widget from another sub-control
-                     template when the manifest specifies a non-toggle control. The widget MUST
-                     carry margin-left:auto (.switch already does; add inline if swapping).
+                     The right-side widget is SWAPPABLE, but ONLY with a compact header control:
+                     currently toggle switch (default) or dropdown.html. Slider, segmented, and
+                     preset-grid are full-width (width:100%) controls and must NOT be placed in
+                     .function-header — they belong in the card body (.function-content).
+                     The widget MUST carry margin-left:auto (.switch already does; dropdown.html
+                     already has it in CSS; add inline only if swapping to a future compact control).
 
      {id}-state      (attribute, only when control = switch)
                      Manifest adds `checked` to .switch-input for ON; absent = OFF.

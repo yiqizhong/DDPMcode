@@ -11,12 +11,28 @@ built from `headset.css` classes, with each model-specific value marked `data-pr
 
 ## Rules
 
+- **Keyword match** — before id lookup, check if the requirement description matches a keyword
+  pattern in the Known-function matching table below. If it matches, treat the function as the
+  named template id (COPY it). This overrides whatever id the manifest happens to assign.
 - **Bespoke function** (`<id>.html` exists here) → COPY it, fill its `data-property` slots from the
   function's params. Never hand-write function markup when a snapshot exists.
 - **No snapshot yet** (no `<id>.html`) → `@skills:headset-function` — it copies the canonical
   `function-frame.html` template and fills it, constrained strictly to manifest params (invent
   nothing). When such a function recurs and needs a bespoke design, promote it to a snapshot here (§9.4).
 - No inline `<style>`; reuse tokens + `headset.css`. New reusable styles go in `headset.css`.
+
+## Known-function matching
+
+Keyword matching is **case-insensitive, partial match** on the requirement description or feature title.
+Match any one keyword in a row to trigger the template.
+
+| Keywords (any one triggers) | Template | Notes |
+|---|---|---|
+| `audio equalizer` · `equalizer` · `eq` · `sound eq` · `eq curve` · `frequency eq` | `eq-audio.html` | 5-band interactive EQ curve; 6-stop snap (+3 → −2 dB) |
+
+**How to apply:** when a keyword triggers a match, resolve the template id to the value in the
+Template column, then follow the normal Bespoke-function copy rule. Do not re-derive markup from
+the description — copy the snapshot verbatim.
 
 ## Value slots inside a function snapshot
 

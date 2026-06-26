@@ -1,0 +1,27 @@
+<!-- Single-toggle function card — canonical snapshot (Layer-1 known function).
+     Use when the function's ENTIRE UI is one on/off toggle — no sliders, no sub-controls.
+     The toggle sits in the function-header on the right (margin-left:auto pushes it there);
+     there is NO .function-content area below.
+     data-property slots:
+       - toggle-title : the function title string
+       - toggle-state : presence of `checked` attribute = ON; absent = OFF
+     Styles: headset.css .switch / .switch-input / .switch-state / .switch-track / .switch-thumb
+     (NO inline <style>). -->
+<div class="function-container">
+  <div class="function-top-section">
+    <div>
+
+      <div class="function-header">
+        <div class="function-title">
+          <p class="function-title-text" data-property="toggle-title">Function Name</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" class="switch-input" data-property="toggle-state" aria-label="Toggle function">
+          <span class="switch-state"></span>
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+        </label>
+      </div>
+
+    </div>
+  </div>
+</div>

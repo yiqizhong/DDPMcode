@@ -30,6 +30,7 @@ Match any one keyword in a row to trigger the template.
 |---|---|---|
 | `audio equalizer` · `equalizer` · `eq` · `sound eq` · `eq curve` · `frequency eq` | `eq-audio.html` | 5-band interactive EQ curve; 6-stop snap (+3 → −2 dB) |
 | `download dell audio` · `download app` · `promotion` · `qr code` · `mobile app download` | `promotion-download.html` | App icon + description + CTA button; close button dismisses card |
+| *(structural)* function has **exactly one boolean parameter** and no sliders / sub-controls | `toggle-single.html` | Title left, toggle right in header; no content area below |
 
 **How to apply:** when a keyword triggers a match, resolve the template id to the value in the
 Template column, then follow the normal Bespoke-function copy rule. Do not re-derive markup from

@@ -31,16 +31,16 @@
 
 | 件 | 是什么 / 何时用 | 通用性 | Agent 如何调用 |
 |---|---|---|---|
-| **标题控件行**(`control-row.html`) | 一行:左边标题,右边一个控件(默认是开关)。**最高频** | ✅ 通用 | copy 进卡 body(`.function-content`),每个开关类设置占一行,填 `{label}`/`{id}-state` |
+| **标题控件行**(`toggle.html`) | 标准 labeled toggle row:左边标题,右边原生开关。**最高频** | ✅ 通用 | copy 进卡 body(`.function-content`),每个开关类设置占一行,填 `{label}`/`{id}-state` |
 
 ### B. 紧凑控件(放进行右侧 / 卡 header 的那个槽——**二选一,可互换**)
 
-> 开关和下拉是**同一类兄弟**:都塞进 control-row / single-control 右侧的 `CONTROL` 槽,都靠 `margin-left:auto` 靠右。换哪个由数据决定。
+> 开关和下拉是**同一类兄弟**:都塞进 `toggle` 派生出的 row / single-control 右侧的 `CONTROL` 槽,都靠 `margin-left:auto` 靠右。换哪个由数据决定。
 
 | 件 | 是什么 / 何时用 | 通用性 | Agent 如何调用 |
 |---|---|---|---|
-| **开关**(switch · **无独立文件**,内嵌在 control-row) | 开/关二选一(布尔值) | ✅ 通用 | 是 control-row 的默认右控件;填 `{id}-state`,加 `checked`=ON |
-| **下拉**(`dropdown.html`) | 单选,但**选项多 / 位置紧**(如关机超时 15min…8h)。自定义 `<details>` 浮层,`position:fixed` 逃出滚动容器裁剪 | ✅ 通用 | 换进 control-row/single-control 的 `CONTROL` 槽;实证示例见附录的 auto-power-off |
+| **开关**(switch · **无独立文件**,内嵌在 `toggle.html`) | 开/关二选一(布尔值) | ✅ 通用 | 是 `toggle` 的默认右控件;填 `{id}-state`,加 `checked`=ON |
+| **下拉**(`dropdown.html`) | 单选,但**选项多 / 位置紧**(如关机超时 15min…8h)。自定义 `<details>` 浮层,`position:fixed` 逃出滚动容器裁剪 | ✅ 通用 | 换进 `toggle`/single-control 的 `CONTROL` 槽;实证示例见附录的 auto-power-off |
 
 ### C. 整宽控件(占满一行,放在卡 body,**不能进 header**)
 
@@ -77,7 +77,7 @@
 
 | 机制 | 是什么 / 何时用 | 通用性 | Agent 如何调用 |
 |---|---|---|---|
-| **可换控件槽**(header 右侧的 `CONTROL START/END`) | header 右侧控件要从默认**开关**换成**下拉**时用 | ✅ 通用,但**只限紧凑控件**:开关 ↔ 下拉(滑杆/分段/预设是整宽,禁入 header) | 把 `CONTROL` 块整段换成开关或下拉。**换法规则只有一份权威:`control-row.html`**;single-control 引用它 |
+| **可换控件槽**(header 右侧的 `CONTROL START/END`) | header 右侧控件要从默认**开关**换成**下拉**时用 | ✅ 通用,但**只限紧凑控件**:开关 ↔ 下拉(滑杆/分段/预设是整宽,禁入 header) | 把 `CONTROL` 块整段换成开关或下拉。**换法规则只有一份权威:`toggle.html`**;single-control 引用它 |
 | **空卡的两个填充槽**(②骨架的 ⓘ 槽 / body 槽) | 用②空白卡壳现拼卡时 | ✅ 通用 | 往 body 槽按序 copy ①积木;有说明才往 ⓘ 槽放 info-tooltip |
 | **分段条件面板**(`segment-panels`,在分段/预设内) | 选某一段后**冒出**一组子控件(选 ANC 露出 XYZ) | ✅ 通用(上限 6) | 用结构表达:第 N 段选中→第 N 面板显示,纯 CSS `:has()`,0 JS |
 | **父子开关联动**(`subfn-group`) | 父开关 OFF 时**置灰**旗下子控件(Sidetone 关→滑杆变灰) | ✅ 通用 | 把父开关 + 依赖件包进 `.subfn-group`,纯 CSS `:has()` 置灰 |
@@ -111,7 +111,7 @@
 
 | 卡 | 内含控件 | 怎么用 | 通用性 |
 |---|---|---|---|
-| **single-control** | 1 开关 | 任意"单个 header 控件、无内容区"功能的**通用模板**;右控件可换开关/下拉(规则见 control-row) | ✅ 通用模板 |
+| **single-control** | 1 开关 | 任意"单个 header 控件、无内容区"功能的**通用模板**;右控件可换开关/下拉(规则见 toggle) | ✅ 通用模板 |
 | **eq-audio** | 5 拖拽点 | 产品有音频均衡器就**直接套这张**;结构写死、固定专用、同页限一张 | ✅ 该功能的现成卡(固定) |
 | **promotion-download** | 2 按钮 | 下载推广卡;**填槽**(图标/文案/CTA)即可换品牌复用(默认恰好是 Dell) | ✅ 填槽复用 |
 

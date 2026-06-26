@@ -11,7 +11,7 @@ Use these as **worked examples** when assembling a new card via `@skills:headset
 
 | File | What it demonstrates |
 |---|---|
-| `collaboration.html` | Reference assembly: card shell + 2× `control-row` (Mic Noise Cancellation, Sidetone) + `slider`, with Sidetone wrapped in a `.subfn-group` (OFF greys the slider) + per-row `info-tooltip`. |
+| `collaboration.html` | Reference assembly: card shell + 2× `toggle` (Mic Noise Cancellation, Sidetone) + `slider`, with Sidetone wrapped in a `.subfn-group` (OFF greys the slider) + per-row `info-tooltip`. |
 | `auto-power-off.html` | Proof of the **swappable header slot**: `single-control` shell with the default toggle switch replaced by `dropdown.html` (fixed-position list escapes overflow clipping). |
 | `noise-control.html` | Weak-model assembly test — a **simplified** Noise Control (toggle + strength slider). **NOT** the real Figma 3-mode (ANC / Transparency / Off); kept as a test artifact, real version TBD. |
 

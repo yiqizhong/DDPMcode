@@ -24,8 +24,8 @@
      HEIGHT: default 56px (label-only). When a 24×24 SVG icon is present the segment
      automatically becomes 80px — no modifier needed; headset.css :has(.segment-icon svg) handles it.
 
-     UPPER LIMIT: options + conditional panels combined must not exceed 6. headset.css only maps
-     positional :has() rules up to nth-child(6); a 7th panel will never be revealed.
+     UPPER LIMIT: at most 6 options (panels are 1:1 with options). headset.css only maps positional
+     :has() rules for .segment / .segment-panel up to nth-child(6); a 7th option/panel never shows.
 
      NAMED SUB-FUNCTION TITLE: if this control is a named sub-function (has a `label` and is not the
      card's sole control — i.e. it sits in a reveal `.segment-panel` or a toggle's `.subfn-child`),
@@ -64,7 +64,7 @@
 
   <!-- OPTIONAL conditional panels — DELETE this block entirely if no panel content is needed.
        Panel count must match segment count. Panels are positionally mapped (1st ↔ 1st, etc.).
-       Each panel can contain any sub-controls (control-row, slider, nested segmented, etc.). -->
+       Each panel can contain any sub-controls (toggle, slider, nested segmented, etc.). -->
   <div class="segment-panels">
     <div class="segment-panel">
       <!-- content shown when {label1} is selected -->

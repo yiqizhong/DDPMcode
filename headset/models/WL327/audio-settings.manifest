@@ -23,7 +23,7 @@ functions:
   - id: collaboration
     title: Collaboration
     subcontrols:
-      - archetype: control-row
+      - archetype: toggle
         label: Mic Noise Canceling
         value: true
         dependents:             # grey out (stay visible) when this toggle is OFF

@@ -1088,7 +1088,7 @@ body {
 .content-area[data-slot] { background: var(--color-zone-feature); min-height: 0; }  /* dev tint — template only; keep the scroll min-height */
 
 /* --- Dropdown sub-control — custom <details>/<summary> control with fixed-position list.
-   Works standalone (full-width row) or as the CONTROL START/END swap in control-row /
+   Works standalone (full-width row) or as the CONTROL START/END swap in toggle /
    single-control (margin-left:auto pushes it right in the flex header). The snippet script should
    set list top/left when open so scroll containers cannot clip it. */
 .dropdown {

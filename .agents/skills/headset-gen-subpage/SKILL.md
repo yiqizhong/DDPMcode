@@ -38,14 +38,14 @@ functions:                            # ordered; the page renders EXACTLY these,
     title: <string>                   # card title — assembled path only (snapshots carry their own)
     info: <string?>                   # optional ⓘ tooltip text
     subcontrols:                      # assembled path only (no snapshot). Ordered list of sub-control slots.
-      - archetype: <enum>             # control-row | slider | segmented | preset-grid | dropdown
+      - archetype: <enum>             # toggle | slider | segmented | preset-grid | dropdown
         ...<archetype value slots>... # per subcontrols/README.md (label / min,max,value / options / …)
         reveals:                      # OPTIONAL — ONLY on a selector archetype (segmented | preset-grid)
           <option-value>:             # key MUST equal one of THIS selector's option `value`s
             - <slot>                  # ordered list of revealed slots; each slot is either:
             ...                       #   a sub-control:  { archetype: <enum>, ...value slots }
                                       #   a nested card:  { function: <function-id> }
-        dependents:                   # OPTIONAL — ONLY on a control-row (toggle)
+        dependents:                   # OPTIONAL — ONLY on a toggle
           - <slot>                    # ordered slot list (same shape as a reveals slot) that GREYS
             ...                       #   OUT (stays visible, non-interactive) when the toggle is OFF
 ```
@@ -56,25 +56,33 @@ functions:                            # ordered; the page renders EXACTLY these,
   revealed slot may itself be a selector with its own `reveals` (recursion). The ONLY legal way to
   express "select X → show Y". It replaces any flat `condition:` field (a subcontrol must NEVER carry
   `condition:`). Do not hand-embed conditional panels.
-- **`dependents`** — the toggle grey-out (`.subfn-group`) relationship. ONLY on a `control-row`
-  (toggle). Its dependents STAY VISIBLE but grey out + go non-interactive when the toggle is OFF.
+- **`dependents`** — the toggle grey-out (`.subfn-group`) relationship. ONLY on a `toggle`.
+  Its dependents STAY VISIBLE but grey out + go non-interactive when the toggle is OFF.
   Use this — not `reveals` — whenever a toggle owns dependent controls (e.g. Mic Noise Canceling →
   Canceling Strength).
 
 ## Validation (run BEFORE emitting — HALT and ask on any failure)
 
-Generation is deterministic; an out-of-contract manifest is an authoring bug, not something to
-paper over. HALT (do not guess, do not hand-fix the HTML) when:
+**Mechanical gate (run this first, every time):**
+```
+python3 .agents/skills/headset-gen-subpage/validate-manifest.py headset/models/$1/$2.manifest
+```
+It enforces the rules below deterministically (zero-dependency, stdlib only — it ALWAYS runs).
+**Exit 0 → proceed. Non-zero → HALT**: fix the manifest at the source (do not guess, do not hand-edit
+the generated HTML), then re-run. The HALT directive is no longer prose a weak model can reason
+around — the script is the gate. (If python3 is somehow unavailable, fail closed: do not generate.)
 
-- `archetype` is not in the enum {control-row, slider, segmented, preset-grid, dropdown}.
-- A subcontrol carries a legacy `condition:` field → tell the author to migrate it to the selector's `reveals`.
-- `reveals` appears on a non-selector archetype (incl. a `control-row`) → HALT; for a toggle's
-  grey-out dependents use `dependents` (reveals is selector-only). Or a `reveals` key matches no option `value`.
-- `dependents` appears on any archetype other than `control-row` (toggle) → HALT.
-- A selector's `options` + revealed `.segment-panel`s combined exceed **6** (headset.css positional
-  `:has()` only maps to `nth-child(6)`; a 7th panel never shows).
+Generation is deterministic; an out-of-contract manifest is an authoring bug. The script HALTs when:
+
+- `archetype` is not in the enum {toggle, slider, segmented, preset-grid, dropdown}.
+- A subcontrol carries a legacy `condition:` field → migrate it to a selector's `reveals` or a toggle's `dependents`.
+- `reveals` appears on a non-selector archetype (incl. a `toggle`); for a toggle's grey-out
+  dependents use `dependents` (reveals is selector-only). Or a `reveals` key matches no option `value`.
+- `dependents` appears on any archetype other than `toggle`.
+- A selector has more than **6** `options` (headset.css positional `:has()` maps `.segment` /
+  `.segment-panel` `nth-child` only up to 6; panels are 1:1 with options).
 - Two options in one selector share the same `value` (or the same `label`) — a data error; ask which is correct.
-- A `function` slot's id has neither a `functions/<id>.html` snapshot nor enough params to assemble.
+- A bare `function` slot's id has no `functions/<id>.html` snapshot.
 
 ## Procedure
 

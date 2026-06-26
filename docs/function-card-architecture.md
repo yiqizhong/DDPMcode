@@ -421,6 +421,10 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 
 弱模型从头到尾只做一件事:**看到一个槽 → 按数据里的 archetype 拷对应片段 → 填值。** 有几个槽、填什么、要不要嵌套——全是数据。
 
+**两条原则钉死(D20,2026-06-26):**
+1. **嵌套能力是普适的、行为是数据驱动的。** 每张**装配卡**的卡身都是槽列表,任何槽都能放子控件、或一张**嵌套的功能卡**(它又有自己的槽,递归无上限);没有 per-function 特例,卡壳(`function-frame.html`)对所有卡一致。子功能**显示/隐藏/置灰/常驻**不是卡的属性,而是按需写进 manifest 的数据:需求="选某项才出现"→ `reveals`(显隐);需求="开关关了仍可见但失效"→ `dependents`(置灰);需求="一直在"→ 普通槽。生成期不决定,照数据渲染。
+2. **快照卡(Layer-1,如 `eq-audio`)是冻结的叶子。** 整段复制、不读 manifest 的 `subcontrols`/`reveals`/`dependents`;其内部嵌套(若有)烤死在快照 HTML 里,不按机型授权。递归槽位逻辑对**装配卡**完全普适;快照卡是**有意的终点**(保 D18 的"生成期极简")。要让快照卡也承载按需嵌套槽 = 重开 D18,**暂不做**(以稳定为先)。
+
 ### 9.2 层结构(模板/规则侧 ↔ 数据侧)
 
 ```
@@ -483,7 +487,10 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 | D16 | **preset-first**:每个功能 ID 一份固定预设组成,默认占绝大多数,覆盖是例外;预设存成数据 | 6.6 | 用户背景:"对应到 ID 几乎都有预设、雷打不动" | 生效(坐实 D6/D8,非反转) |
 | D17 | **快照=派生产物 + "改原子→重建快照"纪律**;暂不建 build 机器(只 2 张卡,方法论接受复制)。快照由卡壳+原子装配而来,`headset-function` 的装配逻辑是未来 build 步骤的种子;卡多了再上"spec→装配→快照"自动化 | F 分析 | drift 真实(B 清 ⓘ SVG 时被迫改片段+3 份烤死副本演示了)但现在便宜 | 生效:纪律立、机器 defer |
 | D18 | **生成期极简**:manifest = 子页标题 + **功能 id 列表(+ 罕见覆盖)**;gen-subpage 对 function 只"复制快照 + 剥标记",per-function 填值近乎空操作(已知卡里几乎没有按机型变的值);不建复杂填值引擎 | G 分析 | 冻结快照里几乎一切都烤死;真正按机型变的是"有哪些功能"这个列表 | 生效:待真跑 gen-subpage 验证 |
-| D19 | **递归槽位/条件显隐 落地为 manifest `reveals` schema + 生成步骤 + 生成期校验**:§6.5/§8/§9.1 的"条件子槽"此前只到 CSS+片段层(`.segment-panels` 位置型 `:has`),manifest 无写法、gen-subpage 无步骤。现定义 `reveals`(selector option value → 有序槽列表,槽=子控件或嵌套 `{function:<id>}`,可递归),取代乱编的 `condition:`;gen-subpage/headset-function 增加 reveals 生成步骤;新增生成期校验(未知 archetype/id、`condition:` 残留、reveals 键不匹配、options+panels>6、重复 option 值 → HALT);确立"产物必须可由 manifest 重生成,禁止手改产物"纪律(把 D17 上升到页面级) | WL327 首跑暴露(EQ 被当 slider、手改 HTML、manifest↔产物分叉) | 架构早有递归原语,缺的是 schema 与生成两层;WL327 是 gen-subpage 首次真跑,撞上 §11 未实现项 | 生效:WL327 重生成验证 |
+| D19 | **递归槽位/条件显隐 落地为 manifest `reveals` schema + 生成步骤 + 生成期校验**:§6.5/§8/§9.1 的"条件子槽"此前只到 CSS+片段层(`.segment-panels` 位置型 `:has`),manifest 无写法、gen-subpage 无步骤。现定义 `reveals`(selector option value → 有序槽列表,槽=子控件或嵌套 `{function:<id>}`,可递归),取代乱编的 `condition:`;gen-subpage/headset-function 增加 reveals 生成步骤;新增生成期校验(未知 archetype/id、`condition:` 残留、reveals 键不匹配、>6 option、重复 option 值 → HALT);确立"产物必须可由 manifest 重生成,禁止手改产物"纪律(把 D17 上升到页面级) | WL327 首跑暴露(EQ 被当 slider、手改 HTML、manifest↔产物分叉) | 架构早有递归原语,缺的是 schema 与生成两层;WL327 是 gen-subpage 首次真跑,撞上 §11 未实现项 | 生效:WL327 重生成验证 |
+| D20 | **toggle `dependents`(置灰)schema + 普适标题槽 `.subfn-label` + 嵌套普适/快照冻结原则 + 机械校验器**:BUG-002 暴露 `reveals` 被误用在 control-row、且命名全宽子控件标题被丢。新增 `dependents`(control-row 的置灰子槽,与 `reveals` 显隐对偶);`.subfn-label` 标题槽对 reveals 与 dependents 普适(补回被丢的 "ANC Strength"/"Canceling Strength");§9.1 钉死"嵌套能力普适、行为数据驱动、快照是冻结叶子(不重开 D18)"。**关键稳定性**:把 HALT 从 SKILL.md 散文升级为**零依赖机械校验器** `validate-manifest.py`(gen-subpage 生成前必跑,非 0 即停),根治"弱模型绕过散文规则"(BUG-002 自述的 skip 原因)。顺带修正"options+panels 合计≤6"的措辞 bug(实为 ≤6 option,panels 与 options 1:1) | BUG-002 + 用户"要稳定"指令 | 散文规则会被弱模型在助人压力下绕过;实例修复不防复发,要普适+机械闸门 | 生效:校验器实测真 manifest 通过、5 类坏 manifest HALT |
+| D21 | 把子控件层显式分成**两级:shape(容器:row/stacked) × component(组件:toggle/dropdown/slider/segmented/preset-grid)**。`control-row` 是 **row 形状**(内含可换的紧凑组件 toggle/dropdown),**不是** segmented/slider/preset-grid 的同级;stacked 形状 = `.subfn-label` 标题 + 全宽组件,标题属于形状(不可丢)。"嵌套子功能"的决策流改为**先选形状(横/竖)再选组件**(见 `headset/AGENTS.md`)。**暂不重命名代码 archetype 枚举**(枚举照旧:`control-row | slider | segmented | preset-grid | dropdown`)——重命名/拆分会动 manifest schema、校验器、片段、所有机型,destabilize,defer。 | 用户设计视角讨论(先选形状再选组件;并指出 dropdown 既是 archetype 又在 control-row 内 = 层级混淆) | 散落逻辑导致丢标题、`reveals` 误用在 control-row 等 bug;两级模型让标题结构化(归形状)、贴合设计师心智;但代码重构面大,稳定优先,只在文档层落地 | 生效(文档层;代码 archetype 重命名 defer) |
+| D22 | archetype `control-row` 重命名为 `toggle`;枚举改为**纯组件** `toggle | slider | segmented | preset-grid | dropdown`;**容器形状由生成器推导**(紧凑组件 toggle/dropdown → row 行;全宽组件 slider/segmented/preset-grid → stacked + `.subfn-label`)。落实 D21 两级模型于代码层。**CSS 类名不变**(`.function-header`/`.switch`/`.subfn-toggle` 等照旧);**生成产物 HTML 不变**(只动 manifest 的 archetype 字符串 + 片段文件名 control-row.html→toggle.html)。`dropdown.html` 改成自带标签行的完整版 = grow-on-demand 待办(暂无 manifest 用 `archetype: dropdown`)。 | 用户追问"为何不改枚举";grep 证据:仅 1 个真实机型用到、dropdown 从未作顶层 archetype → 改名此刻最便宜。 | control-row 是 shape 名混入 component 枚举;1 机型 pilot 阶段重命名成本最低,拖延只会随 manifest 增多变贵;校验器与 schema 同步更新,不损生成稳定性。 | 生效(代码层;dropdown.html 全行版 defer) |
 
 ---
 

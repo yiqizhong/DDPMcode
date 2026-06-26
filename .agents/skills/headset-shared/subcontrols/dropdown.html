@@ -5,7 +5,10 @@
      Mark the initially-selected <li> with class="dropdown-item dropdown-item--selected";
      all others get class="dropdown-item" only.
 
-     SWAPPABLE SLOT: this template can replace the CONTROL START/END block in control-row.html
+     COMPACT COMPONENT: dropdown is the other compact component; as an archetype it renders in a
+     labeled row like toggle. This current snippet is the bare swap-in widget form; a self-contained
+     labeled-row version is a grow-on-demand follow-up (no manifest uses archetype: dropdown yet).
+     SWAPPABLE SLOT: this template can replace the CONTROL START/END block in toggle.html
      or single-control.html, but ONLY with a compact header control — toggle switch or this
      dropdown. Slider, segmented, and preset-grid are full-width (width:100%) and must NOT
      be placed in .function-header; they belong in the card body.

@@ -10,13 +10,19 @@ lives in `headset/headset.css`; the snippet is just the markup + value slots.
 
 ## The atoms (grow on demand — §9.4)
 
-| Snippet | Archetype | Fills | headset.css classes |
+These atoms span two levels: `toggle` and `dropdown` are **compact components** that render as a row
+(shape derived); `slider` / `segmented` / `preset-grid` are **full-width components** that render
+stacked (`.subfn-label` title above). For the full authoring decision procedure (component → derived
+shape → condition), see `headset/AGENTS.md` →
+"Control Selection (Authoring Only)".
+
+| Snippet | Archetype | Description / fills | headset.css classes |
 |---|---|---|---|
-| `control-row.html` | the standard labeled row: **name left + native switch right** | `{label}`, `{id}-state` | `.function-header`, `.switch*` |
-| `slider.html` | min/max labels + native range + value bubble | `{min}/{max}/{val}`, `{label}` | `.slider-row`, `.slider-input`, `.slider-value` |
-| `segmented.html` | row of 2–4 mutually-exclusive option buttons (radio semantics, zero JS) | `{id}`, `{label}`, `{labelN}`, `{valueN}` | `.segmented-control`, `.segment`, `.segment-input`, `.segment-icon`, `.segment-label` |
-| `preset-grid.html` | 2-column grid of 4–6 option buttons; last item can span full width via `.segment--span` | same as segmented + `{id}-preset` | `.preset-grid`, `.segment--span` + all `.segment*` |
-| `info-tooltip.html` | OPTIONAL ⓘ + hover tooltip (shared with the homepage firmware ⓘ) | `{info-text}` | `.info-tooltip*` |
+| `toggle.html` | `toggle` | the standard labeled toggle row: name left + native switch right | `.function-header`, `.switch*` |
+| `slider.html` | `slider` | min/max labels + native range + value bubble; fills `{min}/{max}/{val}`, `{label}` | `.slider-row`, `.slider-input`, `.slider-value` |
+| `segmented.html` | `segmented` | row of 2–4 mutually-exclusive option buttons; fills `{id}`, `{label}`, `{labelN}`, `{valueN}` | `.segmented-control`, `.segment`, `.segment-input`, `.segment-icon`, `.segment-label` |
+| `preset-grid.html` | `preset-grid` | 2-column grid of 4–6 option buttons; fills same as segmented + `{id}-preset` | `.preset-grid`, `.segment--span` + all `.segment*` |
+| `info-tooltip.html` | — | OPTIONAL ⓘ + hover tooltip; fills `{info-text}` | `.info-tooltip*` |
 
 > The archetype list is **open** (docs/function-card-architecture.md §9.3): add a new
 > `<archetype>.html` here when a real design needs one (e.g. `dropdown.html`,
@@ -101,8 +107,8 @@ slot list that fills that option's panel (a sub-control `{ archetype, … }`, or
 ```
 
 Generation emits one `.segment-panel` per option in order (count = option count; an option with no
-`reveals` entry → empty panel). Options + panels combined must stay ≤ 6 (CSS maps `:has()` only to
-`nth-child(6)`). A nested `{ function: <id> }` slot is placed **UNWRAPPED** — drop the card's outer
+`reveals` entry → empty panel). A selector may have at most 6 options (panels are 1:1 with options;
+CSS maps `:has()` only up to `nth-child(6)`). A nested `{ function: <id> }` slot is placed **UNWRAPPED** — drop the card's outer
 `.function-container` / `.function-top-section` shell and put only its inner `.function-header` +
 `.function-content` (plus any trailing `<script>`) into the panel, since the panel already sits inside
 the parent card (the full shell would nest a card in a card). A subcontrol must NEVER carry a flat `condition:` field — that pre-schema form does
@@ -113,11 +119,11 @@ not exist; conditional content lives under the selector's `reveals`.
 
 ## Sub-function dependency (toggle OFF → grey out its sub-functions) — the `dependents` field
 
-A `control-row` toggle can own dependent sub-controls that STAY VISIBLE but grey out when it is OFF.
+A `toggle` can own dependent sub-controls that STAY VISIBLE but grey out when it is OFF.
 In the manifest this is the toggle's **`dependents`** field (ordered slot list, same slot shape as
 `reveals` — a `{ archetype, … }` sub-control or a `{ function: <id> }`). It is the toggle counterpart
 of a selector's `reveals`: `dependents` greys (stays visible), `reveals` shows/hides. `dependents`
-goes ONLY on a `control-row`; `reveals` ONLY on a selector — never swap them.
+goes ONLY on a `toggle`; `reveals` ONLY on a selector — never swap them.
 
 Generation expresses it by structure: ONE `.subfn-group` wraps the toggle row AND its dependents; the
 toggle `<input>` carries `.subfn-toggle`; each dependent is wrapped in a `.subfn-child`:
@@ -149,5 +155,5 @@ drop it.
 ## Reference assembly
 
 `headset-gen-subpage/templates/examples/collaboration.html` is a worked example: card shell +
-two `control-row` (Mic Noise Cancellation, Sidetone) + one `slider`, with the Sidetone row + slider
+two `toggle` controls (Mic Noise Cancellation, Sidetone) + one `slider`, with the Sidetone row + slider
 wrapped in a `.subfn-group` (Sidetone OFF greys the slider), and an `info-tooltip` on each row.

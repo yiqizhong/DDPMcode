@@ -1,7 +1,7 @@
 <!-- Auto Power Off function card — single-control card whose header control is a DROPDOWN.
      This is the worked EXAMPLE of the swappable header slot: single-control.html's shell with the
      default toggle switch replaced by subcontrols/dropdown.html (the swap rule lives in
-     subcontrols/control-row.html). Use for a single header-row setting whose value is one choice
+     subcontrols/toggle.html). Use for a single header-row setting whose value is one choice
      from several options — here an idle timeout.
      Layout: [title + optional ⓘ] .................... [DROPDOWN]
      data-property slots:
@@ -18,7 +18,7 @@
           <p class="function-title-text">Auto Power Off</p>
         </div>
 
-        <!-- OPTIONAL ⓘ — same placement as control-row.html; delete this whole div if no info text -->
+        <!-- OPTIONAL ⓘ — same placement as toggle.html; delete this whole div if no info text -->
         <div class="function-icons">
           <span class="info-tooltip">
             <span class="function-info-icon">
@@ -34,7 +34,7 @@
           </span>
         </div>
 
-        <!-- CONTROL = subcontrols/dropdown.html swapped into the header slot (rule: subcontrols/control-row.html) -->
+        <!-- CONTROL = subcontrols/dropdown.html swapped into the header slot (rule: subcontrols/toggle.html) -->
         <details class="dropdown">
           <summary class="dropdown-trigger">
             <span class="dropdown-value" data-property="auto-power-off-value">4 hours</span>

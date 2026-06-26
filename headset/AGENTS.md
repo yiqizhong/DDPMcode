@@ -73,27 +73,56 @@ nested `{ function: <id> }`, recursively). There is no `condition:` field. Full 
 `.agents/skills/headset-gen-subpage/SKILL.md` → Manifest schema; mechanism:
 `.agents/skills/headset-shared/subcontrols/README.md` → Conditional reveals.
 
-A toggle dependency is different: a `control-row` toggle whose child controls should stay visible
+A toggle dependency is different: a `toggle` component whose child controls should stay visible
 but grey out when OFF uses **`dependents`** (ordered slot list, same slot shape as `reveals`). It
 renders as one `.subfn-group` containing the toggle row and `.subfn-child` dependents. Do not put
-`reveals` on a `control-row`.
+`reveals` on a `toggle`.
 
 > A full equalizer is the `eq-audio` **function** (`functions/eq-audio.html`), not a `slider`
 > sub-control. When a requirement mentions an EQ / equalizer / EQ curve, route it to the `eq-audio`
 > function id (see `functions/README.md` keyword table) — at authoring time. If it appears only when
 > a preset like "Custom" is chosen, place it as `{ function: eq-audio }` under that option's `reveals`.
 
+**Nesting a child — the decision procedure (component enum, derived shape)**
+
+A child under a function card is authored by choosing, in this order:
+
+1. **Component (the real function)** — from the data shape (tables above): on/off → toggle;
+   pick-1-of-N visible/few or icon modes → segmented; presets/profiles 4–6 → preset-grid; ordered
+   range → slider; pick-1-of-N many/tight → dropdown.
+2. **Shape (container) is derived, not authored.** Two shapes: **row** (name left, a compact widget
+   right — one line) and **stacked** (a `.subfn-label` title on top, a full-width widget below).
+3. **Shape follows the component's width:**
+   - compact (`toggle`, `dropdown`) → **row** shape: label left + widget right. The `toggle`
+     component is the standard compact boolean row; `dropdown` is the other compact swappable widget.
+   - full-width (`segmented`, `slider`, `preset-grid`) → **stacked** shape, with its
+     `label` rendered as a `.subfn-label` title above it. The title is part of the stacked shape —
+     never omit it for a named child.
+4. **Condition (when it appears) — orthogonal to shape/component:** always present → a plain slot in
+   `subcontrols[]`; appears on a selector choice → `reveals` on the selector (show/hide); stays
+   visible but greys when a toggle is OFF → `dependents` on the `toggle` (grey-out).
+5. **Or a whole nested card:** a child can be an entire function (`{ function: <id> }`) dropped
+   (unwrapped) into a reveal panel or a dependent — recurses.
+
+The **row** shape is what compact components (`toggle`, `dropdown`) render as; the **stacked** shape
+is `.subfn-label` + a full-width component.
+Mechanism detail (markup, CSS classes): `.agents/skills/headset-shared/subcontrols/README.md`.
+Schema + the mechanical HALT gate: `.agents/skills/headset-gen-subpage/SKILL.md`
+(`validate-manifest.py`).
+
 Segmented vs preset-grid details live in `.agents/skills/headset-shared/subcontrols/README.md`;
 do not duplicate that full rule here.
 
 ## Non-negotiables (apply to every generated page)
 
-- **Manifest is the contract; validate before emitting.** Generation is deterministic and invents
-  nothing (D8). HALT and ask on any out-of-contract manifest — unknown `archetype` or function `id`,
-  a stray `condition:` field, `reveals` on a `control-row` (use `dependents` for toggle grey-out),
-  `dependents` on anything other than `control-row`, a `reveals` key that matches no option,
-  options+panels > 6, or duplicate option values. Do not paper over an authoring bug by hand-editing
-  the HTML (see gen-subpage Validation).
+- **Manifest is the contract; validate before emitting (mechanical gate).** Generation is
+  deterministic and invents nothing (D8). Before generating a sub-page, run
+  `python3 .agents/skills/headset-gen-subpage/validate-manifest.py headset/models/<MODEL>/<SUBPAGE>.manifest`
+  — non-zero exit = HALT (fix the manifest at source; never hand-edit the generated HTML). The script
+  is the enforcement (zero-dependency, always runs), not prose. It catches: unknown `archetype`, stray
+  `condition:`, `reveals` on a `toggle` (use `dependents` for toggle grey-out), `dependents` on a
+  non-toggle, a `reveals` key matching no option, >6 options, duplicate option values, and a `function`
+  slot with no snapshot.
 
 - **Slots:** single value → `data-property="<name>"`; region (variant/list) → `data-slot` +
   `data-instruction`. Names map 1:1 to manifest fields. Fill by name, never by guessing.

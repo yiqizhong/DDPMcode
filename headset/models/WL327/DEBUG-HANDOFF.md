@@ -86,3 +86,85 @@ Updated the Multimedia function to include the full `eq-audio` template (5-band 
 - Used subcontrol snippets: `segmented.html`, `slider.html`, `control-row.html`, `preset-grid.html`
 - No inline styles, all styling via `shared/tokens.css` and `headset.css`
 - Proper manifest-driven generation with data-property filling
+
+---
+
+## Bug #2 — Collaboration: Canceling Strength does not grey out when Mic Noise Canceling is OFF
+
+**Date:** 2026-06-26
+**File affected:** `headset/models/WL327/audio-settings.html`
+**Manifest affected:** `headset/models/WL327/audio-settings.manifest`
+**Status:** Open
+
+### Symptom
+The Canceling Strength segmented control (Low / Medium / High) remains fully interactive and fully opaque when the Mic Noise Canceling toggle is switched to OFF. It should grey out and become non-interactive.
+
+### Expected behavior
+Per product requirement: *"when the Mic noise canceling is off, the canceling strength is not workable."*
+The CSS in `headset.css` (line 893) implements this via:
+```css
+.subfn-group:has(.subfn-toggle:not(:checked)) .subfn-child {
+  opacity: 0.4;
+  pointer-events: none;
+}
+```
+This requires `.subfn-toggle` and `.subfn-child` to both be **descendants of the same `.subfn-group`**.
+
+### Root cause — two compounding failures
+
+**Failure 1: Invalid manifest (authoring error)**
+The manifest used `reveals` on a `control-row` archetype:
+```yaml
+- archetype: control-row
+  label: Mic Noise Canceling
+  value: true
+  reveals:          # ← SCHEMA VIOLATION: reveals is only valid on segmented | preset-grid
+    true:
+      - archetype: segmented
+        ...
+```
+The skill schema explicitly states `reveals` is only legal on selector archetypes (`segmented` | `preset-grid`). A `control-row` is a boolean toggle; its dependency relationship is expressed by HTML structure (`.subfn-group` wrapper), not by a `reveals` entry. The validation rule says: **HALT when `reveals` appears on a non-selector archetype**.
+
+**Failure 2: Validation skipped (generation error)**
+The agent did not HALT. Instead it recognized the semantic intent ("toggle should reveal a sub-control") and tried to implement it. The result was a structurally incorrect `.subfn-group` placement:
+
+```
+.function-content
+  ├── .function-header          ← .subfn-toggle lives HERE (outside .subfn-group)
+  │     └── input.subfn-toggle
+  └── .subfn-group              ← sibling, not a wrapper; :has() never finds the toggle
+        └── .segmented-group.subfn-child
+```
+
+The `:has()` selector on `.subfn-group` can never reach `.subfn-toggle` because the toggle is not a descendant of `.subfn-group`.
+
+### Why validation was skipped — systemic explanation
+The HALT directive exists only as text in `SKILL.md`. It has no mechanical enforcement. The LLM agent, trained to complete tasks helpfully, pattern-matched the `reveals` entry to a known intent and bridged the schema gap with reasoning rather than stopping. **Helpfulness pressure overrode schema compliance.** This is the same failure mode the DDPM "copy, don't create" principle is designed to prevent — but for manifest validation there is no structural constraint equivalent, only a text rule.
+
+### Correct HTML structure
+`.subfn-group` must wrap **both** the toggle row and the dependent controls:
+```html
+<div class="subfn-group">
+  <div class="function-header">   <!-- the Mic Noise Canceling row -->
+    ...
+    <input type="checkbox" class="switch-input subfn-toggle" checked>
+    ...
+  </div>
+  <div class="segmented-group subfn-child">   <!-- greys out when toggle is OFF -->
+    ...
+  </div>
+</div>
+```
+
+### Correct manifest
+`control-row` should carry **no `reveals` entry**. The dependency is structural (`.subfn-group` in HTML), not declarative in the manifest:
+```yaml
+- archetype: control-row
+  label: Mic Noise Canceling
+  value: true
+  # no reveals — toggle dependency is expressed by .subfn-group structure in the HTML
+```
+
+### Fix required
+1. Remove the `reveals` block from `control-row` in `audio-settings.manifest`.
+2. In `audio-settings.html`, restructure the Collaboration function content so `.subfn-group` wraps both `.function-header` (containing the toggle) and the `.segmented-group.subfn-child`.

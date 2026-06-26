@@ -26,6 +26,18 @@ functions:
       - archetype: control-row
         label: Mic Noise Canceling
         value: true
+        reveals:
+          true:
+            - archetype: segmented
+              label: Canceling Strength
+              options:
+                - label: Low
+                  value: low
+                - label: Medium
+                  value: medium
+                  selected: true
+                - label: High
+                  value: high
 
   - id: multimedia
     title: Multimedia

@@ -56,7 +56,7 @@
                  cy values must be one of the 7 stop positions: 20/45.67/71.33/97/122.67/148.33/174
                  manifest overrides cy for stored presets via data-property -->
             <circle data-band="0" data-property="eq-audio-bass"
-                    cx="93"  cy="20"    r="6"
+                    cx="93"  cy="45.67" r="6"
                     fill="#ffffff" stroke="#0063b8" stroke-width="2"
                     style="cursor:ns-resize;touch-action:none;"/>
             <circle data-band="1" data-property="eq-audio-lowmid"
@@ -96,8 +96,8 @@
   if (!svg) return;
 
   /* 7 discrete stops: top (+4 dB) → bottom (−2 dB) */
-  var STOPS_Y  = [20, 45.67, 71.33, 97, 122.67, 148.33, 174];
-  var STOPS_DB = [4,  3,     2,     1,  0,       -1,     -2];
+  var STOPS_Y  = [45.67, 71.33, 97, 122.67, 148.33, 174];
+  var STOPS_DB = [3,     2,     1,  0,       -1,     -2];
   var MAX_Y    = 174;
 
   function snapY(rawY) {

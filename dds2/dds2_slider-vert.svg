@@ -1,0 +1,20 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="dds2_slider-vert" clip-path="url(#clip0_7172_205)">
+<g id="Vector">
+<path d="M13 6.35H14V16H13V6.35Z" fill="#0E0E0E"/>
+<path d="M13 0H14V3.15H13V0Z" fill="#0E0E0E"/>
+<path d="M7.47 13.85H8.53V16H7.47V13.85Z" fill="#0E0E0E"/>
+<path d="M7.47 0H8.53V10.65H7.47V0Z" fill="#0E0E0E"/>
+<path d="M2 0H3V3.15H2V0Z" fill="#0E0E0E"/>
+<path d="M2 6.35H3V16H2V6.35Z" fill="#0E0E0E"/>
+<path d="M11 4.22V5.28H16V4.22H11Z" fill="#0E0E0E"/>
+<path d="M5 4.22H0V5.28H5V4.22Z" fill="#0E0E0E"/>
+<path d="M5.47 11.72V12.78H10.47V11.72H5.47Z" fill="#0E0E0E"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_7172_205">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -1,0 +1,103 @@
+<!-- Auto Power Off function card — single-control card whose header control is a DROPDOWN.
+     This is the worked EXAMPLE of the swappable header slot: single-control.html's shell with the
+     default toggle switch replaced by subcontrols/dropdown.html (the swap rule lives in
+     subcontrols/control-row.html). Use for a single header-row setting whose value is one choice
+     from several options — here an idle timeout.
+     Layout: [title + optional ⓘ] .................... [DROPDOWN]
+     data-property slots:
+       auto-power-off-value   — the displayed selected value in the trigger (e.g. "4 hours")
+       auto-power-off-option  — on each <li>; selected one carries .dropdown-item--selected
+     Styles: headset.css .function-* / .info-tooltip* / .dropdown* (NO inline <style>). -->
+<div class="function-container">
+  <div class="function-top-section">
+    <div>
+
+      <div class="function-header">
+
+        <div class="function-title">
+          <p class="function-title-text">Auto Power Off</p>
+        </div>
+
+        <!-- OPTIONAL ⓘ — same placement as control-row.html; delete this whole div if no info text -->
+        <div class="function-icons">
+          <span class="info-tooltip">
+            <span class="function-info-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <g>
+                  <path d="M8 0C6.41775 0 4.87103 0.469192 3.55544 1.34824C2.23985 2.22729 1.21447 3.47672 0.608967 4.93853C0.00346625 6.40034 -0.15496 8.00887 0.153721 9.56072C0.462403 11.1126 1.22433 12.538 2.34315 13.6569C3.46197 14.7757 4.88743 15.5376 6.43928 15.8463C7.99113 16.155 9.59966 15.9965 11.0615 15.391C12.5233 14.7855 13.7727 13.7602 14.6518 12.4446C15.5308 11.129 16 9.58225 16 8C16 5.87827 15.1571 3.84344 13.6569 2.34315C12.1566 0.842855 10.1217 0 8 0ZM8 14.93C6.62938 14.93 5.28953 14.5236 4.1499 13.7621C3.01027 13.0006 2.12203 11.9183 1.59752 10.652C1.073 9.3857 0.935766 7.99231 1.20316 6.64802C1.47056 5.30374 2.13058 4.06893 3.09975 3.09975C4.06893 2.13057 5.30374 1.47055 6.64803 1.20316C7.99232 0.935762 9.38571 1.073 10.652 1.59751C11.9183 2.12203 13.0006 3.01027 13.7621 4.1499C14.5236 5.28953 14.93 6.62938 14.93 8C14.9274 9.83714 14.1964 11.5983 12.8973 12.8973C11.5983 14.1964 9.83714 14.9274 8 14.93Z" fill="#0E0E0E"/>
+                  <path d="M7.36 3.36H8.64V4.64H7.36V3.36Z" fill="#0E0E0E"/>
+                  <path d="M7.36 6.24H8.64V12.64H7.36V6.24Z" fill="#0E0E0E"/>
+                </g>
+              </svg>
+            </span>
+            <span class="info-tooltip-pop"><span class="info-tooltip-text">Turn the headset off after this idle time.</span></span>
+          </span>
+        </div>
+
+        <!-- CONTROL = subcontrols/dropdown.html swapped into the header slot (rule: subcontrols/control-row.html) -->
+        <details class="dropdown">
+          <summary class="dropdown-trigger">
+            <span class="dropdown-value" data-property="auto-power-off-value">4 hours</span>
+            <span class="dropdown-chevron">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M13.335 3.16748L7 9.50248L0.665 3.16748L0 3.83248L7 10.8325L14 3.83248L13.335 3.16748Z" fill="#0E0E0E"/>
+              </svg>
+            </span>
+          </summary>
+          <ul class="dropdown-list">
+            <li class="dropdown-item" data-property="auto-power-off-option" data-value="15min">15 minutes</li>
+            <li class="dropdown-item" data-property="auto-power-off-option" data-value="30min">30 minutes</li>
+            <li class="dropdown-item" data-property="auto-power-off-option" data-value="1h">1 hour</li>
+            <li class="dropdown-item" data-property="auto-power-off-option" data-value="2h">2 hours</li>
+            <li class="dropdown-item dropdown-item--selected" data-property="auto-power-off-option" data-value="4h">4 hours</li>
+            <li class="dropdown-item" data-property="auto-power-off-option" data-value="6h">6 hours</li>
+            <li class="dropdown-item" data-property="auto-power-off-option" data-value="8h">8 hours</li>
+          </ul>
+        </details>
+        <script>
+        (function () {
+          var el    = document.currentScript.previousElementSibling;
+          var list  = el.querySelector('.dropdown-list');
+          var value = el.querySelector('.dropdown-value');
+
+          /* positioning — fixed list escapes overflow-clipping ancestors (e.g. .content-area) */
+          function reposition() {
+            var r = el.querySelector('.dropdown-trigger').getBoundingClientRect();
+            var listW = list.offsetWidth || 182;
+            list.style.top  = (r.bottom + 4) + 'px';
+            list.style.left = (r.right - listW) + 'px';
+          }
+          var scrollHandler = function () { el.removeAttribute('open'); };
+          var resizeHandler = function () { if (el.hasAttribute('open')) reposition(); };
+
+          el.addEventListener('toggle', function () {
+            if (el.open) {
+              reposition();
+              window.addEventListener('scroll', scrollHandler, true);
+              window.addEventListener('resize', resizeHandler);
+            } else {
+              window.removeEventListener('scroll', scrollHandler, true);
+              window.removeEventListener('resize', resizeHandler);
+            }
+          });
+
+          /* selection (click) */
+          list.addEventListener('click', function (e) {
+            var item = e.target.closest('.dropdown-item');
+            if (!item) return;
+            list.querySelectorAll('.dropdown-item').forEach(function (i) {
+              i.classList.remove('dropdown-item--selected');
+            });
+            item.classList.add('dropdown-item--selected');
+            value.textContent = item.textContent.trim();
+            el.removeAttribute('open');
+          });
+        })();
+        </script>
+        <!-- CONTROL END -->
+
+      </div>
+
+    </div>
+  </div>
+</div>

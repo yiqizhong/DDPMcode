@@ -12,7 +12,7 @@ lives in `headset/headset.css`; the snippet is just the markup + value slots.
 
 | Snippet | Archetype | Fills | headset.css classes |
 |---|---|---|---|
-| `toggle-row.html` | the standard labeled row: **name left + native switch right** | `{label}`, `{id}-state` | `.function-header`, `.switch*` |
+| `control-row.html` | the standard labeled row: **name left + native switch right** | `{label}`, `{id}-state` | `.function-header`, `.switch*` |
 | `slider.html` | min/max labels + native range + value bubble | `{min}/{max}/{val}`, `{label}` | `.slider-row`, `.slider-input`, `.slider-value` |
 | `segmented.html` | row of 2–4 mutually-exclusive option buttons (radio semantics, zero JS) | `{id}`, `{label}`, `{labelN}`, `{valueN}` | `.segmented-control`, `.segment`, `.segment-input`, `.segment-icon`, `.segment-label` |
 | `preset-grid.html` | 2-column grid of 4–6 option buttons; last item can span full width via `.segment--span` | same as segmented + `{id}-preset` | `.preset-grid`, `.segment--span` + all `.segment*` |
@@ -97,5 +97,5 @@ non-interactive — pure CSS `:has()`, zero JS (see `headset.css`).
 ## Reference assembly
 
 `headset-gen-subpage/templates/functions/collaboration.html` is a worked example: card shell +
-two `toggle-row` (Mic Noise Cancellation, Sidetone) + one `slider`, with the Sidetone row + slider
+two `control-row` (Mic Noise Cancellation, Sidetone) + one `slider`, with the Sidetone row + slider
 wrapped in a `.subfn-group` (Sidetone OFF greys the slider), and an `info-tooltip` on each row.

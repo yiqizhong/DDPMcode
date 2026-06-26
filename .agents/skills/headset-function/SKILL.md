@@ -18,7 +18,7 @@ Invoke: `@skills:headset-function <function-id>` — called by `headset-gen-subp
 
 ```
 headset-function/templates/function-frame.html        ← the card SHELL (title + ⓘ slot + body)
-headset-shared/subcontrols/<archetype>.html           ← the sub-controls (toggle-row / slider / …)
+headset-shared/subcontrols/<archetype>.html           ← the sub-controls (control-row / slider / …)
 headset-shared/subcontrols/info-tooltip.html          ← the optional ⓘ + tooltip
 ```
 

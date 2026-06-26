@@ -1,22 +1,36 @@
-<!-- Single-toggle function card — canonical snapshot (Layer-1 known function).
-     Use when the function's ENTIRE UI is one on/off toggle — no sliders, no sub-controls.
-     The toggle sits in the function-header on the right (margin-left:auto pushes it there);
-     there is NO .function-content area below.
-     data-property slots:
-       - toggle-title : the function title string
-       - toggle-info  : tooltip text for the ⓘ icon (OPTIONAL — omit the entire .info-tooltip
-                        span when the manifest provides no info text for this function)
-       - toggle-state : presence of `checked` attribute = ON; absent = OFF
-     Styles: headset.css .switch / .switch-input / .switch-state / .switch-track / .switch-thumb
-             + .info-tooltip / .function-info-icon / .info-tooltip-pop / .info-tooltip-text
-     (NO inline <style>). -->
+<!-- Single-control function card — canonical snapshot (Layer-1 known function).
+     Use when the function's ENTIRE UI is ONE control in the header — no content area below.
+     Layout: [title + optional ⓘ] .................... [CONTROL SLOT]
+
+     PROPERTIES
+     ──────────
+     toggle-title  (value)     The function title string.
+
+     toggle-info   (optional block)
+                   Omit the ENTIRE .info-tooltip span when the manifest provides no info text.
+                   When present: fill .info-tooltip-text with the tooltip string.
+
+     header-control (structural slot)
+                   The block marked CONTROL START / CONTROL END is a SWAPPABLE WIDGET.
+                   Default is a toggle switch. Replace the entire block with a different
+                   control widget from another template when the manifest specifies a
+                   non-toggle control. The widget MUST carry margin-left:auto (the .switch
+                   class already does; add it inline if swapping to another widget).
+
+     toggle-state  (attribute, only when header-control = switch)
+                   Add the `checked` attribute to .switch-input for ON; absent = OFF.
+
+     Styles: headset.css .switch* + .info-tooltip* / .function-info-icon (NO inline <style>). -->
 <div class="function-container">
   <div class="function-top-section">
     <div>
 
       <div class="function-header">
+
         <div class="function-title">
           <p class="function-title-text" data-property="toggle-title">Function Name</p>
+
+          <!-- OPTIONAL: omit this entire span when manifest provides no info text -->
           <span class="info-tooltip" data-property="toggle-info">
             <span class="function-info-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -27,14 +41,18 @@
                 </g>
               </svg>
             </span>
-            <span class="info-tooltip-pop"><span class="info-tooltip-text" data-property="toggle-info">Tooltip text.</span></span>
+            <span class="info-tooltip-pop"><span class="info-tooltip-text">Tooltip text.</span></span>
           </span>
         </div>
+
+        <!-- CONTROL START — replace entire block with a different widget when needed -->
         <label class="switch">
           <input type="checkbox" class="switch-input" data-property="toggle-state" aria-label="Toggle function">
           <span class="switch-state"></span>
           <span class="switch-track"><span class="switch-thumb"></span></span>
         </label>
+        <!-- CONTROL END -->
+
       </div>
 
     </div>

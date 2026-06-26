@@ -1,5 +1,5 @@
 <!-- Dropdown sub-control — a trigger showing the selected value + chevron; click opens an
-     option list below. Zero JS: uses <details>/<summary> for open/close.
+     option list below. <details>/<summary> for open/close; inline script for selection.
      COPY per a function's discrete-choice property; fill {id}, {label}, and option text.
      Mark the initially-selected <li> with class="dropdown-item dropdown-item--selected"
      and aria-selected="true"; all others get class="dropdown-item" only.
@@ -33,3 +33,21 @@
     <li class="dropdown-item" role="option" data-property="{id}-option" data-value="8h">8 hours</li>
   </ul>
 </details>
+<script>
+(function () {
+  var el = document.currentScript.previousElementSibling;
+  var value = el.querySelector('.dropdown-value');
+  el.querySelector('.dropdown-list').addEventListener('click', function (e) {
+    var item = e.target.closest('.dropdown-item');
+    if (!item) return;
+    el.querySelectorAll('.dropdown-item').forEach(function (i) {
+      i.classList.remove('dropdown-item--selected');
+      i.removeAttribute('aria-selected');
+    });
+    item.classList.add('dropdown-item--selected');
+    item.setAttribute('aria-selected', 'true');
+    value.textContent = item.textContent.trim();
+    el.removeAttribute('open');
+  });
+})();
+</script>

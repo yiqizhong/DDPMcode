@@ -957,6 +957,21 @@ body {
   grid-column: 1 / -1;
 }
 
+/* --- EQ Curve — subtitle + chart container used inside the Audio Equalizer function card.
+   The SVG handles all internal layout; only the outer shell needs CSS. */
+.eq-subtitle {
+  font-family: var(--font-family);
+  font-weight: var(--fw-regular);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.eq-chart {
+  width: 100%;
+}
+
 /* ------------------------------------------------------------
    Slot affordance — TEMPLATE-ONLY. Empty [data-slot] regions get
    a faint dashed outline + pale dev zone tint so the author can

@@ -1,0 +1,163 @@
+<!-- Audio Equalizer function card — canonical snapshot (Layer-1 known function).
+     Fixed template: 4-band interactive EQ curve (Bass, Mid-Bass, Mid-Range, Treble).
+     Drag each dot up/down to boost/cut (±12 dB). Smooth Catmull-Rom spline, gradient fill.
+     JS is inline and self-contained (pointer events; no external deps).
+     data-property on each circle carries the band value; the manifest sets initial `cy`
+     by converting stored dB: cy = MID_Y − (db / DB_RANGE × (MID_Y − MIN_Y)).
+     Styles: headset.css .eq-subtitle / .eq-chart (NO inline <style>). -->
+<div class="function-container">
+  <div class="function-top-section">
+    <div>
+
+      <div class="function-header">
+        <div class="function-title">
+          <p class="function-title-text">Audio Equalizer</p>
+        </div>
+        <div class="function-icons"></div>
+      </div>
+
+      <div class="function-content">
+        <p class="eq-subtitle">Adjust the audio ranges of the sound you hear.</p>
+
+        <div class="eq-chart">
+          <svg id="eq-audio" viewBox="0 0 460 210" xmlns="http://www.w3.org/2000/svg"
+               style="display:block;width:100%;height:auto;overflow:visible;">
+            <defs>
+              <linearGradient id="eq-grad-audio" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#0063b8" stop-opacity="0.22"/>
+                <stop offset="100%" stop-color="#0063b8" stop-opacity="0.02"/>
+              </linearGradient>
+              <clipPath id="eq-clip-audio">
+                <rect x="44" y="18" width="408" height="158"/>
+              </clipPath>
+            </defs>
+
+            <!-- vertical grid lines at each band -->
+            <line x1="93"  y1="20" x2="93"  y2="174" stroke="#e1e1e1" stroke-width="1"/>
+            <line x1="194" y1="20" x2="194" y2="174" stroke="#e1e1e1" stroke-width="1"/>
+            <line x1="308" y1="20" x2="308" y2="174" stroke="#e1e1e1" stroke-width="1"/>
+            <line x1="401" y1="20" x2="401" y2="174" stroke="#e1e1e1" stroke-width="1"/>
+
+            <!-- 0 dB reference line -->
+            <line x1="44" y1="97" x2="452" y2="97" stroke="#e1e1e1" stroke-width="1"/>
+            <text x="38" y="101" text-anchor="end"
+                  font-family="Roboto,sans-serif" font-size="11" fill="#d2d2d2">0 dB</text>
+
+            <!-- gradient fill (area under curve, clipped to chart) -->
+            <path id="eq-fill-audio" fill="url(#eq-grad-audio)" clip-path="url(#eq-clip-audio)"/>
+
+            <!-- curve line -->
+            <path id="eq-line-audio" fill="none" stroke="#0063b8" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- draggable control points
+                 cy initial values → Bass +9dB, Mid-Bass −8dB, Mid-Range −2dB, Treble 0dB
+                 manifest overrides cy for stored presets via data-property -->
+            <circle data-band="0" data-property="eq-audio-bass"
+                    cx="93"  cy="38"  r="6"
+                    fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                    style="cursor:ns-resize;touch-action:none;"/>
+            <circle data-band="1" data-property="eq-audio-midbass"
+                    cx="194" cy="148" r="6"
+                    fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                    style="cursor:ns-resize;touch-action:none;"/>
+            <circle data-band="2" data-property="eq-audio-midrange"
+                    cx="308" cy="112" r="6"
+                    fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                    style="cursor:ns-resize;touch-action:none;"/>
+            <circle data-band="3" data-property="eq-audio-treble"
+                    cx="401" cy="97"  r="6"
+                    fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                    style="cursor:ns-resize;touch-action:none;"/>
+
+            <!-- x-axis band labels -->
+            <text x="93"  y="194" text-anchor="middle"
+                  font-family="Roboto,sans-serif" font-size="12" fill="#333333">Bass</text>
+            <text x="308" y="194" text-anchor="middle"
+                  font-family="Roboto,sans-serif" font-size="12" fill="#333333">Mid-range</text>
+            <text x="401" y="194" text-anchor="middle"
+                  font-family="Roboto,sans-serif" font-size="12" fill="#333333">Treble</text>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var svg = document.getElementById('eq-audio');
+  if (!svg) return;
+
+  var MIN_Y = 20, MAX_Y = 174, MID_Y = 97; /* chart bounds; MID_Y = 0 dB */
+  var DB_RANGE = 12;                        /* ±12 dB */
+
+  var dots = Array.from(svg.querySelectorAll('circle[data-band]'))
+    .sort(function (a, b) { return +a.dataset.band - +b.dataset.band; });
+  var linePth = document.getElementById('eq-line-audio');
+  var fillPth = document.getElementById('eq-fill-audio');
+
+  function getPoints() {
+    return dots.map(function (d) {
+      return { x: parseFloat(d.getAttribute('cx')), y: parseFloat(d.getAttribute('cy')) };
+    });
+  }
+
+  /* Catmull-Rom → cubic Bezier smooth curve through all control points */
+  function buildPath(pts) {
+    var d = 'M ' + pts[0].x + ' ' + pts[0].y;
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p0 = pts[Math.max(i - 1, 0)];
+      var p1 = pts[i];
+      var p2 = pts[i + 1];
+      var p3 = pts[Math.min(i + 2, pts.length - 1)];
+      d += ' C ' +
+        (p1.x + (p2.x - p0.x) / 6).toFixed(2) + ' ' +
+        (p1.y + (p2.y - p0.y) / 6).toFixed(2) + ',' +
+        (p2.x - (p3.x - p1.x) / 6).toFixed(2) + ' ' +
+        (p2.y - (p3.y - p1.y) / 6).toFixed(2) + ',' +
+        p2.x + ' ' + p2.y;
+    }
+    return d;
+  }
+
+  function redraw() {
+    var pts = getPoints();
+    var curve = buildPath(pts);
+    linePth.setAttribute('d', curve);
+    var f = pts[0], l = pts[pts.length - 1];
+    fillPth.setAttribute('d', curve + ' L ' + l.x + ' ' + MAX_Y + ' L ' + f.x + ' ' + MAX_Y + ' Z');
+  }
+
+  redraw(); /* draw on init */
+
+  var active = null, startClientY = 0, startCY = 0;
+
+  svg.addEventListener('pointerdown', function (e) {
+    var dot = e.target.closest ? e.target.closest('circle[data-band]') : (
+      e.target.hasAttribute && e.target.hasAttribute('data-band') ? e.target : null);
+    if (!dot) return;
+    active = dot;
+    startClientY = e.clientY;
+    startCY = parseFloat(dot.getAttribute('cy'));
+    svg.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  svg.addEventListener('pointermove', function (e) {
+    if (!active) return;
+    var ctm = svg.getScreenCTM();
+    var scale = ctm ? ctm.a : 1;
+    var newCY = Math.max(MIN_Y, Math.min(MAX_Y,
+      startCY + (e.clientY - startClientY) / scale));
+    active.setAttribute('cy', newCY.toFixed(2));
+    /* store computed dB as data-value for readback */
+    active.setAttribute('data-value',
+      ((MID_Y - newCY) / (MID_Y - MIN_Y) * DB_RANGE).toFixed(1));
+    redraw();
+  });
+
+  svg.addEventListener('pointerup',     function () { active = null; });
+  svg.addEventListener('pointercancel', function () { active = null; });
+})();
+</script>

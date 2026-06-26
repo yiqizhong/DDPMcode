@@ -53,18 +53,26 @@
             <path id="eq-line-audio" fill="none" stroke="#0063b8" stroke-width="2.5"
                   stroke-linecap="round" stroke-linejoin="round"/>
 
-            <!-- draggable control points — Bass (line 1), Mid-range (line 3), Treble (line 5)
-                 cy initial values → Bass +9 dB, Mid-range −2 dB, Treble 0 dB
+            <!-- draggable control points — one per vertical line (all 5 adjustable)
+                 cy initial values → Bass +9dB, Low-Mid +3dB, Mid-range −2dB, High-Mid −1dB, Treble 0dB
                  manifest overrides cy for stored presets via data-property -->
             <circle data-band="0" data-property="eq-audio-bass"
                     cx="93"  cy="38"  r="6"
                     fill="#ffffff" stroke="#0063b8" stroke-width="2"
                     style="cursor:ns-resize;touch-action:none;"/>
-            <circle data-band="1" data-property="eq-audio-midrange"
+            <circle data-band="1" data-property="eq-audio-lowmid"
+                    cx="170" cy="78"  r="6"
+                    fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                    style="cursor:ns-resize;touch-action:none;"/>
+            <circle data-band="2" data-property="eq-audio-midrange"
                     cx="247" cy="112" r="6"
                     fill="#ffffff" stroke="#0063b8" stroke-width="2"
                     style="cursor:ns-resize;touch-action:none;"/>
-            <circle data-band="2" data-property="eq-audio-treble"
+            <circle data-band="3" data-property="eq-audio-highmid"
+                    cx="324" cy="103" r="6"
+                    fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                    style="cursor:ns-resize;touch-action:none;"/>
+            <circle data-band="4" data-property="eq-audio-treble"
                     cx="401" cy="97"  r="6"
                     fill="#ffffff" stroke="#0063b8" stroke-width="2"
                     style="cursor:ns-resize;touch-action:none;"/>

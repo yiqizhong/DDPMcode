@@ -69,6 +69,12 @@ titled "Sound Environment" or "Hear-through Mode" triggers the rule just as much
 "Noise Control"; a card titled "Noise Gate" (a mic threshold control, not an acoustic-environment
 choice) does not.
 
+**Icon lookup — use the segment-icon registry (never search dds2/ directly):**
+When icons are required, copy each icon from `.agents/skills/headset-shared/segment-icons/<value>.svg`
+where `<value>` is the option's `value` field from the manifest. The registry README has the full
+value → file mapping (including aliases like `transparency` → `hear-through.svg`). If the value has
+no file in `segment-icons/` → HALT and ask; never pull from `dds2/` directly or invent an icon.
+
 ## How an atom is used
 
 - **Building a function snapshot** (`headset-gen-subpage/templates/functions/<id>.html`): assemble the
@@ -77,6 +83,33 @@ choice) does not.
 - **`info-tooltip.html` is optional**: copy it into a row's `.function-icons` only when that control
   has info text; otherwise delete `.function-icons`. Whenever present, the hover tooltip is its
   mandatory bound behavior.
+
+## Conditional reveals (selector option → show a panel) — the `reveals` field
+
+Selector atoms (`segmented`, `preset-grid`) carry an optional `.segment-panels` block: the **Nth
+panel shows when the Nth option is selected** (positional `:has(...:checked)`, zero JS). In the
+manifest this is the selector's **`reveals`** map — key = an option `value`, value = the ordered
+slot list that fills that option's panel (a sub-control `{ archetype, … }`, or a nested card
+`{ function: <id> }`, recursively). It is the ONLY way to express "select X → show Y".
+
+```
+- archetype: preset-grid
+  options: [ {label: Default, value: default}, …, {label: Custom, value: custom} ]
+  reveals:
+    custom:
+      - { function: eq-audio }      # Custom selected → the eq-audio card drops into Custom's panel
+```
+
+Generation emits one `.segment-panel` per option in order (count = option count; an option with no
+`reveals` entry → empty panel). Options + panels combined must stay ≤ 6 (CSS maps `:has()` only to
+`nth-child(6)`). A nested `{ function: <id> }` slot is placed **UNWRAPPED** — drop the card's outer
+`.function-container` / `.function-top-section` shell and put only its inner `.function-header` +
+`.function-content` (plus any trailing `<script>`) into the panel, since the panel already sits inside
+the parent card (the full shell would nest a card in a card). A subcontrol must NEVER carry a flat `condition:` field — that pre-schema form does
+not exist; conditional content lives under the selector's `reveals`.
+
+**Reveal vs grey-out are different:** `reveals` shows/hides a panel on option select; the
+`.subfn-group` below greys a still-visible dependent when a toggle is OFF. Do not conflate them.
 
 ## Sub-function dependency (toggle OFF → grey out its sub-functions)
 

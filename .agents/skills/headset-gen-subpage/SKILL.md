@@ -25,6 +25,47 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
   model-number, firmware, PPID), device image, `connectionType` (+ battery), and `features[]`
   (each `label` + `icon` + `link`). The sub-page reuses these so it stays in sync with the home page.
 
+## Manifest schema (the generation contract)
+
+The sub-page manifest is the SOLE source of what renders. Its shape is fixed — generation does not
+invent, infer, or keyword-match (D8). Authoring-time choices (which `id`, which `archetype`) are
+frozen here by the human / strong model BEFORE generation; see `headset/AGENTS.md` → Control Selection.
+
+```
+title: <string>                       # the sub-page / feature title (fills <title> and <h2>)
+functions:                            # ordered; the page renders EXACTLY these, in order, none extra
+  - id: <function-id>                 # routing key. functions/<id>.html copied whole if it exists.
+    title: <string>                   # card title — assembled path only (snapshots carry their own)
+    info: <string?>                   # optional ⓘ tooltip text
+    subcontrols:                      # assembled path only (no snapshot). Ordered list of sub-control slots.
+      - archetype: <enum>             # control-row | slider | segmented | preset-grid | dropdown
+        ...<archetype value slots>... # per subcontrols/README.md (label / min,max,value / options / …)
+        reveals:                      # OPTIONAL — ONLY on a selector archetype (segmented | preset-grid)
+          <option-value>:             # key MUST equal one of THIS selector's option `value`s
+            - <slot>                  # ordered list of revealed slots; each slot is either:
+            ...                       #   a sub-control:  { archetype: <enum>, ...value slots }
+                                      #   a nested card:  { function: <function-id> }
+```
+
+**`reveals` is the conditional-reveal / recursive-slot primitive** (architecture §6.5 / §8 / §9.1).
+It replaces any flat `condition:` field — a subcontrol must NEVER carry `condition:`; conditional
+content belongs under its selector's `reveals`. A revealed slot may itself be a selector with its
+own `reveals` (recursion). This is the ONLY legal way to express "select X → show Y"; do not
+hand-embed conditional panels in the output.
+
+## Validation (run BEFORE emitting — HALT and ask on any failure)
+
+Generation is deterministic; an out-of-contract manifest is an authoring bug, not something to
+paper over. HALT (do not guess, do not hand-fix the HTML) when:
+
+- `archetype` is not in the enum {control-row, slider, segmented, preset-grid, dropdown}.
+- A subcontrol carries a legacy `condition:` field → tell the author to migrate it to the selector's `reveals`.
+- `reveals` appears on a non-selector archetype, or a `reveals` key matches no option `value` of its selector.
+- A selector's `options` + revealed `.segment-panel`s combined exceed **6** (headset.css positional
+  `:has()` only maps to `nth-child(6)`; a 7th panel never shows).
+- Two options in one selector share the same `value` (or the same `label`) — a data error; ask which is correct.
+- A `function` slot's id has neither a `functions/<id>.html` snapshot nor enough params to assemble.
+
 ## Procedure
 
 1. **Copy the frame** to the model folder, rewriting the two stylesheet links from
@@ -55,13 +96,30 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
    filled (same as the home page) — it shows icon-only and reveals the label on hover. **ICON SYNC:**
    the same icon as the home page's feature button. Halt on a missing/unknown icon.
 7. **Functions** (`data-slot="functions"`): **presence/absence — the page shows EXACTLY the functions
-   the manifest lists, no more, no less.** For each `functions[]` item, **copy**
-   `.agents/skills/headset-gen-subpage/templates/functions/<function.id>.html` **whole** — the snapshot
-   is already a complete card, so it goes in **as-is**. The manifest's per-slot params are a **rare
-   override**: replace a `data-property` value only where the manifest provides one; **no params → keep
-   the snapshot's content unchanged** (do not empty it, do not invent). If no snapshot exists, fall back
-   to `@skills:headset-function` (strictly from manifest params — invent nothing). Empty `functions[]`
-   → keep the placeholder note (nothing listed → nothing rendered).
+   the manifest lists, in order, no more, no less.** For each `functions[]` item, render it by **one of
+   two paths, decided by whether a snapshot exists** (architecture §6.6 / D18):
+   - **Snapshot path** — `functions/<function.id>.html` exists → **copy it whole**; it is already a
+     complete card. The manifest's per-slot params are a **rare override**: replace a `data-property`
+     value only where the manifest provides one; **no params → keep the snapshot unchanged** (do not
+     empty it, do not invent).
+   - **Assembled path** — no snapshot → `@skills:headset-function <id>`. It copies the card shell
+     (`function-frame.html`), fills `title`/`info`, then copies one `headset-shared/subcontrols/<archetype>.html`
+     per `subcontrols[]` entry, in order, strictly from manifest params (invent nothing).
+
+   **Conditional reveals (the recursive slot):** when an assembled selector subcontrol (segmented |
+   preset-grid) has `reveals`, emit its `.segment-panels` block — **one `.segment-panel` per option,
+   in option order** (panel count MUST equal option count; an option with no `reveals` entry gets an
+   empty panel). Fill panel N with the slot list for option N's `value`: a **sub-control** slot →
+   copy `subcontrols/<archetype>.html`; a **`function:` slot** → render that function id by the same
+   two-path rule above (snapshot e.g. `eq-audio`, else assembled) **but UNWRAPPED**: the panel is
+   already inside the parent card's body, so drop the nested card's outer shell
+   (`.function-container` > `.function-top-section` > its anonymous `<div>`) and place only its inner
+   content — `.function-header` + `.function-content` (plus any trailing `<script>`) — directly in the
+   panel. Keeping the full shell would draw a card-inside-a-card. A revealed
+   sub-control may itself be a selector with its own `reveals` (recurse). The reveal is wired purely
+   by the existing positional CSS (`headset.css` `.segment-panels` `:has(...:checked)`) — add no JS,
+   embed no panel by hand. Empty `functions[]` → keep the placeholder note.
+
    **Function routing is id-only (architecture D8):** look up `functions/<id>.html` using the
    manifest's `id` field exactly as written — do not perform keyword matching, name inference, or
    description-based lookup. The keyword reference table in `functions/README.md` is an
@@ -86,6 +144,11 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
 - Every sub-page MUST keep the back link to `index.html`. NO Unpair on sub-pages.
 - No inline `<style>`; link `shared/tokens.css` + `headset.css` only.
 - One framework for all sub-pages — never create a sub-page-specific skill.
+- **Reproducible from the manifest (no off-pipeline hand-patching).** The output must be exactly what
+  re-running this skill on the manifest produces. If the rendered page needs something the manifest
+  cannot express, the gap is in the manifest/schema/snippets — fix it THERE (add a `reveals` entry, a
+  snippet, an archetype), never by editing the generated HTML directly. Conditional content (a
+  reveal) lives in `reveals`, not as a hand-placed `.segment-panel`.
 
 ## Self-check
 
@@ -95,4 +158,9 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
 - Connection block copied for `home.manifest.connectionType` (synced with home), with NO Unpair?
 - Collapsed nav: one icon-only button per `home.manifest.features[]`, each icon synced with the home page?
 - Each function COPIED from `functions/<id>.html` (bespoke) or via `headset-function` (no snapshot)?
+- Manifest validated: every `archetype` in the enum, no stray `condition:` field, every `reveals` key
+  matches an option `value`, options+panels ≤ 6, no duplicate option value/label? (HALT on any failure.)
+- Every conditional reveal came from a `reveals` entry (positional `.segment-panel`s, count = option
+  count) — no hand-embedded panel, no added JS?
+- Output reproducible: would re-running this skill on the manifest produce this exact HTML? (No off-pipeline edits.)
 - Back link to `index.html` present? Nothing fabricated? `data-slot`/`data-instruction`/`data-property` stripped?

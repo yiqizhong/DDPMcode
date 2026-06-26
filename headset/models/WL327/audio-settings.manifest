@@ -4,24 +4,26 @@ functions:
   - id: noise-control
     title: Noise Control
     subcontrols:
-      - archetype: icon-segmented
+      - archetype: segmented
+        icons: true            # acoustic-environment modes → icon segmented (domain rule)
         options:
           - label: ANC
             value: anc
+            selected: true
           - label: OFF
             value: off
-        selected: anc
-      - archetype: slider
-        label: ANC Strength
-        min: 1
-        max: 5
-        value: 3
-        condition: anc
+        reveals:               # ANC selected → reveal the strength slider
+          anc:
+            - archetype: slider
+              label: ANC Strength
+              min: 1
+              max: 5
+              value: 3
 
   - id: collaboration
     title: Collaboration
     subcontrols:
-      - archetype: toggle
+      - archetype: control-row
         label: Mic Noise Canceling
         value: true
 
@@ -38,13 +40,10 @@ functions:
             value: bass-boost
           - label: Speech Boost
             value: speech-boost
-          - label: Speech Boost
-            value: speech-boost-2
+          - label: Treble Boost
+            value: treble-boost
           - label: Custom
             value: custom
-      - archetype: slider
-        label: EQ
-        min: 0
-        max: 100
-        value: 50
-        condition: custom
+        reveals:               # Custom selected → reveal the full equalizer card
+          custom:
+            - function: eq-audio

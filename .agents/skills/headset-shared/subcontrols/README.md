@@ -15,12 +15,29 @@ lives in `headset/headset.css`; the snippet is just the markup + value slots.
 | `toggle-row.html` | the standard labeled row: **name left + native switch right** | `{label}`, `{id}-state` | `.function-header`, `.switch*` |
 | `slider.html` | min/max labels + native range + value bubble | `{min}/{max}/{val}`, `{label}` | `.slider-row`, `.slider-input`, `.slider-value` |
 | `segmented.html` | row of 2–4 mutually-exclusive option buttons (radio semantics, zero JS) | `{id}`, `{label}`, `{labelN}`, `{valueN}` | `.segmented-control`, `.segment`, `.segment-input`, `.segment-icon`, `.segment-label` |
+| `preset-grid.html` | 2-column grid of 4–6 option buttons; last item can span full width via `.segment--span` | same as segmented + `{id}-preset` | `.preset-grid`, `.segment--span` + all `.segment*` |
 | `info-tooltip.html` | OPTIONAL ⓘ + hover tooltip (shared with the homepage firmware ⓘ) | `{info-text}` | `.info-tooltip*` |
 
 > The archetype list is **open** (docs/function-card-architecture.md §9.3): add a new
 > `<archetype>.html` here when a real design needs one (e.g. `dropdown.html`,
 > `preset-grid.html`). The control-selection rules (which archetype for which data shape) are in
 > docs §7. Unknown archetypes → the Layer-2 `headset-function` builder, then promote to a snippet here.
+
+## Segmented control vs Preset grid — when to use which
+
+Both archetypes are mutually-exclusive selectors with the same radio semantics, selected state,
+and optional conditional-panel system. The only difference is **layout** and **use context**:
+
+| | `segmented.html` | `preset-grid.html` |
+|---|---|---|
+| Layout | Single horizontal row (`flex row`) | 2-column grid (`CSS grid`) |
+| Item count | 2–4 | 4–6 |
+| Item width | Equal, stretch to fill | Equal, 50% each; last may span full row |
+| Icons | Required for acoustic-environment modes (see rule below); optional otherwise | Not used — label-only |
+| Primary use | Mode switching (ANC/Transparency, channel, EQ mode) | Preset/profile selection (EQ presets, sound profiles, multimedia presets) |
+
+When in doubt: if the options fit comfortably in a single row, use `segmented.html`. If there are
+5+ options or the design explicitly uses a 2-column tile layout, use `preset-grid.html`.
 
 ## Segmented control — icon usage rule
 

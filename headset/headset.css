@@ -929,8 +929,25 @@ body {
 .segmented-group:has(.segment:nth-child(1) .segment-input:checked) .segment-panel:nth-child(1),
 .segmented-group:has(.segment:nth-child(2) .segment-input:checked) .segment-panel:nth-child(2),
 .segmented-group:has(.segment:nth-child(3) .segment-input:checked) .segment-panel:nth-child(3),
-.segmented-group:has(.segment:nth-child(4) .segment-input:checked) .segment-panel:nth-child(4) {
+.segmented-group:has(.segment:nth-child(4) .segment-input:checked) .segment-panel:nth-child(4),
+.segmented-group:has(.segment:nth-child(5) .segment-input:checked) .segment-panel:nth-child(5),
+.segmented-group:has(.segment:nth-child(6) .segment-input:checked) .segment-panel:nth-child(6) {
   display: flex;
+}
+
+/* --- Preset grid — 2-column grid variant of the segmented control.
+   Same .segment* atoms, same conditional-panel system, different container layout.
+   Used for profile/preset selection (EQ presets, sound profiles, etc.).
+   .segment--span makes an item fill the full row width (e.g. a standalone "Custom" row). */
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.segment--span {
+  grid-column: 1 / -1;
 }
 
 /* ------------------------------------------------------------

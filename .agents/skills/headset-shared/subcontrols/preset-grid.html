@@ -1,0 +1,53 @@
+<!-- Preset grid — 2-column grid of 4–6 mutually-exclusive option buttons.
+     A layout variant of segmented.html for profile/preset selection (EQ presets, sound
+     profiles, multimedia modes, etc.). Uses the same .segment* atoms, selected state,
+     and conditional-panel system as the segmented control; only the container layout differs.
+
+     Fill {id}, {label} (aria group name), and per-option {labelN}/{valueN}.
+     The manifest adds `checked` to the <input> whose value matches the initial state.
+     Add/remove <label class="segment"> blocks as needed (typical: 4–6 options).
+     Add .segment--span to the last item to make it span the full row width (e.g. "Custom").
+
+     PANELS: same positional rule as segmented.html — Nth .segment-panel is shown when
+     the Nth segment is checked. DELETE .segment-panels entirely for a plain selector.
+     Panel count must equal segment count; empty panels are allowed.
+
+     Styles: headset.css .preset-grid / .segment--span / + all inherited .segment* styles. -->
+<div class="segmented-group">
+
+  <div class="preset-grid" role="group" aria-label="{label}">
+    <label class="segment">
+      <input type="radio" name="{id}-preset" value="{value1}" class="segment-input" data-property="{id}-preset" aria-label="{label1}">
+      <span class="segment-label">{label1}</span>
+    </label>
+    <label class="segment">
+      <input type="radio" name="{id}-preset" value="{value2}" class="segment-input" data-property="{id}-preset" aria-label="{label2}">
+      <span class="segment-label">{label2}</span>
+    </label>
+    <label class="segment">
+      <input type="radio" name="{id}-preset" value="{value3}" class="segment-input" data-property="{id}-preset" aria-label="{label3}">
+      <span class="segment-label">{label3}</span>
+    </label>
+    <label class="segment">
+      <input type="radio" name="{id}-preset" value="{value4}" class="segment-input" data-property="{id}-preset" aria-label="{label4}">
+      <span class="segment-label">{label4}</span>
+    </label>
+    <!-- .segment--span: spans both columns; use for a standalone last row (e.g. "Custom", "Off").
+         Remove .segment--span if this item should occupy only one column. -->
+    <label class="segment segment--span">
+      <input type="radio" name="{id}-preset" value="{value5}" class="segment-input" data-property="{id}-preset" aria-label="{label5}">
+      <span class="segment-label">{label5}</span>
+    </label>
+  </div>
+
+  <!-- OPTIONAL panels — DELETE this block entirely if no panel content is needed.
+       Panel N is shown when segment N is selected (positional, same as segmented.html). -->
+  <div class="segment-panels">
+    <div class="segment-panel"><!-- content shown when {label1} is selected --></div>
+    <div class="segment-panel"><!-- content shown when {label2} is selected --></div>
+    <div class="segment-panel"><!-- content shown when {label3} is selected --></div>
+    <div class="segment-panel"><!-- content shown when {label4} is selected --></div>
+    <div class="segment-panel"><!-- content shown when {label5} is selected --></div>
+  </div>
+
+</div>

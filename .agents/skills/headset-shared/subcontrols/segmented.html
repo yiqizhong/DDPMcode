@@ -1,0 +1,61 @@
+<!-- Segmented control — a row of 2–4 mutually-exclusive option buttons (radio semantics, zero JS).
+     COPY per a function's discrete-choice property (e.g. EQ mode: Music / Voice / Podcast).
+     Fill {id} (unique per card), {label} (aria group name), and per-segment {labelN}/{valueN}.
+     The manifest adds `checked` to the <input> whose value matches the initial state.
+     Add/remove <label class="segment"> blocks to match the number of options (min 2, max 4).
+
+     ICON RULE (semantic, not keyword-based):
+       Use WITH icons (.segment-icon present) when the control determines how the device mediates
+       the acoustic environment around the user — i.e. the options govern whether and how external
+       sound reaches the listener's ears. Ask: "Do these options decide which real-world sounds the
+       user hears, and how?" If yes → icons required. Examples: ANC / transparency / hear-through /
+       pass-through / ambient modes, environment modes, wind-noise modes.
+       Use WITHOUT icons (delete .segment-icon) for all other discrete choices: EQ presets, channel
+       mode, mic pickup pattern, button assignment, language, LED levels, etc.
+
+     CONDITIONAL PANELS (optional — the tab behavior):
+       Each segment can conditionally reveal a panel of sub-controls below the control row.
+       Panels are matched POSITIONALLY: the Nth .segment-panel is shown when the Nth segment
+       is selected. Pure CSS :has(), zero JS.
+       To opt in: keep the .segment-panels block and put content inside each .segment-panel.
+       To opt out (plain selector only): DELETE the entire .segment-panels block.
+       Panel count must equal segment count; empty panels are allowed (no content shown).
+
+     Icon: COPY a 24×24 <svg> into .segment-icon; DELETE the .segment-icon span entirely if not used.
+     Styles: headset.css .segmented-group / .segmented-control / .segment* / .segment-panel*. -->
+<div class="segmented-group">
+
+  <div class="segmented-control" role="group" aria-label="{label}">
+    <label class="segment">
+      <input type="radio" name="{id}-mode" value="{value1}" class="segment-input" data-property="{id}-mode" aria-label="{label1}">
+      <span class="segment-icon"><!-- optional: paste 24×24 SVG here; delete this span if none --></span>
+      <span class="segment-label">{label1}</span>
+    </label>
+    <label class="segment">
+      <input type="radio" name="{id}-mode" value="{value2}" class="segment-input" data-property="{id}-mode" aria-label="{label2}">
+      <span class="segment-icon"><!-- optional: paste 24×24 SVG here; delete this span if none --></span>
+      <span class="segment-label">{label2}</span>
+    </label>
+    <label class="segment">
+      <input type="radio" name="{id}-mode" value="{value3}" class="segment-input" data-property="{id}-mode" aria-label="{label3}">
+      <span class="segment-icon"><!-- optional: paste 24×24 SVG here; delete this span if none --></span>
+      <span class="segment-label">{label3}</span>
+    </label>
+  </div>
+
+  <!-- OPTIONAL conditional panels — DELETE this block entirely if no panel content is needed.
+       Panel count must match segment count. Panels are positionally mapped (1st ↔ 1st, etc.).
+       Each panel can contain any sub-controls (toggle-row, slider, nested segmented, etc.). -->
+  <div class="segment-panels">
+    <div class="segment-panel">
+      <!-- content shown when {label1} is selected -->
+    </div>
+    <div class="segment-panel">
+      <!-- content shown when {label2} is selected -->
+    </div>
+    <div class="segment-panel">
+      <!-- content shown when {label3} is selected -->
+    </div>
+  </div>
+
+</div>

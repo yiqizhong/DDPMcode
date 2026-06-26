@@ -14,12 +14,34 @@ lives in `headset/headset.css`; the snippet is just the markup + value slots.
 |---|---|---|---|
 | `toggle-row.html` | the standard labeled row: **name left + native switch right** | `{label}`, `{id}-state` | `.function-header`, `.switch*` |
 | `slider.html` | min/max labels + native range + value bubble | `{min}/{max}/{val}`, `{label}` | `.slider-row`, `.slider-input`, `.slider-value` |
+| `segmented.html` | row of 2–4 mutually-exclusive option buttons (radio semantics, zero JS) | `{id}`, `{label}`, `{labelN}`, `{valueN}` | `.segmented-control`, `.segment`, `.segment-input`, `.segment-icon`, `.segment-label` |
 | `info-tooltip.html` | OPTIONAL ⓘ + hover tooltip (shared with the homepage firmware ⓘ) | `{info-text}` | `.info-tooltip*` |
 
 > The archetype list is **open** (docs/function-card-architecture.md §9.3): add a new
-> `<archetype>.html` here when a real design needs one (e.g. `segmented.html`, `dropdown.html`,
+> `<archetype>.html` here when a real design needs one (e.g. `dropdown.html`,
 > `preset-grid.html`). The control-selection rules (which archetype for which data shape) are in
 > docs §7. Unknown archetypes → the Layer-2 `headset-function` builder, then promote to a snippet here.
+
+## Segmented control — icon usage rule
+
+`segmented.html` has two forms: **with icons** and **without icons** (default). The choice is not
+based on the function's name or keywords; it is based on what the control *does to the user's
+listening experience*:
+
+**Use icons when** the segmented control lets the user choose between modes that change how the
+device mediates the acoustic environment around them — i.e. the options govern whether and how
+external sound reaches the listener's ears (examples: active noise cancellation, transparency /
+hear-through / pass-through, ambient mode, environment modes, wind reduction levels expressed as
+modes). The semantic test: *"Do these options determine which sounds from the outside world the
+user hears, and how?"* → yes → icons required.
+
+**Use default (no icons) for everything else** — EQ presets, channel mode, mic pickup pattern,
+LED brightness levels, button assignment choices, language selection, and so on.
+
+The icon rule is **semantic, not lexical**: the function card's title or ID is irrelevant. A card
+titled "Sound Environment" or "Hear-through Mode" triggers the rule just as much as one titled
+"Noise Control"; a card titled "Noise Gate" (a mic threshold control, not an acoustic-environment
+choice) does not.
 
 ## How an atom is used
 

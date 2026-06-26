@@ -819,6 +819,120 @@ body {
   pointer-events: none;
 }
 
+/* --- Segmented control sub-control — a row of 2–4 mutually-exclusive option buttons.
+   Radio semantics, zero JS. Optional conditional panels below the control row (tab behavior):
+   the Nth panel is shown when the Nth segment is checked — positional mapping, pure :has().
+   When .segment-panels is absent the component is a plain value selector with no panel effect. */
+.segmented-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.segmented-control {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+}
+
+.segment {
+  position: relative;
+  display: flex;
+  flex: 1;
+  height: 88px;
+  padding: 16px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
+  background: var(--color-surface);
+  backdrop-filter: blur(5px);
+  cursor: pointer;
+}
+
+.segment-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  margin: 0;
+}
+
+.segment-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-strong);
+}
+
+.segment-icon:empty { display: none; }
+
+.segment-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.segment-label {
+  font-family: var(--font-family);
+  font-weight: var(--fw-medium);
+  font-size: 14px;
+  font-style: normal;
+  line-height: 24px;
+  letter-spacing: 0.07px;
+  color: var(--color-text-strong);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.segment:has(.segment-input:checked) {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.segment:has(.segment-input:checked) .segment-label {
+  color: var(--color-surface);
+}
+
+.segment:has(.segment-input:checked) .segment-icon {
+  color: var(--color-surface);
+}
+
+.segment:has(.segment-input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  z-index: 2;
+}
+
+/* Conditional panels — positional tab behavior.
+   All panels hidden by default; the Nth panel shown when the Nth segment is checked. */
+.segment-panels {
+  display: contents;        /* transparent to layout — panel children stack in .segmented-group's column */
+}
+
+.segment-panel {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.segmented-group:has(.segment:nth-child(1) .segment-input:checked) .segment-panel:nth-child(1),
+.segmented-group:has(.segment:nth-child(2) .segment-input:checked) .segment-panel:nth-child(2),
+.segmented-group:has(.segment:nth-child(3) .segment-input:checked) .segment-panel:nth-child(3),
+.segmented-group:has(.segment:nth-child(4) .segment-input:checked) .segment-panel:nth-child(4) {
+  display: flex;
+}
+
 /* ------------------------------------------------------------
    Slot affordance — TEMPLATE-ONLY. Empty [data-slot] regions get
    a faint dashed outline + pale dev zone tint so the author can

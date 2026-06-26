@@ -3,3 +3,6 @@
 # dev-only preview artifacts
 .claude/launch.json
 headset/_preview-*.html
+
+# throwaway demo/validation model (kept local, not committed)
+headset/models/HS-DEMO/

@@ -21,6 +21,9 @@
        To opt out (plain selector only): DELETE the entire .segment-panels block.
        Panel count must equal segment count; empty panels are allowed (no content shown).
 
+     HEIGHT: default 56px (label-only). When a 24×24 SVG icon is present the segment
+     automatically becomes 80px — no modifier needed; headset.css :has(.segment-icon svg) handles it.
+
      Icon: COPY a 24×24 <svg> into .segment-icon; DELETE the .segment-icon span entirely if not used.
      Styles: headset.css .segmented-group / .segmented-control / .segment* / .segment-panel*. -->
 <div class="segmented-group">

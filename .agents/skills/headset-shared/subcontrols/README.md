@@ -31,13 +31,22 @@ and optional conditional-panel system. The only difference is **layout** and **u
 | | `segmented.html` | `preset-grid.html` |
 |---|---|---|
 | Layout | Single horizontal row (`flex row`) | 2-column grid (`CSS grid`) |
-| Item count | 2–4 | 4–6 |
+| Item count | 2–4 | 4–6 (5+ always grid; 4 depends on semantics) |
 | Item width | Equal, stretch to fill | Equal, 50% each; last may span full row |
 | Icons | Required for acoustic-environment modes (see rule below); optional otherwise | Not used — label-only |
+| Height | **56px** default; **80px** when icon present (auto via `:has`) | **56px** always (no icons) |
 | Primary use | Mode switching (ANC/Transparency, channel, EQ mode) | Preset/profile selection (EQ presets, sound profiles, multimedia presets) |
 
-When in doubt: if the options fit comfortably in a single row, use `segmented.html`. If there are
-5+ options or the design explicitly uses a 2-column tile layout, use `preset-grid.html`.
+**Decision rule — option count alone is not enough; semantics matter:**
+
+| Count | Semantics | Use |
+|---|---|---|
+| 2–3 | any | segmented row (always) |
+| 5–6 | any | preset-grid (always — doesn't fit in a row) |
+| 4 | **mode switching** (e.g. ANC / Low / Off / Transparency) | segmented row |
+| 4 | **preset / profile** (e.g. Default / Bass Boost / Speech / Treble) | preset-grid |
+
+The key semantic question: *"Are these named configurations the user picks from, or modes the device switches between?"* Presets → grid. Modes → row.
 
 ## Segmented control — icon usage rule
 

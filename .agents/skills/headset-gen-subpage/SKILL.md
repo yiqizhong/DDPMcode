@@ -54,10 +54,14 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
    `.agents/skills/headset-shared/icons/<feature.icon>.svg` into its `.feature-icon`. The label IS
    filled (same as the home page) — it shows icon-only and reveals the label on hover. **ICON SYNC:**
    the same icon as the home page's feature button. Halt on a missing/unknown icon.
-7. **Functions** (`data-slot="functions"`): for each `functions[]` item, **copy**
-   `.agents/skills/headset-gen-subpage/templates/functions/<function.id>.html` and fill its
-   `data-property` value slots; if no snapshot exists, fall back to `@skills:headset-function`
-   (strictly from manifest params — invent nothing). Empty `functions[]` → keep the placeholder note.
+7. **Functions** (`data-slot="functions"`): **presence/absence — the page shows EXACTLY the functions
+   the manifest lists, no more, no less.** For each `functions[]` item, **copy**
+   `.agents/skills/headset-gen-subpage/templates/functions/<function.id>.html` **whole** — the snapshot
+   is already a complete card, so it goes in **as-is**. The manifest's per-slot params are a **rare
+   override**: replace a `data-property` value only where the manifest provides one; **no params → keep
+   the snapshot's content unchanged** (do not empty it, do not invent). If no snapshot exists, fall back
+   to `@skills:headset-function` (strictly from manifest params — invent nothing). Empty `functions[]`
+   → keep the placeholder note (nothing listed → nothing rendered).
    **Function routing is id-only (architecture D8):** look up `functions/<id>.html` using the
    manifest's `id` field exactly as written — do not perform keyword matching, name inference, or
    description-based lookup. The keyword reference table in `functions/README.md` is an

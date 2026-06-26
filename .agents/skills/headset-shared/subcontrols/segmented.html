@@ -1,6 +1,6 @@
 <!-- Segmented control — a row of 2–4 mutually-exclusive option buttons (radio semantics, zero JS).
      COPY per a function's discrete-choice property (e.g. EQ mode: Music / Voice / Podcast).
-     Fill {id} (unique per card), {label} (aria group name), and per-segment {labelN}/{valueN}.
+     Fill {id} (unique per card) and per-segment {labelN}/{valueN}.
      The manifest adds `checked` to the <input> whose value matches the initial state.
      Add/remove <label class="segment"> blocks to match the number of options (min 2, max 4).
 
@@ -34,19 +34,19 @@
      Styles: headset.css .segmented-group / .segmented-control / .segment* / .segment-panel*. -->
 <div class="segmented-group">
 
-  <div class="segmented-control" role="group" aria-label="{label}">
+  <div class="segmented-control">
     <label class="segment">
-      <input type="radio" name="{id}-mode" value="{value1}" class="segment-input" data-property="{id}-mode" aria-label="{label1}">
+      <input type="radio" name="{id}-mode" value="{value1}" class="segment-input" data-property="{id}-mode">
       <span class="segment-icon"><!-- optional: paste 24×24 SVG here; delete this span if none --></span>
       <span class="segment-label">{label1}</span>
     </label>
     <label class="segment">
-      <input type="radio" name="{id}-mode" value="{value2}" class="segment-input" data-property="{id}-mode" aria-label="{label2}">
+      <input type="radio" name="{id}-mode" value="{value2}" class="segment-input" data-property="{id}-mode">
       <span class="segment-icon"><!-- optional: paste 24×24 SVG here; delete this span if none --></span>
       <span class="segment-label">{label2}</span>
     </label>
     <label class="segment">
-      <input type="radio" name="{id}-mode" value="{value3}" class="segment-input" data-property="{id}-mode" aria-label="{label3}">
+      <input type="radio" name="{id}-mode" value="{value3}" class="segment-input" data-property="{id}-mode">
       <span class="segment-icon"><!-- optional: paste 24×24 SVG here; delete this span if none --></span>
       <span class="segment-label">{label3}</span>
     </label>

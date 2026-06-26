@@ -3,7 +3,7 @@
      profiles, multimedia modes, etc.). Uses the same .segment* atoms, selected state,
      and conditional-panel system as the segmented control; only the container layout differs.
 
-     Fill {id}, {label} (aria group name), and per-option {labelN}/{valueN}.
+     Fill {id} and per-option {labelN}/{valueN}.
      The manifest adds `checked` to the <input> whose value matches the initial state.
      Add/remove <label class="segment"> blocks as needed (typical: 4–6 options; upper limit 6 —
      headset.css positional :has() rules only map up to nth-child(6)).
@@ -18,27 +18,27 @@
      Styles: headset.css .preset-grid / .segment--span / + all inherited .segment* styles. -->
 <div class="segmented-group">
 
-  <div class="preset-grid" role="group" aria-label="{label}">
+  <div class="preset-grid">
     <label class="segment">
-      <input type="radio" name="{id}-preset" value="{value1}" class="segment-input" data-property="{id}-preset" aria-label="{label1}">
+      <input type="radio" name="{id}-preset" value="{value1}" class="segment-input" data-property="{id}-preset">
       <span class="segment-label">{label1}</span>
     </label>
     <label class="segment">
-      <input type="radio" name="{id}-preset" value="{value2}" class="segment-input" data-property="{id}-preset" aria-label="{label2}">
+      <input type="radio" name="{id}-preset" value="{value2}" class="segment-input" data-property="{id}-preset">
       <span class="segment-label">{label2}</span>
     </label>
     <label class="segment">
-      <input type="radio" name="{id}-preset" value="{value3}" class="segment-input" data-property="{id}-preset" aria-label="{label3}">
+      <input type="radio" name="{id}-preset" value="{value3}" class="segment-input" data-property="{id}-preset">
       <span class="segment-label">{label3}</span>
     </label>
     <label class="segment">
-      <input type="radio" name="{id}-preset" value="{value4}" class="segment-input" data-property="{id}-preset" aria-label="{label4}">
+      <input type="radio" name="{id}-preset" value="{value4}" class="segment-input" data-property="{id}-preset">
       <span class="segment-label">{label4}</span>
     </label>
     <!-- .segment--span: spans both columns; use for a standalone last row (e.g. "Custom", "Off").
          Remove .segment--span if this item should occupy only one column. -->
     <label class="segment segment--span">
-      <input type="radio" name="{id}-preset" value="{value5}" class="segment-input" data-property="{id}-preset" aria-label="{label5}">
+      <input type="radio" name="{id}-preset" value="{value5}" class="segment-input" data-property="{id}-preset">
       <span class="segment-label">{label5}</span>
     </label>
   </div>

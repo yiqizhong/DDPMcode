@@ -5,17 +5,23 @@ file matching a manifest function's `id` into the sub-page's function region and
 slots. This is the **same copy-not-generate mechanism** as the homepage's connection / feature /
 icon snippets — a weak model copies a canonical function instead of inventing one from a description.
 
-**EMPTY for now** — no bespoke function designs exist yet. Functions grow on demand (methodology
-§9.4): 5–8 are expected over time, but when a real function design arrives, drop in `<id>.html`
-built from `headset.css` classes, with each model-specific value marked `data-property="<name>"`.
+**This dir is the id-routed registry: only real, ready-to-use cards live here** (currently
+`eq-audio`, `promotion-download`, `single-control`). Reference / demo cards (e.g. `collaboration`,
+`auto-power-off`, `noise-control`) live in the sibling **`../examples/`** and are **NOT id-routed** —
+`headset-gen-subpage` never copies from there; they are worked examples for assembling new cards.
+Functions grow on demand (§9.4): when a real design arrives, drop a new `<id>.html` **here**, built
+from `headset.css` classes, each model-specific value marked `data-property="<name>"`.
 
 ## Rules
 
 **Generation-time (weak model executing headset-gen-subpage):**
 - **Bespoke function** (`<id>.html` exists here) → COPY the file whose name matches the manifest
-  function's `id` exactly, fill its `data-property` slots from the function's params. Function
-  routing is **id-only** (architecture D8: "身份认 id，不认名字") — the manifest's `id` field is
-  the sole lookup key; no keyword matching or name inference is performed at generation time.
+  function's `id` exactly. The snapshot is a **complete card** — it goes in **as-is**; the manifest's
+  per-slot params are a **rare override** (replace a `data-property` value only where provided; no
+  params → keep the snapshot's content unchanged). The page shows **exactly the functions the manifest
+  lists** (presence/absence) — none extra, and an unlisted function is never rendered. Function routing
+  is **id-only** (architecture D8: "身份认 id，不认名字") — the manifest's `id` field is the sole lookup
+  key; no keyword matching or name inference is performed at generation time.
 - **No snapshot yet** (no `<id>.html` matching the manifest `id`) → `@skills:headset-function` —
   it copies the canonical `function-frame.html` template and fills it, constrained strictly to
   manifest params (invent nothing). When such a function recurs and needs a bespoke design,
@@ -38,7 +44,6 @@ substring matches — e.g. `equalizer` does not trigger on `frequency` or `reque
 | `audio equalizer` · `equalizer` · `sound eq` · `eq curve` · `frequency eq` | `eq-audio` | 5-band interactive EQ curve; 6-stop snap (+3 → −2 dB) |
 | `download dell audio` · `download app` · `promotion` · `qr code` · `mobile app download` | `promotion-download` | App icon + description + CTA button; close button dismisses card |
 | *(structural)* function has **exactly one boolean parameter** and no sliders / sub-controls | `single-control` | Title left, toggle right in header; no content area below — authoring guidance only, not auto-applied at generation time |
-| `auto power off` · `auto-off` · `power off timer` · `idle timeout` · `standby timer` · `sleep timer` | `auto-power-off` | Single header row; value chosen from a dropdown (worked example of the swappable header slot — switch replaced by `dropdown.html`) |
 
 **How to use this table (authoring only):** when designing a manifest and you recognise a function
 that matches a keyword pattern, set the manifest function's `id` to the value in the "Correct id"

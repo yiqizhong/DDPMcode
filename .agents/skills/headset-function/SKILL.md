@@ -27,8 +27,9 @@ function's name. Build only the affordance values from the manifest.
 
 > **Growth rule (methodology §9.4):** a function that recurs and needs a bespoke design graduates
 > into a snapshot `headset-gen-subpage/templates/functions/<id>.html` (copied verbatim by
-> `headset-gen-subpage`, never routed through here — e.g. `functions/collaboration.html`). Until a
-> function has a snapshot, it is assembled here. Do NOT pre-create snapshots speculatively.
+> `headset-gen-subpage`, never routed through here). Reference/demo cards (NOT id-routed) live in
+> `headset-gen-subpage/templates/examples/` — e.g. `examples/collaboration.html` is a worked
+> assembly example. Until a function has a snapshot, it is assembled here. Do NOT pre-create snapshots speculatively.
 
 ## Inputs
 

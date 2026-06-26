@@ -96,6 +96,6 @@ non-interactive — pure CSS `:has()`, zero JS (see `headset.css`).
 
 ## Reference assembly
 
-`headset-gen-subpage/templates/functions/collaboration.html` is a worked example: card shell +
+`headset-gen-subpage/templates/examples/collaboration.html` is a worked example: card shell +
 two `control-row` (Mic Noise Cancellation, Sidetone) + one `slider`, with the Sidetone row + slider
 wrapped in a `.subfn-group` (Sidetone OFF greys the slider), and an `info-tooltip` on each row.

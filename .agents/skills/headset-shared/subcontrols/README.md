@@ -78,6 +78,33 @@ choice) does not.
   has info text; otherwise delete `.function-icons`. Whenever present, the hover tooltip is its
   mandatory bound behavior.
 
+## Conditional reveals (selector option → show a panel) — the `reveals` field
+
+Selector atoms (`segmented`, `preset-grid`) carry an optional `.segment-panels` block: the **Nth
+panel shows when the Nth option is selected** (positional `:has(...:checked)`, zero JS). In the
+manifest this is the selector's **`reveals`** map — key = an option `value`, value = the ordered
+slot list that fills that option's panel (a sub-control `{ archetype, … }`, or a nested card
+`{ function: <id> }`, recursively). It is the ONLY way to express "select X → show Y".
+
+```
+- archetype: preset-grid
+  options: [ {label: Default, value: default}, …, {label: Custom, value: custom} ]
+  reveals:
+    custom:
+      - { function: eq-audio }      # Custom selected → the eq-audio card drops into Custom's panel
+```
+
+Generation emits one `.segment-panel` per option in order (count = option count; an option with no
+`reveals` entry → empty panel). Options + panels combined must stay ≤ 6 (CSS maps `:has()` only to
+`nth-child(6)`). A nested `{ function: <id> }` slot is placed **UNWRAPPED** — drop the card's outer
+`.function-container` / `.function-top-section` shell and put only its inner `.function-header` +
+`.function-content` (plus any trailing `<script>`) into the panel, since the panel already sits inside
+the parent card (the full shell would nest a card in a card). A subcontrol must NEVER carry a flat `condition:` field — that pre-schema form does
+not exist; conditional content lives under the selector's `reveals`.
+
+**Reveal vs grey-out are different:** `reveals` shows/hides a panel on option select; the
+`.subfn-group` below greys a still-visible dependent when a toggle is OFF. Do not conflate them.
+
 ## Sub-function dependency (toggle OFF → grey out its sub-functions)
 
 A function's toggle can own dependent sub-controls. Express it by structure (it is data):

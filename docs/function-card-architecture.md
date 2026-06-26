@@ -483,6 +483,7 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 | D16 | **preset-first**:每个功能 ID 一份固定预设组成,默认占绝大多数,覆盖是例外;预设存成数据 | 6.6 | 用户背景:"对应到 ID 几乎都有预设、雷打不动" | 生效(坐实 D6/D8,非反转) |
 | D17 | **快照=派生产物 + "改原子→重建快照"纪律**;暂不建 build 机器(只 2 张卡,方法论接受复制)。快照由卡壳+原子装配而来,`headset-function` 的装配逻辑是未来 build 步骤的种子;卡多了再上"spec→装配→快照"自动化 | F 分析 | drift 真实(B 清 ⓘ SVG 时被迫改片段+3 份烤死副本演示了)但现在便宜 | 生效:纪律立、机器 defer |
 | D18 | **生成期极简**:manifest = 子页标题 + **功能 id 列表(+ 罕见覆盖)**;gen-subpage 对 function 只"复制快照 + 剥标记",per-function 填值近乎空操作(已知卡里几乎没有按机型变的值);不建复杂填值引擎 | G 分析 | 冻结快照里几乎一切都烤死;真正按机型变的是"有哪些功能"这个列表 | 生效:待真跑 gen-subpage 验证 |
+| D19 | **递归槽位/条件显隐 落地为 manifest `reveals` schema + 生成步骤 + 生成期校验**:§6.5/§8/§9.1 的"条件子槽"此前只到 CSS+片段层(`.segment-panels` 位置型 `:has`),manifest 无写法、gen-subpage 无步骤。现定义 `reveals`(selector option value → 有序槽列表,槽=子控件或嵌套 `{function:<id>}`,可递归),取代乱编的 `condition:`;gen-subpage/headset-function 增加 reveals 生成步骤;新增生成期校验(未知 archetype/id、`condition:` 残留、reveals 键不匹配、options+panels>6、重复 option 值 → HALT);确立"产物必须可由 manifest 重生成,禁止手改产物"纪律(把 D17 上升到页面级) | WL327 首跑暴露(EQ 被当 slider、手改 HTML、manifest↔产物分叉) | 架构早有递归原语,缺的是 schema 与生成两层;WL327 是 gen-subpage 首次真跑,撞上 §11 未实现项 | 生效:WL327 重生成验证 |
 
 ---
 
@@ -495,12 +496,15 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 - [x] Collaboration 卡建出并逐项验证;firmware ⓘ 与卡片 ⓘ 合并成一套 tooltip(§6.7)。
 - [x] **把控件选型的三张表写进 `headset/AGENTS.md`**(D10):①形状→家族;②家族内呈现(Segmented/Dropdown 数量阈值、Button/Hyperlink 语义);③领域约定。只在编写期用。
 
+**已完成(2026-06-26,D19):**
+- [x] **跑 `gen-subpage` 出一个真子页**:WL327 `home.manifest` + `audio-settings.manifest` → `index.html` + `audio-settings.html`(首次真跑,暴露并修复了 schema/生成两层缺口)。
+- [x] **Noise Control(`segmented`)+ Multimedia(`preset-grid`)+ 条件子功能**:条件显隐落地为 `reveals` schema(选 ANC → slider 面板;选 Custom → `eq-audio` 卡),走 §8 的位置型 `:has` CSS。
+- [x] **manifest schema + 生成期校验**:`reveals`/`subcontrols[]` schema 写进 `headset-gen-subpage/SKILL.md`;未知/越界/重复 → HALT。
+
 **未做:**
-- [ ] **跑 `gen-subpage` 出一个真子页**:配最小 `home.manifest` + `audio-settings.manifest`,验证"复制快照 + 填槽 + 剥标记"整条链(目前只验证过预览宿主页,没真跑 gen-subpage)。
-- [ ] **下一张卡:Noise Control**(引出 `segmented` archetype)+ Multimedia(`preset-grid`);条件子功能(选 ANC 冒出)用 §8 的显隐机制。
 - [ ] **偏离款验证**:出一个"删 Sidetone / Noise Control 只留 2 模式"的机型,证明改数据不碰素材。
-- [ ] **已知功能"默认组成"的存放形式** + `gen-subpage` 的覆盖合并逻辑(覆盖路径)。
-- [ ] `headset/models/` 仍无真实 manifest;icons 仅 `audio.svg`。
+- [ ] **已知功能"默认组成"的存放形式** + `gen-subpage` 的覆盖合并逻辑(覆盖路径,目前只支持 per-slot data-property 覆盖)。
+- [ ] icons 仅 `audio.svg`;Noise Control 的 segment 图标仍是手绘占位(非取自 `icons/`),待真 acoustic 图标补齐。
 
 ---
 

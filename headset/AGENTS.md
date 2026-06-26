@@ -64,10 +64,29 @@ runtime: it renders the explicit archetype/id already frozen into the manifest (
 | Acoustic environment modes (ANC / Transparency / hear-through / similar) | Icon Segmented |
 | On/off | Toggle |
 
+**Conditional behavior ("when the user picks X, show Y")**
+
+Decide this at authoring and freeze it as data — never leave it for generation to infer, and never
+hand-patch it into the output. A selector option that should reveal more controls is written as the
+selector's **`reveals`** map (key = option `value` → ordered slot list; a slot is a sub-control or a
+nested `{ function: <id> }`, recursively). There is no `condition:` field. Full schema:
+`.agents/skills/headset-gen-subpage/SKILL.md` → Manifest schema; mechanism:
+`.agents/skills/headset-shared/subcontrols/README.md` → Conditional reveals.
+
+> A full equalizer is the `eq-audio` **function** (`functions/eq-audio.html`), not a `slider`
+> sub-control. When a requirement mentions an EQ / equalizer / EQ curve, route it to the `eq-audio`
+> function id (see `functions/README.md` keyword table) — at authoring time. If it appears only when
+> a preset like "Custom" is chosen, place it as `{ function: eq-audio }` under that option's `reveals`.
+
 Segmented vs preset-grid details live in `.agents/skills/headset-shared/subcontrols/README.md`;
 do not duplicate that full rule here.
 
 ## Non-negotiables (apply to every generated page)
+
+- **Manifest is the contract; validate before emitting.** Generation is deterministic and invents
+  nothing (D8). HALT and ask on any out-of-contract manifest — unknown `archetype` or function `id`,
+  a stray `condition:` field, a `reveals` key that matches no option, options+panels > 6, or duplicate
+  option values. Do not paper over an authoring bug by hand-editing the HTML (see gen-subpage Validation).
 
 - **Slots:** single value → `data-property="<name>"`; region (variant/list) → `data-slot` +
   `data-instruction`. Names map 1:1 to manifest fields. Fill by name, never by guessing.

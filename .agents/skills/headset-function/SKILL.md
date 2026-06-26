@@ -46,13 +46,27 @@ function's name. Build only the affordance values from the manifest.
    `headset-shared/subcontrols/info-tooltip.html` into it and fill `{info-text}`; else delete that div.
 3. **Sub-controls** (`data-slot="subcontrols"`): for each sub-control, in order, COPY the matching
    `headset-shared/subcontrols/<archetype>.html` into `.function-content` and fill its value slots
-   (and its own ⓘ via `info-tooltip.html`, if it has info). Pick the archetype per the control-selection
-   rules in docs/function-card-architecture.md §7. If an archetype has no snippet yet, build it from
-   `headset.css` per those rules and §9.4 (then it can be promoted to `subcontrols/<archetype>.html`).
-4. **Sub-function dependency**: if a toggle owns dependent sub-controls, wrap them together in a
-   `.subfn-group` — the parent switch `<input>` gets the `.subfn-toggle` class, the dependents get
-   `.subfn-child` — so they grey out when the toggle is OFF (pure CSS, see `headset.css`).
-5. Strip `data-slot`/`data-instruction`/`data-property` markers on output.
+   (and its own ⓘ via `info-tooltip.html`, if it has info). The archetype is already chosen in the
+   manifest (per docs/function-card-architecture.md §7 / `headset/AGENTS.md` Control Selection) — copy
+   it as written; do not re-derive. If an archetype has no snippet yet, build it from `headset.css`
+   per §9.4 (then it can be promoted to `subcontrols/<archetype>.html`).
+4. **Conditional reveals** (`reveals` on a selector subcontrol — segmented | preset-grid): keep the
+   snippet's `.segment-panels` block with **one `.segment-panel` per option, in option order** (panel
+   count = option count; an option with no `reveals` entry → empty panel). Into panel N put the slot
+   list for option N's `value`: a sub-control slot → COPY `subcontrols/<archetype>.html` (recurse:
+   it may itself be a selector with `reveals`); a `{ function: <id> }` slot → render that function
+   (snapshot `functions/<id>.html` e.g. `eq-audio`, else assemble here) **UNWRAPPED** — drop its outer
+   `.function-container` > `.function-top-section` > anonymous `<div>` shell and place only the inner
+   `.function-header` + `.function-content` (plus any trailing `<script>`) into the panel; the panel is
+   already inside the parent card, so the full shell would nest a card inside a card. Reveal is
+   pure positional CSS (`.segment-panels` `:has(...:checked)`); add no JS, hand-embed no panel.
+   A subcontrol must NOT carry a flat `condition:` field — that is the pre-schema form; its content
+   belongs under the selector's `reveals`.
+5. **Sub-function dependency (greying, not reveal)**: if a toggle owns dependent sub-controls that stay
+   visible but grey out when OFF, wrap them in a `.subfn-group` — parent switch `<input>` gets
+   `.subfn-toggle`, dependents get `.subfn-child` (pure CSS, see `headset.css`). (This is greying;
+   `reveals` is show/hide. Different mechanisms — do not conflate.)
+6. Strip `data-slot`/`data-instruction`/`data-property` markers on output.
 
 ## Hard rules
 

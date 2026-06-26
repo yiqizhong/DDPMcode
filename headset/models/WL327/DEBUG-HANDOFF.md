@@ -4,6 +4,27 @@
 **Model:** WL327
 **Product:** Dell Pro 3 Wireless ANC Headset
 
+> ## ⚠️ CORRECTION (2026-06-26, supersedes the diagnosis below)
+> The "Issue Identified" / "Key Learnings" below diagnose the **wrong root cause**. They say
+> generation should have keyword-matched "EQ" → `eq-audio`. That contradicts architecture **D8**:
+> generation is **id-routed only and never keyword-matches**; the keyword table is an *authoring-time*
+> guide. Keyword routing applies when **writing the manifest**, not at generation.
+>
+> **Actual root cause:** the architecture's conditional-reveal / recursive-slot primitive
+> (§6.5 / §8 / §9.1) was implemented only at the CSS+snippet layer — there was **no manifest schema
+> and no generation step** for it. So "Custom → show EQ" had no legal manifest expression: the author
+> shoehorned it into a `slider` subcontrol with an invented `condition:` field, then hand-patched the
+> EQ card into the output. That made the manifest diverge from the HTML and the output
+> non-reproducible (re-running gen-subpage would re-emit the slider).
+>
+> **General fix (D19, 2026-06-26):** defined the `reveals` schema (selector option → ordered slot
+> list; a slot is a sub-control or a nested `{ function: <id> }`, recursive), added the gen-subpage /
+> headset-function steps that emit it, added generation-time validation (HALT on unknown
+> archetype/id, stray `condition:`, mismatched `reveals` key, >6 panels, duplicate option values), and
+> a reproducibility rule (no off-pipeline hand-patching). This manifest was rewritten to use `reveals`
+> (Custom → `{ function: eq-audio }`; ANC → strength slider) and the duplicate "Speech Boost" preset
+> was corrected to "Treble Boost". See `docs/function-card-architecture.md` D19.
+
 ## Summary
 Successfully generated UI for WL327 headset following DDPM methodology. Created home page and Audio Settings sub-page with three function cards (Noise Control, Collaboration, Multimedia).
 

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Settings</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <!-- Paths below are written so THIS template renders correctly when previewed IN PLACE
+         (relative to .agents/skills/headset-gen-subpage/templates/). The headset-gen-subpage
+         skill rewrites them to the model-output depth on copy — see that skill's SKILL.md.
+         Do not "fix" these by hand. -->
+    <link rel="stylesheet" href="../../../shared/tokens.css">
+    <link rel="stylesheet" href="../../headset.css">
+</head>
+<body>
+    <div class="frame">
+        <div class="masthead">
+            <div class="masthead-controls">
+                <button class="control-button" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M2.5 7.39001H13.5V8.61001H2.5V7.39001Z" fill="#0E0E0E"/>
+                    </svg>
+                </button>
+                <button class="control-button" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M16 2V14H0V2H16ZM1 13H15V3H1V13Z" fill="#0E0E0E"/>
+                    </svg>
+                </button>
+                <button class="control-button" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <g clip-path="url(#clip0_24_166)">
+                            <path d="M16 0.82L15.18 0L8 7.2L0.82 0.05L0 0.87L7.15 8L0.05 15.13L0.87 16L8 8.85L15.13 16L15.95 15.18L8.8 8L16 0.82Z" fill="#0E0E0E"/>
+                        </g>
+                        <defs>
+                            <clipPath id="clip0_24_166">
+                                <rect width="16" height="16" fill="white"/>
+                            </clipPath>
+                        </defs>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="content-zone">
+            <div class="devices-image-zone">
+                <!-- Header is identical to the homepage header. The only difference is this back
+                     link is a real <a href="index.html"> (the homepage's is a static, non-clickable
+                     <span>). Device name + model + firmware tooltip are the same. -->
+                <div class="page-header">
+                    <a class="back-link" href="index.html">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M16 7.46995H2.23L8.49 1.99995L7.79 1.19995L0 7.99995L7.79 14.79L8.49 13.99L2.23 8.52995H16V7.46995Z" fill="#0E0E0E"/>
+                        </svg>
+                    </a>
+                    <!-- Title + model stacked, left-aligned with each other (model aligns to the title, not the back arrow). -->
+                    <div class="header-text">
+                        <h1 class="page-title">Dell Pro 3 Wireless ANC Headset</h1>
+                        <div class="secondary-header">
+                            <span class="model-number">WL327</span>
+                            <div class="info-tooltip">
+                                <img src="https://www.figma.com/api/mcp/asset/6f0b89ee-7b00-4a3f-9869-e84329cc2025" alt="Firmware" class="firmware-icon">
+                                <div class="info-tooltip-pop">
+                                    <span class="info-tooltip-text">Firmware Version 33.442.103.12</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Device image — same position as the homepage. -->
+                <div class="device-image-place"><img src="images/product.png" alt="Dell Pro 3 Wireless ANC Headset"></div>
+                <div class="control-zone">
+                    <div class="connection-tag">
+                        <div class="bluetooth-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M12.1799 4.9L7.27995 0V6.55L4.51995 4L3.81995 4.76L7.27995 8L3.81995 11.25L4.51995 12.01L7.27995 9.45V16L12.1799 11.1L8.83995 8L12.1799 4.9ZM8.31995 2.51L10.6899 4.87L8.31995 7.07V2.51ZM10.6899 11.13L8.31995 13.49V8.93L10.6899 11.13Z" fill="#0E0E0E"/>
+                            </svg>
+                        </div>
+                        <div class="battery-indicator">
+                            <div class="battery-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M16 14L16 7L2 7L2 14L16 14Z" fill="#7AA809"/>
+                                    <path d="M18.125 15.422L18.125 12.9745L19.375 12.9745C19.75 12.9745 20 12.7099 20 12.313L20 8.34398C20 7.94708 19.75 7.68248 19.375 7.68248L18.125 7.68248L18.125 5.23495C18.125 4.7719 17.75 4.375 17.3125 4.375L0.812501 4.375C0.375001 4.375 8.56879e-07 4.7719 8.36638e-07 5.23495L3.91348e-07 15.422C3.71108e-07 15.885 0.375 16.2819 0.8125 16.2819L17.3125 16.2819C17.75 16.2819 18.125 15.885 18.125 15.422ZM1.25 14.9589L1.25 5.69799L16.875 5.69799L16.875 14.9589L1.25 14.9589Z" fill="#0E0E0E"/>
+                                </svg>
+                            </div>
+                            <span class="battery-text">76%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Sub-page feature zone = collapsed nav + content area, side by side as ONE region (Figma 19:403). -->
+            <div class="feature-zone--subpage">
+                <div class="feature-nav-collapsed">
+                    <a class="feature-button feature-button--collapsed" href="audio-settings.html">
+                        <div class="button-content">
+                            <div class="feature-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 23 23" fill="none">
+                                    <path d="M4.02 7.575H0V15.075H4.02L8.895 20.475L12.135 21.09V1.59L8.895 2.175L4.02 7.575ZM10.53 3.495V19.17L9.72 19.005L4.74 13.53H1.59V9.165H4.74L9.72 3.645L10.53 3.495Z" fill="#0E0E0E"/>
+                                    <path d="M16.38 0L15.615 1.335C17.3764 2.34117 18.8405 3.79516 19.8588 5.54958C20.8771 7.304 21.4134 9.29647 21.4134 11.325C21.4134 13.3535 20.8771 15.346 19.8588 17.1004C18.8405 18.8548 17.3764 20.3088 15.615 21.315L16.38 22.65C18.3787 21.5109 20.0404 19.8632 21.1962 17.8741C22.352 15.885 22.9609 13.6255 22.9609 11.325C22.9609 9.02449 22.352 6.76495 21.1962 4.77588C20.0404 2.78682 18.3787 1.13907 16.38 0Z" fill="#0E0E0E"/>
+                                    <path d="M18.27 11.325C18.283 9.96311 17.9549 8.61964 17.3156 7.41705C16.6763 6.21446 15.7462 5.19101 14.61 4.44L13.8 5.745C14.7289 6.34783 15.4908 7.17518 16.0151 8.15052C16.5395 9.12585 16.8095 10.2177 16.8 11.325C16.8147 12.4154 16.5578 13.4923 16.0524 14.4586C15.547 15.4248 14.809 16.2501 13.905 16.86L14.73 18.15C15.8373 17.3928 16.7401 16.3733 17.3578 15.1824C17.9754 13.9916 18.2888 12.6664 18.27 11.325Z" fill="#0E0E0E"/>
+                                </svg>
+                            </div>
+                            <span class="feature-text">Audio Settings</span>
+                        </div>
+                    </a>
+                </div>
+                <!-- Feature content (528px, light-gray bg, 16px radius) = Feature header (40px) + content area. -->
+                <div class="feature-content">
+                    <!-- Feature header — the feature/function name; 20px #0E0E0E. -->
+                    <div class="feature-header">
+                        <h2 class="feature-title">Audio Settings</h2>
+                    </div>
+                    <!-- Content area — feature components, stacked vertically (8px gap). -->
+                    <div class="content-area">
+                        <!-- Noise Control function -->
+                        <div class="function-container">
+                          <div class="function-top-section">
+                            <div>
+                              <div class="function-header">
+                                <div class="function-title">
+                                  <p class="function-title-text">Noise Control</p>
+                                </div>
+                                <div class="function-icons">
+                                </div>
+                              </div>
+                              <div class="function-content">
+                                <div class="segmented-group">
+                                  <div class="segmented-control">
+                                    <label class="segment">
+                                      <input type="radio" name="noise-mode" value="anc" class="segment-input" checked>
+                                      <span class="segment-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                          <path d="M12 3L10.59 4.41L16.17 10H4V12H16.17L10.59 17.59L12 19L20 11L12 3Z" fill="currentColor"/>
+                                        </svg>
+                                      </span>
+                                      <span class="segment-label">ANC</span>
+                                    </label>
+                                    <label class="segment">
+                                      <input type="radio" name="noise-mode" value="off" class="segment-input">
+                                      <span class="segment-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
+                                        </svg>
+                                      </span>
+                                      <span class="segment-label">OFF</span>
+                                    </label>
+                                  </div>
+                                  <div class="segment-panels">
+                                    <div class="segment-panel">
+                                      <div class="slider-row">
+                                        <p class="slider-label">1</p>
+                                        <div class="slider-input-wrap" style="--min:1;--max:5;--val:3;">
+                                          <input type="range" class="slider-input" min="1" max="5" step="1" value="3"
+                                                 oninput="this.parentNode.style.setProperty('--val',this.value);this.nextElementSibling.textContent=this.value;">
+                                          <p class="slider-value">3</p>
+                                        </div>
+                                        <p class="slider-label">5</p>
+                                      </div>
+                                    </div>
+                                    <div class="segment-panel"></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Collaboration function -->
+                        <div class="function-container">
+                          <div class="function-top-section">
+                            <div>
+                              <div class="function-header">
+                                <div class="function-title">
+                                  <p class="function-title-text">Collaboration</p>
+                                </div>
+                                <div class="function-icons">
+                                </div>
+                              </div>
+                              <div class="function-content">
+                                <div class="function-header">
+                                  <div class="function-title">
+                                    <p class="function-label">Mic Noise Canceling</p>
+                                  </div>
+                                  <div class="function-icons">
+                                  </div>
+                                  <label class="switch">
+                                    <input type="checkbox" class="switch-input" checked>
+                                    <span class="switch-state"></span>
+                                    <span class="switch-track"><span class="switch-thumb"></span></span>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Multimedia function -->
+                        <div class="function-container">
+                          <div class="function-top-section">
+                            <div>
+                              <div class="function-header">
+                                <div class="function-title">
+                                  <p class="function-title-text">Multimedia</p>
+                                </div>
+                                <div class="function-icons">
+                                </div>
+                              </div>
+                              <div class="function-content">
+                                <div class="segmented-group">
+                                  <div class="preset-grid">
+                                    <label class="segment">
+                                      <input type="radio" name="multimedia-preset" value="default" class="segment-input" checked>
+                                      <span class="segment-label">Default</span>
+                                    </label>
+                                    <label class="segment">
+                                      <input type="radio" name="multimedia-preset" value="bass-boost" class="segment-input">
+                                      <span class="segment-label">Bass Boost</span>
+                                    </label>
+                                    <label class="segment">
+                                      <input type="radio" name="multimedia-preset" value="speech-boost" class="segment-input">
+                                      <span class="segment-label">Speech Boost</span>
+                                    </label>
+                                    <label class="segment">
+                                      <input type="radio" name="multimedia-preset" value="speech-boost-2" class="segment-input">
+                                      <span class="segment-label">Speech Boost</span>
+                                    </label>
+                                    <label class="segment segment--span">
+                                      <input type="radio" name="multimedia-preset" value="custom" class="segment-input">
+                                      <span class="segment-label">Custom</span>
+                                    </label>
+                                  </div>
+                                  <div class="segment-panels">
+                                    <div class="segment-panel"></div>
+                                    <div class="segment-panel"></div>
+                                    <div class="segment-panel"></div>
+                                    <div class="segment-panel"></div>
+                                    <div class="segment-panel">
+                                      <div class="function-header">
+                                        <div class="function-title">
+                                          <p class="function-title-text">Audio Equalizer</p>
+                                        </div>
+                                        <div class="function-icons"></div>
+                                      </div>
+                                      <p class="eq-subtitle">Adjust the audio ranges of the sound you hear.</p>
+                                      <div class="eq-chart">
+                                        <svg id="eq-audio" viewBox="0 0 460 210" xmlns="http://www.w3.org/2000/svg"
+                                             style="display:block;width:100%;height:auto;overflow:visible;">
+                                          <defs>
+                                            <linearGradient id="eq-grad-audio" x1="0" y1="0" x2="0" y2="1">
+                                              <stop offset="0%"   stop-color="#0063b8" stop-opacity="0.22"/>
+                                              <stop offset="100%" stop-color="#0063b8" stop-opacity="0.02"/>
+                                            </linearGradient>
+                                            <clipPath id="eq-clip-audio">
+                                              <rect x="44" y="18" width="408" height="158"/>
+                                            </clipPath>
+                                          </defs>
+                                          <line x1="44" y1="122.67" x2="452" y2="122.67" stroke="#e1e1e1" stroke-width="1"/>
+                                          <text x="38" y="126.67" text-anchor="end"
+                                                font-family="Roboto,sans-serif" font-size="11" fill="#d2d2d2">0 dB</text>
+                                          <line x1="93"  y1="20" x2="93"  y2="174" stroke="#e1e1e1" stroke-width="1"/>
+                                          <line x1="170" y1="20" x2="170" y2="174" stroke="#e1e1e1" stroke-width="1"/>
+                                          <line x1="247" y1="20" x2="247" y2="174" stroke="#e1e1e1" stroke-width="1"/>
+                                          <line x1="324" y1="20" x2="324" y2="174" stroke="#e1e1e1" stroke-width="1"/>
+                                          <line x1="401" y1="20" x2="401" y2="174" stroke="#e1e1e1" stroke-width="1"/>
+                                          <path id="eq-fill-audio" fill="url(#eq-grad-audio)" clip-path="url(#eq-clip-audio)"/>
+                                          <path id="eq-line-audio" fill="none" stroke="#0063b8" stroke-width="2.5"
+                                                stroke-linecap="round" stroke-linejoin="round"/>
+                                          <circle data-band="0" data-property="eq-audio-bass"
+                                                  cx="93"  cy="45.67" r="6"
+                                                  fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                                                  style="cursor:ns-resize;touch-action:none;"/>
+                                          <circle data-band="1" data-property="eq-audio-lowmid"
+                                                  cx="170" cy="45.67" r="6"
+                                                  fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                                                  style="cursor:ns-resize;touch-action:none;"/>
+                                          <circle data-band="2" data-property="eq-audio-midrange"
+                                                  cx="247" cy="97"    r="6"
+                                                  fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                                                  style="cursor:ns-resize;touch-action:none;"/>
+                                          <circle data-band="3" data-property="eq-audio-highmid"
+                                                  cx="324" cy="122.67" r="6"
+                                                  fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                                                  style="cursor:ns-resize;touch-action:none;"/>
+                                          <circle data-band="4" data-property="eq-audio-treble"
+                                                  cx="401" cy="122.67" r="6"
+                                                  fill="#ffffff" stroke="#0063b8" stroke-width="2"
+                                                  style="cursor:ns-resize;touch-action:none;"/>
+                                          <text x="93"  y="194" text-anchor="middle"
+                                                font-family="Roboto,sans-serif" font-size="12" fill="#333333">Bass</text>
+                                          <text x="247" y="194" text-anchor="middle"
+                                                font-family="Roboto,sans-serif" font-size="12" fill="#333333">Mid-range</text>
+                                          <text x="401" y="194" text-anchor="middle"
+                                                font-family="Roboto,sans-serif" font-size="12" fill="#333333">Treble</text>
+                                        </svg>
+                                      </div>
+                                      <script>
+                                      (function () {
+                                        var svg = document.getElementById('eq-audio');
+                                        if (!svg) return;
+                                        var STOPS_Y  = [45.67, 71.33, 97, 122.67, 148.33, 174];
+                                        var STOPS_DB = [3,     2,     1,  0,       -1,     -2];
+                                        var MAX_Y    = 174;
+                                        function snapY(rawY) {
+                                          var bestIdx = 0;
+                                          STOPS_Y.forEach(function (s, i) {
+                                            if (Math.abs(s - rawY) < Math.abs(STOPS_Y[bestIdx] - rawY)) bestIdx = i;
+                                          });
+                                          return bestIdx;
+                                        }
+                                        var dots = Array.from(svg.querySelectorAll('circle[data-band]'))
+                                          .sort(function (a, b) { return +a.dataset.band - +b.dataset.band; });
+                                        var linePth = document.getElementById('eq-line-audio');
+                                        var fillPth = document.getElementById('eq-fill-audio');
+                                        dots.forEach(function (d) {
+                                          var idx = snapY(parseFloat(d.getAttribute('cy')));
+                                          d.setAttribute('data-value', STOPS_DB[idx]);
+                                        });
+                                        function getPoints() {
+                                          return dots.map(function (d) {
+                                            return { x: parseFloat(d.getAttribute('cx')), y: parseFloat(d.getAttribute('cy')) };
+                                          });
+                                        }
+                                        function buildPath(pts) {
+                                          var d = 'M ' + pts[0].x + ' ' + pts[0].y;
+                                          for (var i = 0; i < pts.length - 1; i++) {
+                                            var p0 = pts[Math.max(i - 1, 0)];
+                                            var p1 = pts[i];
+                                            var p2 = pts[i + 1];
+                                            var p3 = pts[Math.min(i + 2, pts.length - 1)];
+                                            d += ' C ' +
+                                              (p1.x + (p2.x - p0.x) / 6).toFixed(2) + ' ' +
+                                              (p1.y + (p2.y - p0.y) / 6).toFixed(2) + ',' +
+                                              (p2.x - (p3.x - p1.x) / 6).toFixed(2) + ' ' +
+                                              (p2.y - (p3.y - p1.y) / 6).toFixed(2) + ',' +
+                                              p2.x + ' ' + p2.y;
+                                          }
+                                          return d;
+                                        }
+                                        function redraw() {
+                                          var pts = getPoints();
+                                          var curve = buildPath(pts);
+                                          linePth.setAttribute('d', curve);
+                                          var f = pts[0], l = pts[pts.length - 1];
+                                          fillPth.setAttribute('d', curve + ' L ' + l.x + ' ' + MAX_Y + ' L ' + f.x + ' ' + MAX_Y + ' Z');
+                                        }
+                                        redraw();
+                                        var active = null, startClientY = 0, startCY = 0;
+                                        svg.addEventListener('pointerdown', function (e) {
+                                          var dot = e.target.closest ? e.target.closest('circle[data-band]') :
+                                            (e.target.hasAttribute && e.target.hasAttribute('data-band') ? e.target : null);
+                                          if (!dot) return;
+                                          active = dot;
+                                          startClientY = e.clientY;
+                                          startCY = parseFloat(dot.getAttribute('cy'));
+                                          svg.setPointerCapture(e.pointerId);
+                                          e.preventDefault();
+                                        });
+                                        svg.addEventListener('pointermove', function (e) {
+                                          if (!active) return;
+                                          var ctm = svg.getScreenCTM();
+                                          var scale = ctm ? ctm.d : 1;
+                                          var rawY = startCY + (e.clientY - startClientY) / scale;
+                                          var idx  = snapY(rawY);
+                                          active.setAttribute('cy', STOPS_Y[idx]);
+                                          active.setAttribute('data-value', STOPS_DB[idx]);
+                                          redraw();
+                                        });
+                                        svg.addEventListener('pointerup',     function () { active = null; });
+                                        svg.addEventListener('pointercancel', function () { active = null; });
+                                      })();
+                                      </script>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

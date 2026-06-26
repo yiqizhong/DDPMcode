@@ -1,0 +1,50 @@
+title: Audio Settings
+
+functions:
+  - id: noise-control
+    title: Noise Control
+    subcontrols:
+      - archetype: icon-segmented
+        options:
+          - label: ANC
+            value: anc
+          - label: OFF
+            value: off
+        selected: anc
+      - archetype: slider
+        label: ANC Strength
+        min: 1
+        max: 5
+        value: 3
+        condition: anc
+
+  - id: collaboration
+    title: Collaboration
+    subcontrols:
+      - archetype: toggle
+        label: Mic Noise Canceling
+        value: true
+
+  - id: multimedia
+    title: Multimedia
+    subcontrols:
+      - archetype: preset-grid
+        label: Presets
+        options:
+          - label: Default
+            value: default
+            selected: true
+          - label: Bass Boost
+            value: bass-boost
+          - label: Speech Boost
+            value: speech-boost
+          - label: Speech Boost
+            value: speech-boost-2
+          - label: Custom
+            value: custom
+      - archetype: slider
+        label: EQ
+        min: 0
+        max: 100
+        value: 50
+        condition: custom

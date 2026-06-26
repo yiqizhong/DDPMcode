@@ -1,0 +1,14 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="dds2_stack" clip-path="url(#clip0_7172_207)">
+<g id="Vector">
+<path d="M11.63 14.49H2.82L4.38 12.18H2.57L0 16H12.41L16 10.67H14.22L11.63 14.49Z" fill="#0E0E0E"/>
+<path d="M12.41 10.67L16 5.33H14.22L13.22 6.85L11.67 9.15H2.83L4.38 6.85H2.57L0 10.67H12.41Z" fill="#0E0E0E"/>
+<path d="M12.42 5.33L16 0H3.59L0 5.33H12.42ZM13.18 1.51L11.63 3.82H2.83L4.38 1.51H13.18Z" fill="#0E0E0E"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_7172_207">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>

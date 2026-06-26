@@ -1,0 +1,13 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="dds2_pop-up-arrow-corner" clip-path="url(#clip0_7172_1134)">
+<g id="Vector">
+<path d="M14.93 14.93H1.06V1.07H8V0H0V16H16V8H14.94L14.93 14.93Z" fill="#0E0E0E"/>
+<path d="M10.43 0V1.06H14.21L6.68 8.59L7.44 9.34L14.93 1.84V5.57H16V0H10.43Z" fill="#0E0E0E"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_7172_1134">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>

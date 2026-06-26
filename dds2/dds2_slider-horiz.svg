@@ -1,0 +1,20 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="dds2_slider-horiz" clip-path="url(#clip0_7172_340)">
+<g id="Vector">
+<path d="M0 2H3.15V3H0V2Z" fill="#0E0E0E"/>
+<path d="M6.35 2H16V3H6.35V2Z" fill="#0E0E0E"/>
+<path d="M0 7.47H10.65V8.53H0V7.47Z" fill="#0E0E0E"/>
+<path d="M13.85 7.47H16V8.53H13.85V7.47Z" fill="#0E0E0E"/>
+<path d="M6.35 13H16V14H6.35V13Z" fill="#0E0E0E"/>
+<path d="M0 13H3.15V14H0V13Z" fill="#0E0E0E"/>
+<path d="M5.28 0H4.22V5H5.28V0Z" fill="#0E0E0E"/>
+<path d="M4.22 11V16H5.28V11H4.22Z" fill="#0E0E0E"/>
+<path d="M12.78 5.53H11.72V10.53H12.78V5.53Z" fill="#0E0E0E"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_7172_340">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>

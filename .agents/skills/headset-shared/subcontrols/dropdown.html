@@ -1,0 +1,33 @@
+<!-- Dropdown sub-control — a trigger showing the selected value + chevron; click opens an
+     option list below. Zero JS: uses <details>/<summary> for open/close.
+     COPY per a function's discrete-choice property; fill {id}, {label}, and option text.
+     Mark the initially-selected <li> with class="dropdown-item dropdown-item--selected"
+     and aria-selected="true"; all others get class="dropdown-item" only.
+
+     SWAPPABLE SLOT: this template can replace the CONTROL START/END block in control-row.html
+     or single-control.html. When used there the .dropdown margin-left:auto (already set in CSS)
+     pushes it to the right of the header row; the list opens downward with absolute positioning.
+
+     data-property slots:
+       {id}-value    — the displayed selected value in the trigger (e.g. "4 hours")
+       {id}-option   — on each <li>; manifest sets selected state via the --selected modifier class
+
+     Styles: headset.css .dropdown / .dropdown-trigger / .dropdown-value / .dropdown-chevron /
+             .dropdown-list / .dropdown-item / .dropdown-item--selected (NO inline <style>). -->
+<details class="dropdown">
+  <summary class="dropdown-trigger" aria-label="{label}">
+    <span class="dropdown-value" data-property="{id}-value">4 hours</span>
+    <svg class="dropdown-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </summary>
+  <ul class="dropdown-list" role="listbox" aria-label="{label}">
+    <li class="dropdown-item" role="option" data-property="{id}-option" data-value="15min">15 minutes</li>
+    <li class="dropdown-item" role="option" data-property="{id}-option" data-value="30min">30 minutes</li>
+    <li class="dropdown-item" role="option" data-property="{id}-option" data-value="1h">1 hour</li>
+    <li class="dropdown-item" role="option" data-property="{id}-option" data-value="2h">2 hours</li>
+    <li class="dropdown-item dropdown-item--selected" role="option" data-property="{id}-option" data-value="4h" aria-selected="true">4 hours</li>
+    <li class="dropdown-item" role="option" data-property="{id}-option" data-value="6h">6 hours</li>
+    <li class="dropdown-item" role="option" data-property="{id}-option" data-value="8h">8 hours</li>
+  </ul>
+</details>

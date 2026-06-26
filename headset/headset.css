@@ -1065,6 +1065,68 @@ body {
 .feature-zone[data-slot] { background: var(--color-zone-feature); }     /* dev tint — template only */
 .content-area[data-slot] { background: var(--color-zone-feature); min-height: 0; }  /* dev tint — template only; keep the scroll min-height */
 
+/* --- Dropdown sub-control — <details>/<summary> open/close, zero JS.
+   Works standalone (full-width row) or as the CONTROL START/END swap in control-row /
+   single-control (margin-left:auto pushes it right in the flex header). */
+.dropdown {
+  position: relative;
+  margin-left: auto;    /* right-aligns when inside .function-header flex row */
+  flex-shrink: 0;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 140px;
+  padding: 10px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-family);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--color-text-strong);
+  user-select: none;
+}
+.dropdown-trigger::-webkit-details-marker { display: none; }
+
+.dropdown-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-strong);
+  transition: transform 0.15s ease;
+}
+details[open] > .dropdown-trigger .dropdown-chevron { transform: rotate(180deg); }
+
+.dropdown-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  z-index: 20;
+  list-style: none;
+  padding: 8px 0;
+  margin: 0;
+}
+
+.dropdown-item {
+  padding: 12px 24px;
+  font-family: var(--font-family);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--color-text-strong);
+  cursor: pointer;
+}
+.dropdown-item:hover { background: var(--color-border-light); }
+.dropdown-item--selected { color: var(--color-accent); }
+
 /* ------------------------------------------------------------
    Uniform scrollbar — everywhere: 4px wide, light gray, 8px radius.
    Thumb height auto-adapts to content; track is transparent.

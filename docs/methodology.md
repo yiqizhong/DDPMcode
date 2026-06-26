@@ -6,17 +6,29 @@
 
 ---
 
-> ⚠️ **Status: reference only — the codebase is the source of truth.**
-> Parts of this framework are out of date. Where it conflicts with the repo, follow the
-> repo's `AGENTS.md` / `README.md`. Known divergences already settled in code:
+> ⚠️ **Status: reference only — the codebase is the source of truth.** (Last reconciled 2026-06-26.)
+> This is the original v1.0 methodology; parts are now superseded. Where it conflicts with the repo,
+> follow the repo. **For the current model, read the living docs first:**
+> [`navigation.md`](navigation.md) (what to read/change for a task) · [`component-catalog.md`](component-catalog.md)
+> (the components) · [`function-card-architecture.md`](function-card-architecture.md) (function-card design +
+> decisions D1–D18) · `../AGENTS.md` & `../headset/AGENTS.md` (operational rules).
+>
+> **Known divergences already settled in code (this doc is superseded on these points):**
 > - **§9.5 skill location** — skills live **flat at repo-root** `.agents/skills/`, namespaced
 >   `<category>-<role>-<name>` (not nested per category). Nested grouping (§9.7.3) was tested
 >   2026-06-24 and fails Devin discovery.
-> - **Pilot category** — the real pilot is **headset** (`headset/`); "Mouse" here is only a
->   teaching example.
+> - **Pilot category** — the real pilot is **headset** (`headset/`); "Mouse" here is only a teaching example.
 > - **§3 markup** — markup is **copied verbatim from pre-written snippet files, never generated**
->   from a `data-instruction` description; an unknown enum value **halts and asks** (see
->   `AGENTS.md` → "Markup is copied from snippets").
+>   from a `data-instruction` description; an unknown enum value **halts and asks**.
+> - **§9.4 control → two layers** — a "control" is not one atom. A sub-page function is a **function card**
+>   (title + slot body) assembled from **sub-control atoms** (toggle/slider/segmented/…); the slot model
+>   recurses into the card. See `function-card-architecture.md`.
+> - **§3.1 "no runtime show/hide" is OVERRIDDEN for in-panel interaction** — end-user interaction inside
+>   one device panel (segmented conditional panels, selected states, sub-function greying) DOES pre-embed +
+>   reveal via CSS `:has()`/`:checked` (D11/D12). Cross-model variants still bake one state, no hiding.
+> - **Function routing is id-only (D8)** — `gen-subpage` copies `functions/<id>.html` by the manifest's `id`;
+>   keyword tables are authoring-time hints only. Demo/reference cards live in `templates/examples/` and are NOT id-routed.
+> - **No accessibility** — the codebase deliberately omits aria/role/keyboard-nav/focus-ring (project preference).
 
 ---
 

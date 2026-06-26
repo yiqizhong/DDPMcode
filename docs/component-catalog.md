@@ -1,98 +1,129 @@
 # 组件清单（Component Catalog）· headset 品类
 
-> **性质**:这是一份**活清单(living catalog)**,记录当前系统里所有可复用 UI 组件、它们的用途、
-> 通用性,以及 Agent 在生成期/编写期如何调用它们。**每次新增/改名/删除组件都要更新这里。**
-> 设计推理与决策记录见 [`function-card-architecture.md`](function-card-architecture.md)(思考日志,不是清单)。
->
-> **最后更新**:2026-06-26 · **维护规则见文末第 6 节。**
+> **性质**:一份**活清单**,记录当前所有可复用 UI 组件:它是什么、何时用、通用不通用、Agent 怎么调用。
+> **每次新增/改名/删除组件都要更新这里。** 类名用大白话,括号里是代码里的真实文件/术语(映射不丢)。
+> 设计决策的"为什么"见 [`function-card-architecture.md`](function-card-architecture.md);去哪读/改见 [`navigation.md`](navigation.md)。
+> **最后更新**:2026-06-26 · 维护规则见文末。
 
-## 0. 速览
+## 0. 速览(可复用的"件"有哪三类)
 
-| 类别 | 数量 | 位置 |
-|---|---|---|
-| 原子片段(sub-control) | 6 | `.agents/skills/headset-shared/subcontrols/` |
-| 通用 Frame(卡壳) | 1 | `.agents/skills/headset-function/templates/` |
-| 功能卡快照(function snapshot) | 6 | `.agents/skills/headset-gen-subpage/templates/functions/` |
-| 槽机制(slot mechanism) | 4 | 嵌在上述文件 + `headset.css` |
-
-**调用模型一句话**:`gen-subpage` 读 manifest 的 `functions[]` → **按 `id` 复制整张功能卡**(D8,纯 id,
-不认名字)→ 无快照才转 `headset-function`(复制卡壳 Frame + 按 archetype 复制原子拼装)。"用哪个控件"
-是**编写期**按 §7 三表决定、冻进 manifest;**生成期只照抄,不推断**。
-
----
-
-## 1. 原子片段(subcontrols/)—— 卡片 body 里堆叠的最小积木
-
-| 片段 | 何时用 | 通用性 | Agent 如何调用 |
+| 类别 | 一句话是什么 | 数量 | 位置 |
 |---|---|---|---|
-| **control-row.html** | 布尔开关的标准行"左标题+右控件"。**最高频** | ✅ 通用 | `headset-function`/快照作者 copy 进 `.function-content`,每个开关类子控件一份,填 `{label}`/`{id}-state` |
-| **slider.html** | 一个值落在**有序**区间/档位(音量、强度、Sidetone 等级) | ✅ 通用 | copy 进 body;填 `{min}/{max}/{val}`;唯一一行 `oninput` 驱动数值气泡 |
-| **segmented.html** | 从 **2–4 个无序项选 1**、要全部可见/带图标(**模式切换**:ANC/Transparency) | ✅ 通用 | copy 进 body;加/删 `.segment` 配选项数;可选 `.segment-panels` 条件面板。**选项+面板上限 6** |
-| **preset-grid.html** | **4–6 个预设**平铺选择(EQ 预设、音效 profile) | ✅ 通用 | copy 进 body;2 列网格;末项可 `.segment--span` 整行。**上限 6** |
-| **info-tooltip.html** | 某控件**有说明文字**时(可选 ⓘ + hover) | ✅ 通用(可选件) | 有 info 才 copy 进该行 `.function-icons`;无则删该 div |
-| **dropdown.html** | 单选枚举但**选项多/位置紧**,不适合平铺(详见第 4 节) | ✅ 通用 | copy 进 body 作下拉;**或 swap 进 header 槽**(见第 5 节) |
+| **① 卡内控件积木**(子控件 / `subcontrols/`) | 拼进功能卡里的小控件:开关、下拉、滑杆、分段… | 6 文件(+ 开关无独立文件) | `.agents/skills/headset-shared/subcontrols/` |
+| **② 通用功能卡骨架**(空白卡壳 / `function-frame.html`) | 没现成卡时用的**空模板**:一个标题 + 空 body,往里塞积木拼出卡 | 1 | `.agents/skills/headset-function/templates/` |
+| **③ 可换内容的槽位 + 联动机制**(slot / CSS) | 模板里"能换内容 / 会联动"的位置 | 4 | 嵌在上面文件 + `headset.css` |
 
-**segmented vs preset-grid vs dropdown 的判据**(详见 `subcontrols/README.md` + AGENTS 控件选型表):
-2–3 项→segmented;5–6 项→preset-grid;4 项看语义(模式切换→segmented,预设→grid);选项多/位置紧→dropdown。
+> 上面 **①积木 / ②骨架 / ③槽机制** 是跨产品复用的"件"。`functions/` 目录里那些**整张的功能卡**另算,且分两类:
+> 一类是**现成可套用的卡**(`single-control`/`eq-audio`/`promotion-download`),另一类是开发时建的**演示样例**
+> (`collaboration`/`auto-power-off`/`noise-control`)——清点与区分见文末附录。
+
+**调用模型一句话**:`gen-subpage` 读 manifest 的 `functions[]` → 若某功能 `id` **正好命中 `functions/` 里已有的卡**就
+整张复制(D8,纯 id 不认名字),**否则**用 `headset-function` 复制②空白卡壳 + copy ①积木**现拼**。"用哪个控件"是
+**编写期**按选型表决定、冻进 manifest;生成期只照抄。
 
 ---
 
-## 2. 通用 Frame —— 万能卡壳兜底
+## ① 卡内控件积木(子控件 · `subcontrols/`)
 
-| 文件 | 何时用 | 通用性 | Agent 如何调用 |
+> 这些是拼进功能卡里的小控件。按"长什么样、放哪"分成四组——**A 是装控件的行,B/C 是控件本体,D 是辅助。**
+
+### A. 行容器(装一个控件的标准行)
+
+| 件 | 是什么 / 何时用 | 通用性 | Agent 如何调用 |
 |---|---|---|---|
-| **function-frame.html** | 某功能**没有专属快照**时的兜底卡壳(标题 + 可选 ⓘ 槽 + 子控件 body 槽) | ✅ 通用 | `headset-function`(Layer-2) copy 它,填 `function-title`,再按 manifest 往 `data-slot="subcontrols"` copy 原子 |
+| **标题控件行**(`control-row.html`) | 一行:左边标题,右边一个控件(默认是开关)。**最高频** | ✅ 通用 | copy 进卡 body(`.function-content`),每个开关类设置占一行,填 `{label}`/`{id}-state` |
 
----
+### B. 紧凑控件(放进行右侧 / 卡 header 的那个槽——**二选一,可互换**)
 
-## 3. 功能卡快照(functions/)—— 按 `id` 整卡复制
+> 开关和下拉是**同一类兄弟**:都塞进 control-row / single-control 右侧的 `CONTROL` 槽,都靠 `margin-left:auto` 靠右。换哪个由数据决定。
 
-| 卡 | 内含交互件 | 何时用 | 通用性 | Agent 如何调用 |
-|---|---|---|---|---|
-| **single-control.html** | 1 switch | 整卡=header 里一个布尔开关、下方无内容区 | ✅ 通用 | 按 id copy;header 控件是 swap 槽(规则见 control-row) |
-| **auto-power-off.html** | 1 dropdown | header 一行、值从下拉选(关机超时);**swappable 槽的 worked example** | ✅ 通用 | 按 id copy;dropdown 已换入 header 槽,填 `auto-power-off-value`/`-option` |
-| **collaboration.html** | 2 switch + 1 slider + ⓘ | 协作/通话降噪(**参考装配范例**) | ✅ 通用(数据驱动拼装,可删/改/增子控件) | 按 id copy + 填 `data-property` |
-| **noise-control.html** | 1 switch + 1 slider | 降噪 | ⚠️ **半通用**:结构通用,但当前是**简化测试版**,≠ Figma 真三段(ANC/Transparency/Off);docs §6.8 标"保留中" | 按 id copy;真三段版出现时再换 |
-| **promotion-download.html** | 2 按钮(关闭+CTA) | App 下载推广卡 | ⚠️ **半通用**:卡结构通用,默认内容 **Dell 品牌特定**,靠槽覆盖 | 按 id copy + 填 `promo-icon-src`/`promo-title`/`promo-description`/`promo-cta-label` |
-| **eq-audio.html** | 5 拖拽点 | 音频均衡器曲线 | ❌ **固定特殊**:5-band 写死、**单实例**(固定 SVG id)、唯一可变是 cy 档位值 | 按 id copy;几乎不填值(除非 manifest 给 6 档之一的初始 cy) |
-
-> **通用性总评**:除 **eq-audio**(固定)外其余基本通用;唯二要留意 **noise-control**(测试版待换真版)
-> 和 **promotion-download**(默认内容品牌化、靠槽覆盖才通用)。
-
----
-
-## 4. Dropdown 下拉菜单(= 第 1 节的 dropdown.html)
-
-| 维度 | 说明 |
-|---|---|
-| 何时用 | 单选枚举但**选项多/空间紧**,不适合 segmented 平铺(如关机超时 15min…8h) |
-| 通用性 | ✅ 通用 |
-| 实现 | 有意的**自定义件**(`<details>/<summary>` + 自定义列表 + 定位脚本),非原生 `<select>`——为保 Figma 外观,架构 §8.3/D12 登记为例外。`position:fixed` 浮层逃出滚动容器裁剪 |
-| Agent 如何调用 | (a) 作 body 内子控件 copy;(b) **swap 进** control-row / single-control 的 header CONTROL 槽(带 `margin-left:auto`)。实证卡见 `auto-power-off.html` |
-
----
-
-## 5. 槽机制(Slot)—— 嵌在上述文件 + headset.css 里
-
-| 机制 | 何时用 | 通用性 | Agent 如何调用 |
+| 件 | 是什么 / 何时用 | 通用性 | Agent 如何调用 |
 |---|---|---|---|
-| **可替换 header 槽**(`control-row` / `single-control` 的 `CONTROL START/END`) | header 右侧控件要从默认 switch 换成别的 | ✅ 通用,但**仅限紧凑控件**:switch ↔ dropdown(slider/segmented/preset 整宽,禁入 header) | 把 CONTROL 块整段替换为 switch 或 dropdown。**swap 规则单一权威在 `control-row.html`**;single-control 引用它 |
-| **Frame 的两个 data-slot**(`function-info` ⓘ槽 / `subcontrols` 子控件槽) | 用 function-frame 兜底拼卡时 | ✅ 通用 | headset-function 往 `subcontrols` 槽按序 copy 原子;有 info 才往 `function-info` 槽放 tooltip |
-| **segment-panels 条件面板**(segmented/preset 内) | 选某分段后**冒出**一组子控件(选 ANC 露出 XYZ) | ✅ 通用(上限 6) | 数据结构表达:第 N 段选中→第 N 面板显示,纯 CSS `:has()`,0 JS |
-| **subfn-group 依赖**(`.subfn-toggle`/`.subfn-child`) | 父开关 OFF 时**置灰**旗下子控件(Sidetone 关→灰 slider) | ✅ 通用 | 把父 toggle + 依赖件包进 `.subfn-group`,纯 CSS `:has()` 置灰 |
+| **开关**(switch · **无独立文件**,内嵌在 control-row) | 开/关二选一(布尔值) | ✅ 通用 | 是 control-row 的默认右控件;填 `{id}-state`,加 `checked`=ON |
+| **下拉**(`dropdown.html`) | 单选,但**选项多 / 位置紧**(如关机超时 15min…8h)。自定义 `<details>` 浮层,`position:fixed` 逃出滚动容器裁剪 | ✅ 通用 | 换进 control-row/single-control 的 `CONTROL` 槽;实证示例见附录的 auto-power-off |
+
+### C. 整宽控件(占满一行,放在卡 body,**不能进 header**)
+
+| 件 | 是什么 / 何时用 | 通用性 | Agent 如何调用 |
+|---|---|---|---|
+| **滑杆**(`slider.html`) | 一个值落在**有序**区间/档位(音量、强度、Sidetone 等级) | ✅ 通用 | copy 进 body;填 `{min}/{max}/{val}`;一行 `oninput` 驱动数值气泡 |
+| **分段选择**(`segmented.html`) | 从 **2–4 个项选 1**、要全部可见 / 带图标(模式切换:ANC/Transparency) | ✅ 通用 | copy 进 body;加/删 `.segment` 配数量;可选条件面板。**选项+面板上限 6** |
+| **预设网格**(`preset-grid.html`) | **4–6 个预设**平铺(EQ 预设、音效 profile) | ✅ 通用 | copy 进 body;2 列网格;末项可整行。**上限 6** |
+
+### D. 辅助件
+
+| 件 | 是什么 / 何时用 | 通用性 | Agent 如何调用 |
+|---|---|---|---|
+| **信息提示**(`info-tooltip.html`) | 控件旁的 ⓘ 图标 + hover 说明 | ✅ 通用(可选) | 有说明才 copy 进该行 `.function-icons`;没有就删掉那个 div |
+
+**选哪个控件**(细则见 `subcontrols/README.md` + `headset/AGENTS.md` 选型表):
+开/关→**开关**;有序值→**滑杆**;2–3 项→**分段**;4 项看语义(模式切换→分段 / 预设→网格);5–6 项→**预设网格**;选项多或位置紧→**下拉**。
 
 ---
 
-## 6. 维护规则(怎么更新这份清单)
+## ② 通用功能卡骨架(空白卡壳 · `function-frame.html`)
 
-每次发生以下情况,**同一个 PR 内**更新本文件:
+> 当某功能在 `functions/` 里**没有对应 id 的卡**时,用这个空模板**按产品需求现拼**一张。
 
-1. **新增原子/卡/Frame** → 在对应表加一行(何时用 / 通用性 / 调用方式),并更新第 0 节速览数量。
-2. **改名/删除** → 改/删对应行;若旧名可能被人查找,在 [`function-card-architecture.md`](function-card-architecture.md) 旧名处留"(现名 …)"括注。
-3. **通用性变化**(如 noise-control 换成 Figma 真版、promotion 去品牌化)→ 更新该行的通用性标记。
-4. **调用规则变化**(路由、swap 范围、控件选型表)→ 同步 `headset/AGENTS.md` + 本表"调用方式"列。
-5. 改完顶部"最后更新"日期。
+| 件 | 是什么 / 何时用 | 通用性 | Agent 如何调用 |
+|---|---|---|---|
+| **空白功能卡壳**(`function-frame.html`) | 一个**空卡模板**:标题 + 可选 ⓘ 槽 + 空 body 槽。往 body 里按需 copy ①的积木,拼出一张新卡 | ✅ 通用(万能兜底) | `headset-function` 复制它,填标题,再往 `data-slot="subcontrols"` 按序 copy ①积木 |
 
-> 约束提醒(对所有组件都成立):片段内**无内联 `<style>`**,样式只进 `headset.css` 用 `shared/tokens.css` 的
-> token;markup 一律 **copy 不 generate**;生成期剥掉 `data-slot`/`data-instruction`/`data-property` 标记。
-> 本系统**不做 a11y**(无 aria/role/键盘导航/focus-ring,用户偏好)。
+---
+
+## ③ 可换内容的槽位 + 联动机制(slot / CSS · 嵌在上面文件 + `headset.css`)
+
+> 这些不是独立文件,是模板里"能换内容 / 会联动"的位置和规则。
+
+| 机制 | 是什么 / 何时用 | 通用性 | Agent 如何调用 |
+|---|---|---|---|
+| **可换控件槽**(header 右侧的 `CONTROL START/END`) | header 右侧控件要从默认**开关**换成**下拉**时用 | ✅ 通用,但**只限紧凑控件**:开关 ↔ 下拉(滑杆/分段/预设是整宽,禁入 header) | 把 `CONTROL` 块整段换成开关或下拉。**换法规则只有一份权威:`control-row.html`**;single-control 引用它 |
+| **空卡的两个填充槽**(②骨架的 ⓘ 槽 / body 槽) | 用②空白卡壳现拼卡时 | ✅ 通用 | 往 body 槽按序 copy ①积木;有说明才往 ⓘ 槽放 info-tooltip |
+| **分段条件面板**(`segment-panels`,在分段/预设内) | 选某一段后**冒出**一组子控件(选 ANC 露出 XYZ) | ✅ 通用(上限 6) | 用结构表达:第 N 段选中→第 N 面板显示,纯 CSS `:has()`,0 JS |
+| **父子开关联动**(`subfn-group`) | 父开关 OFF 时**置灰**旗下子控件(Sidetone 关→滑杆变灰) | ✅ 通用 | 把父开关 + 依赖件包进 `.subfn-group`,纯 CSS `:has()` 置灰 |
+
+---
+
+## 维护规则(怎么更新这份清单)
+
+发生以下情况时,**同一次改动里**更新本文件:
+
+1. **新增积木 / 骨架 / 槽机制** → 在 ①②③ 对应类别加一行(是什么 / 何时用 / 通用性 / 调用),并更新第 0 节速览数量。
+2. **改名 / 删除** → 改/删对应行;若旧名可能被人查找,在 [`function-card-architecture.md`](function-card-architecture.md) 旧名处留"(现名 …)"括注。
+3. **通用性变化** → 更新该行通用性标记。
+4. **调用规则变化**(路由、可换控件范围、控件选型表)→ 同步 `headset/AGENTS.md` + 本表"调用"列。
+5. **增删功能卡** → 真实可用卡放 `functions/`(id 路由)、demo/范例放 `examples/`(不路由);更新文末附录对应组,别混。
+6. 改完顶部"最后更新"日期。
+
+> **对所有组件都成立的约束**:片段内**不写内联 `<style>`**,样式全进 `headset.css` 用 `shared/tokens.css` 的 token;
+> markup 一律 **copy 不 generate**;生成期剥掉 `data-slot`/`data-instruction`/`data-property` 标记;
+> **本系统不做 a11y**(无 aria/role/键盘导航/focus-ring,用户偏好)。
+
+---
+
+## 附录 · 现有的功能卡(A 在 `functions/` · B 在 `examples/`)
+
+> 功能卡分两种:**A 现成可套用的**(真要用,直接复制/填槽)和 **B 演示样例**(开发时建来验证架构,**不是产品卡**)。
+> A 放在 id 路由的 `functions/`;**B 已隔离到 `examples/`**(不参与 id 路由,gen-subpage 不从那复制)。
+> 注意:即便有 A,真实产品的**其它**功能卡仍要**按需求**用 ①②③ 拼/定义——A 只是已经建好的那几张。
+
+### A. 现成可套用的卡(在 `functions/`,id 路由)
+
+| 卡 | 内含控件 | 怎么用 | 通用性 |
+|---|---|---|---|
+| **single-control** | 1 开关 | 任意"单个 header 控件、无内容区"功能的**通用模板**;右控件可换开关/下拉(规则见 control-row) | ✅ 通用模板 |
+| **eq-audio** | 5 拖拽点 | 产品有音频均衡器就**直接套这张**;结构写死、固定专用、同页限一张 | ✅ 该功能的现成卡(固定) |
+| **promotion-download** | 2 按钮 | 下载推广卡;**填槽**(图标/文案/CTA)即可换品牌复用(默认恰好是 Dell) | ✅ 填槽复用 |
+
+### B. 演示样例(在 `examples/` · **不参与 id 路由**,开发时建来验证架构)
+
+| 卡 | 内含控件 | 它其实是什么 | 备注 |
+|---|---|---|---|
+| **collaboration** | 2 开关+1 滑杆+ⓘ | **参考装配范例**:教 ①② 怎么拼出一张卡 | 仍被 frame/SKILL/README/single-control 当教学范例引用(指向 `examples/`) |
+| **auto-power-off** | 1 下拉 | **"开关换下拉"的证明卡**(验证可换控件槽) | swap 能力的唯一实证 |
+| **noise-control** | 1 开关+1 滑杆 | 弱模型测试用的**简化版**(≠ Figma 真三段降噪) | 真三段版待建 |
+
+> **已隔离(2026-06-26)**:B 组从 `functions/` 移到 `examples/`、摘出 id 路由;同步改了 4 处教学引用
+> (frame / SKILL / subcontrols README / single-control)+ `functions/README` + 预览宿主页;测试机型 **HS-DEMO** 的
+> manifest 已改为引用 A 组真实卡(`eq-audio` + `promotion-download`),旧生成页已删(可用 gen-subpage 重生成)。
+> 结果:教学范例 / swap 证明都保住,id 注册表只剩真实可用卡。

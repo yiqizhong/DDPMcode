@@ -288,7 +288,7 @@ Collaboration 卡已按本架构从 Figma 导出**完整建出 + 逐项验证**(
 - 样式全在 `headset.css`;新增 token `--color-control-inactive`、`--radius-card`。
 - `headset-function`(Layer-2)SKILL 改成"卡壳 + 复制子控件"装配模型。
 
-**成品样板:** `functions/collaboration.html` = 卡壳 + 2×`toggle-row` (现名 `control-row`)(Mic Noise Cancellation / Sidetone)+ 1×slider;Sidetone 行 + slider 包在 `.subfn-group`;每行带可选 ⓘ。纯 HTML + data-property,无内联样式,交互全靠原生控件 + CSS(仅 slider 一行 `oninput`)。
+**成品样板:** `functions/collaboration.html`(现移至 `examples/collaboration.html`,作教学范例、不参与 id 路由) = 卡壳 + 2×`toggle-row` (现名 `control-row`)(Mic Noise Cancellation / Sidetone)+ 1×slider;Sidetone 行 + slider 包在 `.subfn-group`;每行带可选 ⓘ。纯 HTML + data-property,无内联样式,交互全靠原生控件 + CSS(仅 slider 一行 `oninput`)。
 
 **review 决策(已落地):**
 | 项 | 决定 |
@@ -307,7 +307,7 @@ Collaboration 卡已按本架构从 Figma 导出**完整建出 + 逐项验证**(
 
 把"建一张新卡"的活交给 **Haiku 4.5**(冷启动子 agent,只给 `headset-function` skill + `subcontrols/` 积木 + 卡壳 + 一张参考卡 `collaboration.html`),需求:一个 Noise Control 卡 = Mic Noise Cancellation 开关 + 强度 slider(1–3),开关 OFF 时 slider 置灰。
 
-**结果:通过。** Haiku 全靠**复制**卡壳 + `toggle-row` (现名 `control-row`) + `slider` 装出 `functions/noise-control.html`——`.subfn-group` 联动接对(开关 `.subfn-toggle`、slider `.subfn-child`)、原生控件、零内联样式、零瞎编;浏览器实测渲染正确,灰/恢复(opacity 0.4↔1)正确。**证明"copy-not-generate + 可复用积木"对弱模型友好**——这是整套架构最想要的性质。
+**结果:通过。** Haiku 全靠**复制**卡壳 + `toggle-row` (现名 `control-row`) + `slider` 装出 `functions/noise-control.html`(现移至 `examples/noise-control.html`)——`.subfn-group` 联动接对(开关 `.subfn-toggle`、slider `.subfn-child`)、原生控件、零内联样式、零瞎编;浏览器实测渲染正确,灰/恢复(opacity 0.4↔1)正确。**证明"copy-not-generate + 可复用积木"对弱模型友好**——这是整套架构最想要的性质。
 
 小毛病(无害):多建了个 `_preview-*`(已 gitignore);没 info 的 `.function-icons` 留成空 div 没删。
 

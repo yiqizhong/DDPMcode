@@ -8,3 +8,6 @@ features:
   - label: Audio Settings
     icon: audio
     link: audio-settings.html
+  - label: Device Settings
+    icon: settings
+    link: device-settings.html

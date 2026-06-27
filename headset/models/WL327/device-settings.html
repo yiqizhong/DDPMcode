@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Headset device</title>
+    <title>Device Settings</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
-
     <link rel="stylesheet" href="../../../shared/tokens.css">
     <link rel="stylesheet" href="../../headset.css">
 </head>
@@ -40,13 +39,11 @@
         <div class="content-zone">
             <div class="devices-image-zone">
                 <div class="page-header">
-
-                    <span class="back-link">
+                    <a class="back-link" href="index.html">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                             <path d="M16 7.46995H2.23L8.49 1.99995L7.79 1.19995L0 7.99995L7.79 14.79L8.49 13.99L2.23 8.52995H16V7.46995Z" fill="#0E0E0E"/>
                         </svg>
-                    </span>
-
+                    </a>
                     <div class="header-text">
                         <h1 class="page-title">Dell Pro 3 Wireless ANC Headset</h1>
                         <div class="secondary-header">
@@ -61,7 +58,6 @@
                     </div>
                 </div>
                 <div class="device-image-place"><img src="images/product.png" alt="Dell Pro 3 Wireless ANC Headset"></div>
-
                 <div class="control-zone">
 <div class="connection-tag">
     <div class="bluetooth-icon">
@@ -79,14 +75,11 @@
         <span class="battery-text">76%</span>
     </div>
 </div>
-<button class="unpair-button" type="button">
-    <span class="unpair-text">Unpair</span>
-</button>
 </div>
             </div>
-
-            <div class="feature-zone">
-<a class="feature-button" href="audio-settings.html">
+            <div class="feature-zone--subpage">
+                <div class="feature-nav-collapsed">
+<a class="feature-button feature-button--collapsed" href="audio-settings.html">
     <div class="button-content">
         <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 23 23" fill="none">
     <path d="M4.02 7.575H0V15.075H4.02L8.895 20.475L12.135 21.09V1.59L8.895 2.175L4.02 7.575ZM10.53 3.495V19.17L9.72 19.005L4.74 13.53H1.59V9.165H4.74L9.72 3.645L10.53 3.495Z" fill="#0E0E0E"/>
@@ -96,7 +89,7 @@
         <span class="feature-text">Audio Settings</span>
     </div>
 </a>
-<a class="feature-button" href="device-settings.html">
+<a class="feature-button feature-button--collapsed" href="device-settings.html">
     <div class="button-content">
         <div class="feature-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M8.00001 0L1.07001 4V12L8.00001 16L14.93 12V4L8.00001 0ZM13.38 4.34L8.00001 7.35L2.62001 4.35L8.00001 1.23L13.38 4.34ZM2.14001 5.34L7.46001 8.34V14.53L2.14001 11.39V5.34ZM8.53001 14.51V8.28L13.86 5.28V11.37L8.53001 14.51Z" fill="#0E0E0E"/>
@@ -105,6 +98,101 @@
     </div>
 </a>
 </div>
+                <div class="feature-content">
+                    <div class="feature-header">
+                        <h2 class="feature-title">Device Settings</h2>
+                    </div>
+                    <div class="content-area">
+<div class="function-container">
+  <div class="function-top-section">
+    <h3 class="function-name">Auto Off</h3>
+  </div>
+  <div class="function-content">
+    <div class="function-header">
+      <div class="function-title">
+        <p class="function-label">Auto Off Time</p>
+      </div>
+      <div class="function-icons">
+      </div>
+      <details class="dropdown">
+        <summary class="dropdown-trigger">
+          <span class="dropdown-value">1 hour</span>
+          <span class="dropdown-chevron">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M13.335 3.16748L7 9.50248L0.665 3.16748L0 3.83248L7 10.8325L14 3.83248L13.335 3.16748Z" fill="#0E0E0E"/>
+            </svg>
+          </span>
+        </summary>
+        <ul class="dropdown-list">
+          <li class="dropdown-item" data-value="30m">30 mins</li>
+          <li class="dropdown-item dropdown-item--selected" data-value="1h">1 hour</li>
+          <li class="dropdown-item" data-value="2h">2 hours</li>
+          <li class="dropdown-item" data-value="3h">3 hours</li>
+        </ul>
+      </details>
+      <script>
+      (function () {
+        var el    = document.currentScript.previousElementSibling;
+        var list  = el.querySelector('.dropdown-list');
+        var value = el.querySelector('.dropdown-value');
+
+        function reposition() {
+          var r = el.querySelector('.dropdown-trigger').getBoundingClientRect();
+          var listW = list.offsetWidth || 182;
+          list.style.top  = (r.bottom + 4) + 'px';
+          list.style.left = (r.right - listW) + 'px';
+        }
+        var scrollHandler = function () { el.removeAttribute('open'); };
+        var resizeHandler = function () { if (el.hasAttribute('open')) reposition(); };
+
+        el.addEventListener('toggle', function () {
+          if (el.open) {
+            reposition();
+            window.addEventListener('scroll', scrollHandler, true);
+            window.addEventListener('resize', resizeHandler);
+          } else {
+            window.removeEventListener('scroll', scrollHandler, true);
+            window.removeEventListener('resize', resizeHandler);
+          }
+        });
+
+        list.addEventListener('click', function (e) {
+          var item = e.target.closest('.dropdown-item');
+          if (!item) return;
+          list.querySelectorAll('.dropdown-item').forEach(function (i) {
+            i.classList.remove('dropdown-item--selected');
+          });
+          item.classList.add('dropdown-item--selected');
+          value.textContent = item.textContent.trim();
+          el.removeAttribute('open');
+        });
+      })();
+      </script>
+    </div>
+  </div>
+</div>
+<div class="function-container">
+  <div class="function-top-section">
+    <h3 class="function-name">Dell Audio Promotion</h3>
+  </div>
+  <div class="function-content">
+    <div class="function-header">
+      <div class="function-title">
+        <p class="function-label">Enable Dell Audio Promotion</p>
+      </div>
+      <div class="function-icons">
+      </div>
+      <label class="switch">
+        <input type="checkbox" class="switch-input">
+        <span class="switch-state"></span>
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>
+  </div>
+</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>

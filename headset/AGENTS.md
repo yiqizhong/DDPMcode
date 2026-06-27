@@ -39,6 +39,11 @@ If a relevant skill exists but was not used, that is a violation — redo it thr
 These rules are for writing manifests and design snippets. Generation does not choose controls at
 runtime: it renders the explicit archetype/id already frozen into the manifest (§7 / D10).
 
+> **Authoritative per-archetype contract** (shape, conditional channel, options rule, required props)
+> is generated from the catalog — run `python3 .agents/skills/headset-gen-subpage/archetypes.py`. It is
+> always in sync with the validator; never hand-maintain a parallel copy of it. The family map and the
+> fuzzy heuristics below (which the catalog can't encode) stay here as prose.
+
 **Data shape → archetype family**
 
 | Data shape | Family |

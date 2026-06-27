@@ -1,8 +1,9 @@
-# Sub-control snippets (the reusable atoms inside a function card)
+# DDPM Components — the reusable controls inside a function card
 
-One snippet per **sub-control archetype** — the small interactive pieces that stack inside a
-function card's body (`.function-content`). A function card is assembled as: **card shell** (the
-title + ⓘ header over a body) **+ a vertical list of these sub-controls**.
+One snippet per **DDPM Component archetype** (a *DDPM Component* is one of these reusable controls —
+toggle / slider / segmented / preset-grid / dropdown) — the small interactive pieces that stack inside
+a function card's body (`.function-content`). A function card is assembled as: **card shell** (the
+title + ⓘ header over a body) **+ a vertical list of these DDPM Components**.
 
 These are **copied, never generated from a description** (the §9.7.4 "copy, don't create" rule) —
 the same mechanism as `connection/*.html`, `feature-button.html`, and `icons/*.svg`. Their styling
@@ -19,15 +20,16 @@ shape → condition), see `headset/AGENTS.md` →
 | Snippet | Archetype | Description / fills | headset.css classes |
 |---|---|---|---|
 | `toggle.html` | `toggle` | the standard labeled toggle row: name left + native switch right | `.function-header`, `.switch*` |
+| `dropdown.html` | `dropdown` | compact labeled row: label left + `<details>`/`<summary>` dropdown widget right; fills `{id}`, per-option label/value/selected | `.dropdown`, `.dropdown-trigger`, `.dropdown-value`, `.dropdown-chevron`, `.dropdown-list`, `.dropdown-item`, `.dropdown-item--selected` |
 | `slider.html` | `slider` | min/max labels + native range + value bubble; fills `{min}/{max}/{val}`, `{label}` | `.slider-row`, `.slider-input`, `.slider-value` |
 | `segmented.html` | `segmented` | row of 2–4 mutually-exclusive option buttons; fills `{id}`, `{label}`, `{labelN}`, `{valueN}` | `.segmented-control`, `.segment`, `.segment-input`, `.segment-icon`, `.segment-label` |
 | `preset-grid.html` | `preset-grid` | 2-column grid of 4–6 option buttons; fills same as segmented + `{id}-preset` | `.preset-grid`, `.segment--span` + all `.segment*` |
 | `info-tooltip.html` | — | OPTIONAL ⓘ + hover tooltip; fills `{info-text}` | `.info-tooltip*` |
 
 > The archetype list is **open** (docs/function-card-architecture.md §9.3): add a new
-> `<archetype>.html` here when a real design needs one (e.g. `dropdown.html`,
-> `preset-grid.html`). The control-selection rules (which archetype for which data shape) are in
-> docs §7. Unknown archetypes → the Layer-2 `headset-function` builder, then promote to a snippet here.
+> `<archetype>.html` here when a real design needs one. The control-selection rules (which archetype
+> for which data shape) are in docs §7. Unknown archetypes → the Layer-2 `headset-function` builder,
+> then promote to a snippet here.
 >
 > **Adding an archetype is two edits kept in lockstep:** the snippet here (markup) **and** a block in
 > `.agents/skills/headset-gen-subpage/archetypes.py` — the machine-readable contract (width →
@@ -89,7 +91,7 @@ no file in `segment-icons/` → HALT and ask; never pull from `dds2/` directly o
 ## How an atom is used
 
 - **Building a function snapshot** (`headset-gen-subpage/templates/functions/<id>.html`): assemble the
-  card by copying the card shell + one of these per sub-control, filling the slots. The result is a
+  card by copying the card shell + one of these per component, filling the slots. The result is a
   frozen snapshot (a known Layer-1 function), copied verbatim at generation time.
 - **`info-tooltip.html` is optional**: copy it into a row's `.function-icons` only when that control
   has info text; otherwise delete `.function-icons`. Whenever present, the hover tooltip is its
@@ -100,7 +102,7 @@ no file in `segment-icons/` → HALT and ask; never pull from `dds2/` directly o
 Selector atoms (`segmented`, `preset-grid`) carry an optional `.segment-panels` block: the **Nth
 panel shows when the Nth option is selected** (positional `:has(...:checked)`, zero JS). In the
 manifest this is the selector's **`reveals`** map — key = an option `value`, value = the ordered
-slot list that fills that option's panel (a sub-control `{ archetype, … }`, or a nested card
+slot list that fills that option's panel (a component `{ archetype, … }`, or a nested card
 `{ function: <id> }`, recursively). It is the ONLY way to express "select X → show Y".
 
 ```
@@ -116,7 +118,7 @@ Generation emits one `.segment-panel` per option in order (count = option count;
 CSS maps `:has()` only up to `nth-child(6)`). A nested `{ function: <id> }` slot is placed **UNWRAPPED** — drop the card's outer
 `.function-container` / `.function-top-section` shell and put only its inner `.function-header` +
 `.function-content` (plus any trailing `<script>`) into the panel, since the panel already sits inside
-the parent card (the full shell would nest a card in a card). A subcontrol must NEVER carry a flat `condition:` field — that pre-schema form does
+the parent card (the full shell would nest a card in a card). A component must NEVER carry a flat `condition:` field — that pre-schema form does
 not exist; conditional content lives under the selector's `reveals`.
 
 **Reveal vs grey-out are different:** `reveals` shows/hides a panel on option select; the
@@ -124,9 +126,9 @@ not exist; conditional content lives under the selector's `reveals`.
 
 ## Sub-function dependency (toggle OFF → grey out its sub-functions) — the `dependents` field
 
-A `toggle` can own dependent sub-controls that STAY VISIBLE but grey out when it is OFF.
+A `toggle` can own dependent components that STAY VISIBLE but grey out when it is OFF.
 In the manifest this is the toggle's **`dependents`** field (ordered slot list, same slot shape as
-`reveals` — a `{ archetype, … }` sub-control or a `{ function: <id> }`). It is the toggle counterpart
+`reveals` — a `{ archetype, … }` component or a `{ function: <id> }`). It is the toggle counterpart
 of a selector's `reveals`: `dependents` greys (stays visible), `reveals` shows/hides. `dependents`
 goes ONLY on a `toggle`; `reveals` ONLY on a selector — never swap them.
 
@@ -146,8 +148,8 @@ toggle `<input>` carries `.subfn-toggle`; each dependent is wrapped in a `.subfn
 When the `.subfn-toggle` is OFF, every `.subfn-child` in the group greys out + goes
 non-interactive — pure CSS `:has()`, zero JS (see `headset.css`).
 
-**Title slot for a named full-width sub-control (`.subfn-label`) — the canonical rule.** A full-width
-sub-control (`segmented` / `slider` / `preset-grid`) renders its `label` as a
+**Title slot for a named full-width component (`.subfn-label`) — the canonical rule.** A full-width
+component (`segmented` / `slider` / `preset-grid`) renders its `label` as a
 `<p class="subfn-label">{label}</p>` heading above it **whenever it is NOT the card's sole control** —
 i.e. it sits in a reveal `.segment-panel` (e.g. ANC → "ANC Strength") OR in a toggle's `.subfn-child`
 (e.g. Mic Noise Canceling → "Canceling Strength") OR is a non-sole stacked control. The heading is the

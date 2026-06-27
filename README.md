@@ -47,7 +47,7 @@ isolated folder later, sharing only `shared/tokens.css`.
     templates/examples/               # reference/demo cards — NOT id-routed (collaboration, auto-power-off, noise-control)
   headset-function/       SKILL.md + templates/function-frame.html  # no-snapshot card builder (shell + atoms)
   headset-shared/                     # NOT a skill — snippets shared by the gen skills:
-    subcontrols/  connection/  icons/  feature-button.html
+    components/  connection/  icons/  feature-button.html
 shared/tokens.css                     # design-token layer
 headset/
   AGENTS.md                           # category map: routing + non-negotiables

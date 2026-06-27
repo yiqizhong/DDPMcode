@@ -73,10 +73,10 @@ runtime: it renders the explicit archetype/id already frozen into the manifest (
 
 Decide this at authoring and freeze it as data — never leave it for generation to infer, and never
 hand-patch it into the output. A selector option that should reveal more controls is written as the
-selector's **`reveals`** map (key = option `value` → ordered slot list; a slot is a sub-control or a
+selector's **`reveals`** map (key = option `value` → ordered slot list; a slot is a component or a
 nested `{ function: <id> }`, recursively). There is no `condition:` field. Full schema:
 `.agents/skills/headset-gen-subpage/SKILL.md` → Manifest schema; mechanism:
-`.agents/skills/headset-shared/subcontrols/README.md` → Conditional reveals.
+`.agents/skills/headset-shared/components/README.md` → Conditional reveals.
 
 A toggle dependency is different: a `toggle` component whose child controls should stay visible
 but grey out when OFF uses **`dependents`** (ordered slot list, same slot shape as `reveals`). It
@@ -84,7 +84,7 @@ renders as one `.subfn-group` containing the toggle row and `.subfn-child` depen
 `reveals` on a `toggle`.
 
 > A full equalizer is the `eq-audio` **function** (`functions/eq-audio.html`), not a `slider`
-> sub-control. When a requirement mentions an EQ / equalizer / EQ curve, route it to the `eq-audio`
+> component. When a requirement mentions an EQ / equalizer / EQ curve, route it to the `eq-audio`
 > function id (see `functions/README.md` keyword table) — at authoring time. If it appears only when
 > a preset like "Custom" is chosen, place it as `{ function: eq-audio }` under that option's `reveals`.
 
@@ -104,18 +104,18 @@ A child under a function card is authored by choosing, in this order:
      `label` rendered as a `.subfn-label` title above it. The title is part of the stacked shape —
      never omit it for a named child.
 4. **Condition (when it appears) — orthogonal to shape/component:** always present → a plain slot in
-   `subcontrols[]`; appears on a selector choice → `reveals` on the selector (show/hide); stays
+   `components[]`; appears on a selector choice → `reveals` on the selector (show/hide); stays
    visible but greys when a toggle is OFF → `dependents` on the `toggle` (grey-out).
 5. **Or a whole nested card:** a child can be an entire function (`{ function: <id> }`) dropped
    (unwrapped) into a reveal panel or a dependent — recurses.
 
 The **row** shape is what compact components (`toggle`, `dropdown`) render as; the **stacked** shape
 is `.subfn-label` + a full-width component.
-Mechanism detail (markup, CSS classes): `.agents/skills/headset-shared/subcontrols/README.md`.
+Mechanism detail (markup, CSS classes): `.agents/skills/headset-shared/components/README.md`.
 Schema + the mechanical HALT gate: `.agents/skills/headset-gen-subpage/SKILL.md`
 (`validate-manifest.py`).
 
-Segmented vs preset-grid details live in `.agents/skills/headset-shared/subcontrols/README.md`;
+Segmented vs preset-grid details live in `.agents/skills/headset-shared/components/README.md`;
 do not duplicate that full rule here.
 
 ## Non-negotiables (apply to every generated page)

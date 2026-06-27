@@ -11,6 +11,14 @@ slots from the model manifest. **Copy + fill — never generate the frame from s
 
 Invoke: `@skills:headset-gen-homepage <MODEL>` (e.g. `@skills:headset-gen-homepage HS1234`).
 
+## Deterministic executor (preferred)
+
+The canonical, reproducible generation path is now the render scripts:
+`python3 .agents/skills/headset-gen-subpage/render-model.py <MODEL>` builds the whole model, or
+`python3 .agents/skills/headset-gen-subpage/render-home.py <MODEL>` renders this single home page.
+The Procedure below is the human-readable SPEC those scripts implement and must stay in lock-step
+with them.
+
 ## Inputs
 
 - `$1` — the model folder name under `headset/models/`.

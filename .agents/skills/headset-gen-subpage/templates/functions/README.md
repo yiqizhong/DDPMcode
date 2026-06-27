@@ -43,7 +43,7 @@ substring matches — e.g. `equalizer` does not trigger on `frequency` or `reque
 |---|---|---|
 | `audio equalizer` · `equalizer` · `sound eq` · `eq curve` · `frequency eq` | `eq-audio` | 5-band interactive EQ curve; 6-stop snap (+3 → −2 dB) |
 | `download dell audio` · `download app` · `promotion` · `qr code` · `mobile app download` | `promotion-download` | App icon + description + CTA button; close button dismisses card |
-| *(structural)* function has **exactly one boolean parameter** and no sliders / sub-controls | `single-control` | Title left, toggle right in header; no content area below — authoring guidance only, not auto-applied at generation time |
+| *(structural)* function has **exactly one boolean parameter** and no sliders / components | `single-control` | Title left, toggle right in header; no content area below — authoring guidance only, not auto-applied at generation time |
 
 **How to use this table (authoring only):** when designing a manifest and you recognise a function
 that matches a keyword pattern, set the manifest function's `id` to the value in the "Correct id"

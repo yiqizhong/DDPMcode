@@ -102,10 +102,10 @@
                     <div class="content-area" data-slot="functions"
                          data-instruction="Do NOT write function markup. For each item in manifest.functions[]:
                            if functions/<function.id>.html exists, COPY it whole and fill any data-property overrides;
-                           else @skills:headset-function <id> assembles it (shell + one subcontrols/<archetype>.html
-                           per subcontrols[] entry, strictly from manifest params — invent nothing).
-                           Conditional content: a selector subcontrol's `reveals` map fills its .segment-panel(s)
-                           positionally (a sub-control, or a nested {function:<id>} card) — never a `condition:`
+                           else @skills:headset-function <id> assembles it (shell + one components/<archetype>.html
+                           per components[] entry, strictly from manifest params — invent nothing).
+                           Conditional content: a selector component's `reveals` map fills its .segment-panel(s)
+                           positionally (a component, or a nested {function:<id>} card) — never a `condition:`
                            field, never a hand-embedded panel. If functions[] is empty, leave the note below.">
                         <p class="placeholder-note">Sub-feature content TBD — to be filled from the manifest.</p>
                     </div>

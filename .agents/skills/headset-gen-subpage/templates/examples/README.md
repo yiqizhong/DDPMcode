@@ -7,7 +7,7 @@ These are **reference / demo function cards** built during development to valida
 > Real, routable product cards live in `../functions/`.
 
 Use these as **worked examples** when assembling a new card via `@skills:headset-function`
-(card shell `function-frame.html` + `subcontrols/*` atoms):
+(card shell `function-frame.html` + `components/*` atoms):
 
 | File | What it demonstrates |
 |---|---|

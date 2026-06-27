@@ -16,6 +16,14 @@ A sub-page SHARES the model's device identity, connection, and feature list with
 Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
 (e.g. `@skills:headset-gen-subpage HS1234 mic-settings`).
 
+## Deterministic executor (preferred)
+
+The canonical, reproducible generation path is now the render scripts:
+`python3 .agents/skills/headset-gen-subpage/render-model.py <MODEL>` builds the whole model, or
+`python3 .agents/skills/headset-gen-subpage/render-subpage.py <MODEL> <SUBPAGE>` renders this
+single sub-page. The Procedure below is the human-readable SPEC those scripts implement and must
+stay in lock-step with them.
+
 ## Inputs
 
 - `$1` — model folder under `headset/models/`. `$2` — sub-page file stem.
@@ -37,13 +45,13 @@ functions:                            # ordered; the page renders EXACTLY these,
   - id: <function-id>                 # routing key. functions/<id>.html copied whole if it exists.
     title: <string>                   # card title — assembled path only (snapshots carry their own)
     info: <string?>                   # optional ⓘ tooltip text
-    subcontrols:                      # assembled path only (no snapshot). Ordered list of sub-control slots.
+    components:                      # assembled path only (no snapshot). Ordered list of component slots.
       - archetype: <enum>             # toggle | slider | segmented | preset-grid | dropdown
-        ...<archetype value slots>... # per subcontrols/README.md (label / min,max,value / options / …)
+        ...<archetype value slots>... # per components/README.md (label / min,max,value / options / …)
         reveals:                      # OPTIONAL — ONLY on a selector archetype (segmented | preset-grid)
           <option-value>:             # key MUST equal one of THIS selector's option `value`s
             - <slot>                  # ordered list of revealed slots; each slot is either:
-            ...                       #   a sub-control:  { archetype: <enum>, ...value slots }
+            ...                       #   a component:  { archetype: <enum>, ...value slots }
                                       #   a nested card:  { function: <function-id> }
         dependents:                   # OPTIONAL — ONLY on a toggle
           - <slot>                    # ordered slot list (same shape as a reveals slot) that GREYS
@@ -54,7 +62,7 @@ functions:                            # ordered; the page renders EXACTLY these,
 - **`reveals`** — the conditional-reveal / recursive-slot primitive (architecture §6.5 / §8 / §9.1).
   ONLY on a selector (segmented | preset-grid). A selected option SHOWS/HIDES a `.segment-panel`. A
   revealed slot may itself be a selector with its own `reveals` (recursion). The ONLY legal way to
-  express "select X → show Y". It replaces any flat `condition:` field (a subcontrol must NEVER carry
+  express "select X → show Y". It replaces any flat `condition:` field (a component must NEVER carry
   `condition:`). Do not hand-embed conditional panels.
 - **`dependents`** — the toggle grey-out (`.subfn-group`) relationship. ONLY on a `toggle`.
   Its dependents STAY VISIBLE but grey out + go non-interactive when the toggle is OFF.
@@ -77,7 +85,7 @@ is derived from one machine-readable contract — `archetypes.py` (next to the v
 archetype there + its snippet, never by hardcoding. The script HALTs when:
 
 - `archetype` is not in the catalog {toggle, slider, segmented, preset-grid, dropdown}.
-- A subcontrol carries a legacy `condition:` field → migrate it to a selector's `reveals` or a toggle's `dependents`.
+- A component carries a legacy `condition:` field → migrate it to a selector's `reveals` or a toggle's `dependents`.
 - A required prop is missing — `slider` without `min`/`max`/`value`; a `dropdown` without `options`.
 - A `label` is missing where one renders — any compact row (`toggle`/`dropdown`), and any full-width
   control (`slider`/`segmented`/`preset-grid`) that is NOT its card's sole top-level control (a lone
@@ -128,23 +136,23 @@ archetype there + its snippet, never by hardcoding. The script HALTs when:
      value only where the manifest provides one; **no params → keep the snapshot unchanged** (do not
      empty it, do not invent).
    - **Assembled path** — no snapshot → `@skills:headset-function <id>`. It copies the card shell
-     (`function-frame.html`), fills `title`/`info`, then copies one `headset-shared/subcontrols/<archetype>.html`
-     per `subcontrols[]` entry, in order, strictly from manifest params (invent nothing).
+     (`function-frame.html`), fills `title`/`info`, then copies one `headset-shared/components/<archetype>.html`
+     per `components[]` entry, in order, strictly from manifest params (invent nothing).
 
-   **Conditional reveals (the recursive slot):** when an assembled selector subcontrol (segmented |
+   **Conditional reveals (the recursive slot):** when an assembled selector component (segmented |
    preset-grid) has `reveals`, emit its `.segment-panels` block — **one `.segment-panel` per option,
    in option order** (panel count MUST equal option count; an option with no `reveals` entry gets an
-   empty panel). Fill panel N with the slot list for option N's `value`: a **sub-control** slot →
-   copy `subcontrols/<archetype>.html` — and if that sub-control is a full-width control
+   empty panel). Fill panel N with the slot list for option N's `value`: a **component** slot →
+   copy `components/<archetype>.html` — and if that component is a full-width control
    (segmented/slider/preset-grid) carrying a `label`, render `<p class="subfn-label">{label}</p>` as
    the panel's first child, above the control (a revealed control is never the card's sole control, so
-   its `label` always renders — `.subfn-label` title rule: subcontrols/README.md); a **`function:` slot** → render that function id by the same
+   its `label` always renders — `.subfn-label` title rule: components/README.md); a **`function:` slot** → render that function id by the same
    two-path rule above (snapshot e.g. `eq-audio`, else assembled) **but UNWRAPPED**: the panel is
    already inside the parent card's body, so drop the nested card's outer shell
    (`.function-container` > `.function-top-section` > its anonymous `<div>`) and place only its inner
    content — `.function-header` + `.function-content` (plus any trailing `<script>`) — directly in the
    panel. Keeping the full shell would draw a card-inside-a-card. A revealed
-   sub-control may itself be a selector with its own `reveals` (recurse). The reveal is wired purely
+   component may itself be a selector with its own `reveals` (recurse). The reveal is wired purely
    by the existing positional CSS (`headset.css` `.segment-panels` `:has(...:checked)`) — add no JS,
    embed no panel by hand. Empty `functions[]` → keep the placeholder note.
 

@@ -133,7 +133,7 @@
 **方案 B:每个已知功能一个独立 Skill**
 
 优点:
-- **能装逻辑**:SKILL.md 可写生成步骤、条件判断、`@skills:` 调子控件——适合需要现搭/组合的复杂功能。
+- **能装逻辑**:SKILL.md 可写生成步骤、条件判断、`@skills:` 调组件——适合需要现搭/组合的复杂功能。
 - **自描述/可点名**:description 摆明"何时用我",显式调用,目录即功能目录。
 - **强隔离**:每功能自带模板 + 规则 + 自检,边界清楚。
 
@@ -152,7 +152,7 @@
 - 需要逻辑的只有一处——"现搭未知功能"——已由**单个** `headset-function`(第二层)兜住,逻辑集中在这一个 skill。
 - 这就是"§9.4 说做成 skill,但 codebase 改成快照"那个已确认的"以 codebase 为准"点。
 
-**后续精化(第 8 节之后)**:被当快照存的,**精确地说是"子控件片段"`subcontrols/<type>.html`,不是整个 function**。function 不再是冻结快照,而是"数据驱动拼装"(见第 5、9 节)。
+**后续精化(第 8 节之后)**:被当快照存的,**精确地说是"组件片段"`components/<type>.html`,不是整个 function**。function 不再是冻结快照,而是"数据驱动拼装"(见第 5、9 节)。
 
 ---
 
@@ -178,22 +178,22 @@
 **这直接证明**:
 - 一个子页(Audio Settings)的 Content Area = **一列功能**(数量可变),不是单一功能。
 - 我上一轮的"1:1、撤掉列表"**作废**;**最初那版 `functions[]` 列表方向是对的**,该保留。
-- 要修的是:一个"功能"是**有标题、内部带多个子控件的整块卡片**(Collaboration = 标题 + 两个开关 + 滑杆),不是单行。所以 v1 的 `.function-module`/`function-frame.html` 形态要升级成"卡片块"。
+- 要修的是:一个"功能"是**有标题、内部带多个组件的整块卡片**(Collaboration = 标题 + 两个开关 + 滑杆),不是单行。所以 v1 的 `.function-module`/`function-frame.html` 形态要升级成"卡片块"。
 
-四级层级因此定死:**Feature(主页按钮/子页)→ Content Area(装 1~N 个功能)→ Function(有标题的卡片)→ Sub-control(功能内部的小控件)。**
+四级层级因此定死:**Feature(主页按钮/子页)→ Content Area(装 1~N 个功能)→ Function(有标题的卡片)→ Component(功能内部的小控件)。**
 
 ### 5.4 形态 v4:冻结快照不行 → 数据驱动拼装
 
 在此之前我推荐"已知功能 = 冻结快照、原样复制"。**你用真实 case 戳穿了它**:
 
 **你的输入(几个真实 use case)**:
-- 下一款耳机有 Collaboration 和 Mic Noise Cancellation,但**没有 Sidetone**。(删子控件)
+- 下一款耳机有 Collaboration 和 Mic Noise Cancellation,但**没有 Sidetone**。(删组件)
 - 或:有 Collaboration,但没有 Mic Noise Cancellation 和 Sidetone;它把 Mic Noise Cancellation **改名叫 Noise Cancellation**——名字像,但**根本不是同一个功能**。(换成另一个)
-- Noise Control:大多产品有 ANC/Transparency/Off 三个模式;下一个可能有**第 4、第 5 个模式**;或反过来**只要 ANC + Transparency,删掉 Off**。(子控件内部选项数在变)
+- Noise Control:大多产品有 ANC/Transparency/Off 三个模式;下一个可能有**第 4、第 5 个模式**;或反过来**只要 ANC + Transparency,删掉 Off**。(组件内部选项数在变)
 
 **我承认 v4 修正**(这是细化粒度,不是又翻案,核心原则"固定结构 + 差异进数据"没变,只是我把"固定"放错了层级):
 - 一份"写死的 collaboration.html"没法原样复制——一复制就要删元素/改名/改选项数,等于在拷贝出来的 HTML 上打补丁,又脆又乱。
-- **把"固定素材"下沉到子控件层**:固定的是 `subcontrols/<type>.html`(toggle/slider/segmented/preset-grid 的**外形**);**function = 数据驱动的拼装**(卡片外壳 + 按列表拷子控件片段)。
+- **把"固定素材"下沉到组件层**:固定的是 `components/<type>.html`(toggle/slider/segmented/preset-grid 的**外形**);**function = 数据驱动的拼装**(卡片外壳 + 按列表拷组件片段)。
 - **身份认 id,不认名字**:"看起来像但不是同一个" → 不同 id → 不同片段(未知→第二层现搭);永远不是"改名复用"。
 - 你的删/改/增全是改数据,素材一行不动。
 
@@ -205,7 +205,7 @@
 
 > **有序的槽位列表;每个槽由数据决定填什么;数量可变;可递归。**
 
-并且:你说的"槽位"就是模板里**已有的 `data-slot`**(主页 `feature-zone`、子页 `functions` 区都是槽),只是现在递归用到了功能卡片内部。这说明模型自洽:从 Content Area 到最里层子控件,全程只有"槽 + 数据填充"这一件事。
+并且:你说的"槽位"就是模板里**已有的 `data-slot`**(主页 `feature-zone`、子页 `functions` 区都是槽),只是现在递归用到了功能卡片内部。这说明模型自洽:从 Content Area 到最里层组件,全程只有"槽 + 数据填充"这一件事。
 
 ### 5.6 形态演变小结
 
@@ -214,7 +214,7 @@
 | v1 | 单行 `.function-module` | 改名那轮顺手做的 | 被 v3 升级 |
 | v2 | function = 整块 Content Area;**1:1** | 你说"Skill 就是子页" | **被 v3 推翻** |
 | v3 | Content Area = 功能列表;function = 卡片 | Audio Settings 截图 | 保留(回到列表) |
-| v4 | function = 数据驱动拼装;固定素材下沉到子控件 | 删/改/增真实 case | 保留 |
+| v4 | function = 数据驱动拼装;固定素材下沉到组件 | 删/改/增真实 case | 保留 |
 | v5 | **递归槽位列表**(综合) | 你的"槽位"心智 | **当前收敛** |
 
 ---
@@ -229,19 +229,19 @@
 2. **Collaboration** —— 标题 + ⓘ 信息图标;内含:**Mic Noise Cancellation**(右侧 OFF + 开关)、**Sidetone**(右侧 OFF + 开关),下方一个**滑杆 1—2—3**(当前在 2)。
 3. **Multimedia** —— 标题 + ⓘ;预设网格:**Default**(选中,蓝)、**Bass Boost**、**Speech Boost**、**Treble Boost**,底部 **Custom**(整行)。
 
-→ 形态归纳:这一屏只用了 **3~4 种 archetype**:segmented(带图标卡片)、`toggle-row` (现名 `control-row`)、slider、option-grid(预设)。名字(ANC、Mic Noise Cancellation、Bass Boost)和选项数都是**数据**,不是新素材。
+→ 形态归纳:这一屏只用了 **3~4 种 archetype**:segmented(带图标卡片)、`toggle`、slider、option-grid(预设)。名字(ANC、Mic Noise Cancellation、Bass Boost)和选项数都是**数据**,不是新素材。
 
 ### 6.2 Collaboration 的"固定基座 + 机型增量"
 
 - 基座 = Mic Noise Cancellation + Sidetone + 滑杆,10 款通用。
 - 未来某款要在 Collaboration 下**加一个专属子功能** → 在大模板基础上加 nuance/alternative。
-- 处理:基座固定子控件 + 一个 **extra 槽**;增量/替代来自 manifest 数据,**基座文件不动**;新子控件若库里没有 → 第二层现搭再塞进槽。(这是 v4/v5 的"槽 + 数据"在子控件层的体现。)
+- 处理:基座固定组件 + 一个 **extra 槽**;增量/替代来自 manifest 数据,**基座文件不动**;新组件若库里没有 → 第二层现搭再塞进槽。(这是 v4/v5 的"槽 + 数据"在组件层的体现。)
 
 ### 6.3 变体 case 清单(全靠改数据)
 
 | case | 处理 |
 |---|---|
-| Collaboration 没有 Sidetone | 该功能的子控件(槽)列表去掉 `sidetone` |
+| Collaboration 没有 Sidetone | 该功能的组件(槽)列表去掉 `sidetone` |
 | Noise Control 只要 ANC + Transparency(删 Off) | segmented 的 `modes` 列表 = `[anc, transparency]` |
 | Noise Control 加第 4/5 个模式 | `modes` 列表加项 |
 | Mic Noise Cancellation → Noise Cancellation(不是同一个) | 换成另一个 id `noise-cancellation`;已知→拷片段,未知→`headset-function` 现搭 |
@@ -260,7 +260,7 @@
 
 **你的输入(背景补充)**:功能卡只要能对应到 ID,**几乎都有预设的显示状态和组合;除非用户特别提出修改,否则大部分是固定搭配("雷打不动")**。也就是:**预设(default)占绝大多数,覆盖(override)是例外。**
 
-**标准子控件框架(最常见的槽形态)**:**左边 Title(功能名),右边组件(Toggle / Dropdown)**。大部分"开关类"功能都用这个标准行;它就是子控件层最高频的那个 archetype。
+**标准组件框架(最常见的槽形态)**:**左边 Title(功能名),右边组件(Toggle / Dropdown)**。大部分"开关类"功能都用这个标准行;它就是组件层最高频的那个 archetype。
 
 **几个功能的预设(authored once,机型默认直接用)**:
 | 功能 | archetype | 默认组成 | 可变范围(仅在明确要求时) |
@@ -283,12 +283,12 @@
 Collaboration 卡已按本架构从 Figma 导出**完整建出 + 逐项验证**(浏览器实测渲染、computed 颜色/尺寸、交互状态)。第一张走通"快照"全链路的卡,并产出可复用 building blocks。
 
 **可复用件(已建):**
-- 卡壳 `headset-function/templates/function-frame.html`(标题 + 可选 ⓘ 槽 + 子控件 body 槽)。
-- 子控件 `headset-shared/subcontrols/`:`toggle-row.html` (现名 `control-row.html`) / `slider.html` / `info-tooltip.html` + README。
+- 卡壳 `headset-function/templates/function-frame.html`(标题 + 可选 ⓘ 槽 + 组件 body 槽)。
+- 组件 `headset-shared/components/`:`toggle.html` / `slider.html` / `info-tooltip.html` + README。
 - 样式全在 `headset.css`;新增 token `--color-control-inactive`、`--radius-card`。
-- `headset-function`(Layer-2)SKILL 改成"卡壳 + 复制子控件"装配模型。
+- `headset-function`(Layer-2)SKILL 改成"卡壳 + 复制组件"装配模型。
 
-**成品样板:** `functions/collaboration.html`(现移至 `examples/collaboration.html`,作教学范例、不参与 id 路由) = 卡壳 + 2×`toggle-row` (现名 `control-row`)(Mic Noise Cancellation / Sidetone)+ 1×slider;Sidetone 行 + slider 包在 `.subfn-group`;每行带可选 ⓘ。纯 HTML + data-property,无内联样式,交互全靠原生控件 + CSS(仅 slider 一行 `oninput`)。
+**成品样板:** `functions/collaboration.html`(现移至 `examples/collaboration.html`,作教学范例、不参与 id 路由) = 卡壳 + 2×`toggle`(Mic Noise Cancellation / Sidetone)+ 1×slider;Sidetone 行 + slider 包在 `.subfn-group`;每行带可选 ⓘ。纯 HTML + data-property,无内联样式,交互全靠原生控件 + CSS(仅 slider 一行 `oninput`)。
 
 **review 决策(已落地):**
 | 项 | 决定 |
@@ -305,9 +305,9 @@ Collaboration 卡已按本架构从 Figma 导出**完整建出 + 逐项验证**(
 
 ### 6.8 弱模型验证(Haiku 4.5,2026-06-25)
 
-把"建一张新卡"的活交给 **Haiku 4.5**(冷启动子 agent,只给 `headset-function` skill + `subcontrols/` 积木 + 卡壳 + 一张参考卡 `collaboration.html`),需求:一个 Noise Control 卡 = Mic Noise Cancellation 开关 + 强度 slider(1–3),开关 OFF 时 slider 置灰。
+把"建一张新卡"的活交给 **Haiku 4.5**(冷启动子 agent,只给 `headset-function` skill + `components/` 积木 + 卡壳 + 一张参考卡 `collaboration.html`),需求:一个 Noise Control 卡 = Mic Noise Cancellation 开关 + 强度 slider(1–3),开关 OFF 时 slider 置灰。
 
-**结果:通过。** Haiku 全靠**复制**卡壳 + `toggle-row` (现名 `control-row`) + `slider` 装出 `functions/noise-control.html`(现移至 `examples/noise-control.html`)——`.subfn-group` 联动接对(开关 `.subfn-toggle`、slider `.subfn-child`)、原生控件、零内联样式、零瞎编;浏览器实测渲染正确,灰/恢复(opacity 0.4↔1)正确。**证明"copy-not-generate + 可复用积木"对弱模型友好**——这是整套架构最想要的性质。
+**结果:通过。** Haiku 全靠**复制**卡壳 + `toggle` + `slider` 装出 `functions/noise-control.html`(现移至 `examples/noise-control.html`)——`.subfn-group` 联动接对(开关 `.subfn-toggle`、slider `.subfn-child`)、原生控件、零内联样式、零瞎编;浏览器实测渲染正确,灰/恢复(opacity 0.4↔1)正确。**证明"copy-not-generate + 可复用积木"对弱模型友好**——这是整套架构最想要的性质。
 
 小毛病(无害):多建了个 `_preview-*`(已 gitignore);没 info 的 `.function-icons` 留成空 div 没删。
 
@@ -383,7 +383,7 @@ Collaboration 卡已按本架构从 Figma 导出**完整建出 + 逐项验证**(
 
 **我确认并升级(承认这比我提的 `headset.js` 运行时更好)**:用**原生 HTML 表单控件**,行为是浏览器给的:
 
-| 子控件 | 原生元素 | 自带行为(0 JS) |
+| 组件 | 原生元素 | 自带行为(0 JS) |
 |---|---|---|
 | Toggle | `<input type="checkbox">`(CSS 描成开关) | 勾/取消、选中态 |
 | Segmented | 一组 `<input type="radio" name=…>` | 单选互斥、选中态 |
@@ -412,7 +412,7 @@ Collaboration 卡已按本架构从 Figma 导出**完整建出 + 逐项验证**(
 
 ```
 Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Control / Collaboration / …)
-  └─ 功能卡片      = 一列槽位 → 每个槽放一个子控件(toggle / slider / segmented / …)
+  └─ 功能卡片      = 一列槽位 → 每个槽放一个组件(toggle / slider / segmented / …)
        └─ 某个槽   = 也可以放"又带槽位的卡片"(嵌套:选 ANC 冒出的那组子功能)
             └─ …   递归下去
 ```
@@ -422,8 +422,8 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 弱模型从头到尾只做一件事:**看到一个槽 → 按数据里的 archetype 拷对应片段 → 填值。** 有几个槽、填什么、要不要嵌套——全是数据。
 
 **两条原则钉死(D20,2026-06-26):**
-1. **嵌套能力是普适的、行为是数据驱动的。** 每张**装配卡**的卡身都是槽列表,任何槽都能放子控件、或一张**嵌套的功能卡**(它又有自己的槽,递归无上限);没有 per-function 特例,卡壳(`function-frame.html`)对所有卡一致。子功能**显示/隐藏/置灰/常驻**不是卡的属性,而是按需写进 manifest 的数据:需求="选某项才出现"→ `reveals`(显隐);需求="开关关了仍可见但失效"→ `dependents`(置灰);需求="一直在"→ 普通槽。生成期不决定,照数据渲染。
-2. **快照卡(Layer-1,如 `eq-audio`)是冻结的叶子。** 整段复制、不读 manifest 的 `subcontrols`/`reveals`/`dependents`;其内部嵌套(若有)烤死在快照 HTML 里,不按机型授权。递归槽位逻辑对**装配卡**完全普适;快照卡是**有意的终点**(保 D18 的"生成期极简")。要让快照卡也承载按需嵌套槽 = 重开 D18,**暂不做**(以稳定为先)。
+1. **嵌套能力是普适的、行为是数据驱动的。** 每张**装配卡**的卡身都是槽列表,任何槽都能放组件、或一张**嵌套的功能卡**(它又有自己的槽,递归无上限);没有 per-function 特例,卡壳(`function-frame.html`)对所有卡一致。子功能**显示/隐藏/置灰/常驻**不是卡的属性,而是按需写进 manifest 的数据:需求="选某项才出现"→ `reveals`(显隐);需求="开关关了仍可见但失效"→ `dependents`(置灰);需求="一直在"→ 普通槽。生成期不决定,照数据渲染。
+2. **快照卡(Layer-1,如 `eq-audio`)是冻结的叶子。** 整段复制、不读 manifest 的 `components`/`reveals`/`dependents`;其内部嵌套(若有)烤死在快照 HTML 里,不按机型授权。递归槽位逻辑对**装配卡**完全普适;快照卡是**有意的终点**(保 D18 的"生成期极简")。要让快照卡也承载按需嵌套槽 = 重开 D18,**暂不做**(以稳定为先)。
 
 ### 9.2 层结构(模板/规则侧 ↔ 数据侧)
 
@@ -431,30 +431,30 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 模板/规则侧                                  数据侧(manifest)
 ──────────────────────────────────────     ──────────────────────────────────
 1. tokens.css      设计常量                  (无)
-2. headset.css     布局 + 子控件样式          (无)
+2. headset.css     布局 + 组件样式          (无)
                    + :checked/:hover 状态
                    + 浅层条件显隐
 3. page frames     gen-homepage/gen-subpage  home.manifest: identity+connection+features[]
    (骨架 + 槽 data-slot,copy+fill)           <subpage>.manifest: title + functions[](槽列表)
-4. Functions       卡片外壳(标题+ⓘ)         每个功能: id + 子控件槽列表(+ 默认组成可覆盖)
+4. Functions       卡片外壳(标题+ⓘ)         每个功能: id + 组件槽列表(+ 默认组成可覆盖)
    = 数据驱动拼装
-5. Sub-controls    subcontrols/<type>.html    每个子控件: archetype + 值(label/选项/默认/有序?)
+5. Components    components/<type>.html    每个组件: archetype + 值(label/选项/默认/有序?)
    (原生表单控件片段,行为浏览器自带)         + 可选 reveals(条件子槽,0/N,可嵌套)
 ```
 
-### 9.3 两层(known/unknown)落在"子控件 archetype"
+### 9.3 两层(known/unknown)落在"组件 archetype"
 
-- **已知 archetype**(`toggle-row` (现名 `control-row`) / segmented/slider/preset-grid…)→ 有片段 → copy + 填(第一层)。archetype 数量少而有界(十种上下),按需生长,补得完。
+- **已知 archetype**(`toggle` / segmented/slider/preset-grid…)→ 有片段 → copy + 填(第一层)。archetype 数量少而有界(十种上下),按需生长,补得完。
 - **未知 archetype** → `headset-function`(第二层)现搭;复现了再固化成片段(§9.4)。
-- **已知功能的"默认组成"**(标准 Collaboration = 哪几个子控件)= 数据(注册表,§5.2),按 id 引用,机型可覆盖(删/改/增)。
+- **已知功能的"默认组成"**(标准 Collaboration = 哪几个组件)= 数据(注册表,§5.2),按 id 引用,机型可覆盖(删/改/增)。
 - **preset-first(默认占绝大多数,见 §6.6)**:每个功能 ID 都有一份固定预设组成("雷打不动");常规机型只是"引用 ID 拿预设",覆盖是例外。预设存成数据而非冻结 HTML,所以常规简单 + 例外可改两头都成立。
-- **最高频的子控件 archetype = 标准行**:左 Title + 右组件(Toggle/Dropdown)。Sidetone 这类则是固定的复合(上 Toggle + 下 Slider);Noise Control 固定 Segment Control;Multimedia 固定模式网格(默认 5、最多 6 的 2×3)。
-- **archetype 清单是开放/临时的(用户确认 2026-06-25)**:目前列出的(`toggle-row` (现名 `control-row`)、segmented、slider、dropdown、option-grid/preset-grid、标准行……)只是当下想到的**起点,不是封闭枚举**——以后会补充或修改。增/改一个 archetype 走"未知 → 现搭 → 复现后固化"那条路(§9.4),并**顺带更新 §7 的两层决策表和受影响的预设**。这正是"按需生长"的体现,不需要一开始就枚举全。
+- **最高频的组件 archetype = 标准行**:左 Title + 右组件(Toggle/Dropdown)。Sidetone 这类则是固定的复合(上 Toggle + 下 Slider);Noise Control 固定 Segment Control;Multimedia 固定模式网格(默认 5、最多 6 的 2×3)。
+- **archetype 清单是开放/临时的(用户确认 2026-06-25)**:目前列出的(`toggle`、segmented、slider、dropdown、option-grid/preset-grid、标准行……)只是当下想到的**起点,不是封闭枚举**——以后会补充或修改。增/改一个 archetype 走"未知 → 现搭 → 复现后固化"那条路(§9.4),并**顺带更新 §7 的两层决策表和受影响的预设**。这正是"按需生长"的体现,不需要一开始就枚举全。
 
 ### 9.4 与方法论的映射
 
 - 对齐:§3(槽)、§4(变体:archetype enum 选片段)、§5(列表:槽列表、模式列表)、§5.2(注册表:默认组成按 id)、§9.3(子页一个框架 skill)、§9.4(已知片段/未知兜底/高频提升)、§9.7.4(copy 不 create)。
-- **扩展**(codebase 比方法论细一层):方法论把"控件"当单层原子;真实 function 是**复合**的,故拆成 **function 卡片 + sub-control 原子两层**,并递归用到卡片内部。
+- **扩展**(codebase 比方法论细一层):方法论把"控件"当单层原子;真实 function 是**复合**的,故拆成 **function 卡片 + component 原子两层**,并递归用到卡片内部。
 - **覆盖**:§3.1 "生成期烤死、不做运行时显隐" 在**控件交互层被真交互覆盖**(8.2);跨型号/连接仍烤死。
 
 ### 9.5 诚实的边界与风险
@@ -476,8 +476,8 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 | D5 | 一个子页 = 一个功能(1:1),撤掉列表 | 5.2 | 误读"Skill 就是子页" | **已撤销**(被截图推翻) |
 | D6 | 已知功能用快照/数据,不为每功能开 skill | 第 4 节 | 见 4.3 优劣;逻辑只需一处 | 生效 |
 | D7 | Content Area = 功能列表(1~N) | 5.3 | Audio Settings 截图 | 生效 |
-| D8 | 固定素材下沉到子控件;function = 数据驱动拼装;身份认 id | 5.4 | 删/改/增真实 case | 生效 |
-| D9 | function = 卡片块(标题 + 子控件),非单行 | 5.3/5.4 | 截图 | 生效(替代 D3) |
+| D8 | 固定素材下沉到组件;function = 数据驱动拼装;身份认 id | 5.4 | 删/改/增真实 case | 生效 |
+| D9 | function = 卡片块(标题 + 组件),非单行 | 5.3/5.4 | 截图 | 生效(替代 D3) |
 | D10 | 控件选型:三张表(①形状→家族 ②家族内呈现 segmented/dropdown、button/link ③领域约定)+ 编写期推一次冻成数据;不做 runtime 选择引擎 | 第 7 节 | 把推断收敛成查表 | 生效(已写进 headset/AGENTS.md) |
 | D11 | 真交互(而非静态稿) | 8.2 | 用户选 B | 生效 |
 | D12 | 用原生表单控件 + CSS,几乎零 JS;撤掉 `headset.js`;Dropdown 是登记例外(`<details>/<summary>` + 少量脚本,不用原生 `<select>`) | 8.3 | 行为浏览器自带,更贴"copy 不构造";Dropdown 为保 Figma 自定义列表外观例外处理 | 生效(替代早先的 headset.js 提案) |
@@ -487,9 +487,9 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 | D16 | **preset-first**:每个功能 ID 一份固定预设组成,默认占绝大多数,覆盖是例外;预设存成数据 | 6.6 | 用户背景:"对应到 ID 几乎都有预设、雷打不动" | 生效(坐实 D6/D8,非反转) |
 | D17 | **快照=派生产物 + "改原子→重建快照"纪律**;暂不建 build 机器(只 2 张卡,方法论接受复制)。快照由卡壳+原子装配而来,`headset-function` 的装配逻辑是未来 build 步骤的种子;卡多了再上"spec→装配→快照"自动化 | F 分析 | drift 真实(B 清 ⓘ SVG 时被迫改片段+3 份烤死副本演示了)但现在便宜 | 生效:纪律立、机器 defer |
 | D18 | **生成期极简**:manifest = 子页标题 + **功能 id 列表(+ 罕见覆盖)**;gen-subpage 对 function 只"复制快照 + 剥标记",per-function 填值近乎空操作(已知卡里几乎没有按机型变的值);不建复杂填值引擎 | G 分析 | 冻结快照里几乎一切都烤死;真正按机型变的是"有哪些功能"这个列表 | 生效:待真跑 gen-subpage 验证 |
-| D19 | **递归槽位/条件显隐 落地为 manifest `reveals` schema + 生成步骤 + 生成期校验**:§6.5/§8/§9.1 的"条件子槽"此前只到 CSS+片段层(`.segment-panels` 位置型 `:has`),manifest 无写法、gen-subpage 无步骤。现定义 `reveals`(selector option value → 有序槽列表,槽=子控件或嵌套 `{function:<id>}`,可递归),取代乱编的 `condition:`;gen-subpage/headset-function 增加 reveals 生成步骤;新增生成期校验(未知 archetype/id、`condition:` 残留、reveals 键不匹配、>6 option、重复 option 值 → HALT);确立"产物必须可由 manifest 重生成,禁止手改产物"纪律(把 D17 上升到页面级) | WL327 首跑暴露(EQ 被当 slider、手改 HTML、manifest↔产物分叉) | 架构早有递归原语,缺的是 schema 与生成两层;WL327 是 gen-subpage 首次真跑,撞上 §11 未实现项 | 生效:WL327 重生成验证 |
-| D20 | **toggle `dependents`(置灰)schema + 普适标题槽 `.subfn-label` + 嵌套普适/快照冻结原则 + 机械校验器**:BUG-002 暴露 `reveals` 被误用在 control-row、且命名全宽子控件标题被丢。新增 `dependents`(control-row 的置灰子槽,与 `reveals` 显隐对偶);`.subfn-label` 标题槽对 reveals 与 dependents 普适(补回被丢的 "ANC Strength"/"Canceling Strength");§9.1 钉死"嵌套能力普适、行为数据驱动、快照是冻结叶子(不重开 D18)"。**关键稳定性**:把 HALT 从 SKILL.md 散文升级为**零依赖机械校验器** `validate-manifest.py`(gen-subpage 生成前必跑,非 0 即停),根治"弱模型绕过散文规则"(BUG-002 自述的 skip 原因)。顺带修正"options+panels 合计≤6"的措辞 bug(实为 ≤6 option,panels 与 options 1:1) | BUG-002 + 用户"要稳定"指令 | 散文规则会被弱模型在助人压力下绕过;实例修复不防复发,要普适+机械闸门 | 生效:校验器实测真 manifest 通过、5 类坏 manifest HALT |
-| D21 | 把子控件层显式分成**两级:shape(容器:row/stacked) × component(组件:toggle/dropdown/slider/segmented/preset-grid)**。`control-row` 是 **row 形状**(内含可换的紧凑组件 toggle/dropdown),**不是** segmented/slider/preset-grid 的同级;stacked 形状 = `.subfn-label` 标题 + 全宽组件,标题属于形状(不可丢)。"嵌套子功能"的决策流改为**先选形状(横/竖)再选组件**(见 `headset/AGENTS.md`)。**暂不重命名代码 archetype 枚举**(枚举照旧:`control-row | slider | segmented | preset-grid | dropdown`)——重命名/拆分会动 manifest schema、校验器、片段、所有机型,destabilize,defer。 | 用户设计视角讨论(先选形状再选组件;并指出 dropdown 既是 archetype 又在 control-row 内 = 层级混淆) | 散落逻辑导致丢标题、`reveals` 误用在 control-row 等 bug;两级模型让标题结构化(归形状)、贴合设计师心智;但代码重构面大,稳定优先,只在文档层落地 | 生效(文档层;代码 archetype 重命名 defer) |
+| D19 | **递归槽位/条件显隐 落地为 manifest `reveals` schema + 生成步骤 + 生成期校验**:§6.5/§8/§9.1 的"条件子槽"此前只到 CSS+片段层(`.segment-panels` 位置型 `:has`),manifest 无写法、gen-subpage 无步骤。现定义 `reveals`(selector option value → 有序槽列表,槽=组件或嵌套 `{function:<id>}`,可递归),取代乱编的 `condition:`;gen-subpage/headset-function 增加 reveals 生成步骤;新增生成期校验(未知 archetype/id、`condition:` 残留、reveals 键不匹配、>6 option、重复 option 值 → HALT);确立"产物必须可由 manifest 重生成,禁止手改产物"纪律(把 D17 上升到页面级) | WL327 首跑暴露(EQ 被当 slider、手改 HTML、manifest↔产物分叉) | 架构早有递归原语,缺的是 schema 与生成两层;WL327 是 gen-subpage 首次真跑,撞上 §11 未实现项 | 生效:WL327 重生成验证 |
+| D20 | **toggle `dependents`(置灰)schema + 普适标题槽 `.subfn-label` + 嵌套普适/快照冻结原则 + 机械校验器**:BUG-002 暴露 `reveals` 被误用在 control-row、且命名全宽组件标题被丢。新增 `dependents`(control-row 的置灰子槽,与 `reveals` 显隐对偶);`.subfn-label` 标题槽对 reveals 与 dependents 普适(补回被丢的 "ANC Strength"/"Canceling Strength");§9.1 钉死"嵌套能力普适、行为数据驱动、快照是冻结叶子(不重开 D18)"。**关键稳定性**:把 HALT 从 SKILL.md 散文升级为**零依赖机械校验器** `validate-manifest.py`(gen-subpage 生成前必跑,非 0 即停),根治"弱模型绕过散文规则"(BUG-002 自述的 skip 原因)。顺带修正"options+panels 合计≤6"的措辞 bug(实为 ≤6 option,panels 与 options 1:1) | BUG-002 + 用户"要稳定"指令 | 散文规则会被弱模型在助人压力下绕过;实例修复不防复发,要普适+机械闸门 | 生效:校验器实测真 manifest 通过、5 类坏 manifest HALT |
+| D21 | 把组件层显式分成**两级:shape(容器:row/stacked) × component(组件:toggle/dropdown/slider/segmented/preset-grid)**。`control-row` 是 **row 形状**(内含可换的紧凑组件 toggle/dropdown),**不是** segmented/slider/preset-grid 的同级;stacked 形状 = `.subfn-label` 标题 + 全宽组件,标题属于形状(不可丢)。"嵌套子功能"的决策流改为**先选形状(横/竖)再选组件**(见 `headset/AGENTS.md`)。**暂不重命名代码 archetype 枚举**(枚举照旧:`control-row | slider | segmented | preset-grid | dropdown`)——重命名/拆分会动 manifest schema、校验器、片段、所有机型,destabilize,defer。 | 用户设计视角讨论(先选形状再选组件;并指出 dropdown 既是 archetype 又在 control-row 内 = 层级混淆) | 散落逻辑导致丢标题、`reveals` 误用在 control-row 等 bug;两级模型让标题结构化(归形状)、贴合设计师心智;但代码重构面大,稳定优先,只在文档层落地 | 生效(文档层;代码 archetype 重命名 defer) |
 | D22 | archetype `control-row` 重命名为 `toggle`;枚举改为**纯组件** `toggle | slider | segmented | preset-grid | dropdown`;**容器形状由生成器推导**(紧凑组件 toggle/dropdown → row 行;全宽组件 slider/segmented/preset-grid → stacked + `.subfn-label`)。落实 D21 两级模型于代码层。**CSS 类名不变**(`.function-header`/`.switch`/`.subfn-toggle` 等照旧);**生成产物 HTML 不变**(只动 manifest 的 archetype 字符串 + 片段文件名 control-row.html→toggle.html)。`dropdown.html` 改成自带标签行的完整版 = grow-on-demand 待办(暂无 manifest 用 `archetype: dropdown`)。 | 用户追问"为何不改枚举";grep 证据:仅 1 个真实机型用到、dropdown 从未作顶层 archetype → 改名此刻最便宜。 | control-row 是 shape 名混入 component 枚举;1 机型 pilot 阶段重命名成本最低,拖延只会随 manifest 增多变贵;校验器与 schema 同步更新,不损生成稳定性。 | 生效(代码层;dropdown.html 全行版 defer) |
 
 ---
@@ -499,14 +499,14 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 **已完成(2026-06-25):**
 - [x] `headset-function` 改名迁移已 commit(130da31)。
 - [x] function 形态从单行升级成卡片:`function-frame.html` 重做成卡壳;`.function-*` 卡片样式落地(§6.7)。
-- [x] 新增 `headset-shared/subcontrols/`:`toggle-row` (现名 `control-row`) / `slider` / `info-tooltip`(§6.7);`segmented` / `dropdown` / `preset-grid` 等按需再加。
+- [x] 新增 `headset-shared/components/`:`toggle` / `slider` / `info-tooltip`(§6.7);`segmented` / `dropdown` / `preset-grid` 等按需再加。
 - [x] Collaboration 卡建出并逐项验证;firmware ⓘ 与卡片 ⓘ 合并成一套 tooltip(§6.7)。
 - [x] **把控件选型的三张表写进 `headset/AGENTS.md`**(D10):①形状→家族;②家族内呈现(Segmented/Dropdown 数量阈值、Button/Hyperlink 语义);③领域约定。只在编写期用。
 
 **已完成(2026-06-26,D19):**
 - [x] **跑 `gen-subpage` 出一个真子页**:WL327 `home.manifest` + `audio-settings.manifest` → `index.html` + `audio-settings.html`(首次真跑,暴露并修复了 schema/生成两层缺口)。
 - [x] **Noise Control(`segmented`)+ Multimedia(`preset-grid`)+ 条件子功能**:条件显隐落地为 `reveals` schema(选 ANC → slider 面板;选 Custom → `eq-audio` 卡),走 §8 的位置型 `:has` CSS。
-- [x] **manifest schema + 生成期校验**:`reveals`/`subcontrols[]` schema 写进 `headset-gen-subpage/SKILL.md`;未知/越界/重复 → HALT。
+- [x] **manifest schema + 生成期校验**:`reveals`/`components[]` schema 写进 `headset-gen-subpage/SKILL.md`;未知/越界/重复 → HALT。
 
 **未做:**
 - [ ] **偏离款验证**:出一个"删 Sidetone / Noise Control 只留 2 模式"的机型,证明改数据不碰素材。
@@ -520,15 +520,15 @@ Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Contro
 - **Feature(主页入口)**:主页 Feature Zone 的按钮,`features[]` 一项,点进去是一个子页。**不是 skill**,复制 `feature-button.html`。
 - **子页(sub-page)**:如 "Audio Settings",有标题 + Content Area;由一个框架 skill `gen-subpage` 生成,**不为每个子页开 skill**(§9.3)。
 - **Content Area**:子页的内容区,= 一列**功能槽**(1~N 个,可变)。
-- **Function / 功能卡片**:Content Area 里的一张有标题的卡片(Noise Control / Collaboration / Multimedia)。内部 = 一列**子控件槽**。**用数据驱动拼装,不是冻结快照。**
-- **Sub-control / 子控件**:功能内部的小控件(开关/滑杆/分段/预设网格)。用**原生表单控件片段**,行为浏览器自带。
-- **Slot / 槽位**:模板里的填充位(代码里的 `data-slot`)。**递归**:Content Area、功能卡片、子控件层层都是"槽列表"。
-- **Archetype / 形态**:子控件的"外形类别"(`toggle-row` (现名 `control-row`) / segmented/slider/dropdown/preset-grid…)。**少而有界**;名字/选项是数据。
-- **Snippet / Snapshot / 片段 / 快照**:被复制的静态 HTML 素材(+ 值槽)。子控件片段、连接块、feature-button 都属此类。
+- **Function / 功能卡片**:Content Area 里的一张有标题的卡片(Noise Control / Collaboration / Multimedia)。内部 = 一列**组件槽**。**用数据驱动拼装,不是冻结快照。**
+- **Component / 组件**:功能内部的小控件(开关/滑杆/分段/预设网格)。用**原生表单控件片段**,行为浏览器自带。
+- **Slot / 槽位**:模板里的填充位(代码里的 `data-slot`)。**递归**:Content Area、功能卡片、组件层层都是"槽列表"。
+- **Archetype / 形态**:组件的"外形类别"(`toggle` / segmented/slider/dropdown/preset-grid…)。**少而有界**;名字/选项是数据。
+- **Snippet / Snapshot / 片段 / 快照**:被复制的静态 HTML 素材(+ 值槽)。组件片段、连接块、feature-button 都属此类。
 - **Skill**:带 `SKILL.md` 的文件夹,能跑逻辑。这里只有框架 skill(`gen-homepage`/`gen-subpage`)和未知功能现搭器(`headset-function`);**不为每个已知功能开 skill**。
 - **Layer 1 / 已知**:有片段/默认组成 → copy + 填。
 - **Layer 2 / 未知**:`headset-function` 现搭 → 复现后固化(§9.4)。
-- **Manifest / 清单 / 组成数据**:机型/子页的内容数据。决定有哪些功能、每个功能哪些子控件槽、每个子控件的值与 archetype、条件 reveals。
+- **Manifest / 清单 / 组成数据**:机型/子页的内容数据。决定有哪些功能、每个功能哪些组件槽、每个组件的值与 archetype、条件 reveals。
 - **Reveal / 条件显隐**:某状态(如选 ANC)下才出现的条件槽,0/N、可嵌套;浅层 CSS、深层声明引擎。
 - **编写期(authoring) vs 生成期(generation)**:推理/判断只在编写期发生并冻结成数据;生成期确定性拼装、不推。
 

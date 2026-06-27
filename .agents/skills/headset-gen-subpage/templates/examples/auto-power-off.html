@@ -1,7 +1,7 @@
 <!-- Auto Power Off function card — single-control card whose header control is a DROPDOWN.
      This is the worked EXAMPLE of the swappable header slot: single-control.html's shell with the
-     default toggle switch replaced by subcontrols/dropdown.html (the swap rule lives in
-     subcontrols/toggle.html). Use for a single header-row setting whose value is one choice
+     default toggle switch replaced by components/dropdown.html (the swap rule lives in
+     components/toggle.html). Use for a single header-row setting whose value is one choice
      from several options — here an idle timeout.
      Layout: [title + optional ⓘ] .................... [DROPDOWN]
      data-property slots:
@@ -34,7 +34,7 @@
           </span>
         </div>
 
-        <!-- CONTROL = subcontrols/dropdown.html swapped into the header slot (rule: subcontrols/toggle.html) -->
+        <!-- CONTROL = components/dropdown.html swapped into the header slot (rule: components/toggle.html) -->
         <details class="dropdown">
           <summary class="dropdown-trigger">
             <span class="dropdown-value" data-property="auto-power-off-value">4 hours</span>

@@ -3,7 +3,7 @@ title: Audio Settings
 functions:
   - id: noise-control
     title: Noise Control
-    subcontrols:
+    components:
       - archetype: segmented
         icons: true            # acoustic-environment modes → icon segmented (domain rule)
         options:
@@ -22,7 +22,7 @@ functions:
 
   - id: collaboration
     title: Collaboration
-    subcontrols:
+    components:
       - archetype: toggle
         label: Mic Noise Canceling
         value: true
@@ -40,7 +40,7 @@ functions:
 
   - id: multimedia
     title: Multimedia
-    subcontrols:
+    components:
       - archetype: preset-grid
         label: Presets
         options:

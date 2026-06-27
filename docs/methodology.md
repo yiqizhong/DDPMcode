@@ -21,7 +21,7 @@
 > - **§3 markup** — markup is **copied verbatim from pre-written snippet files, never generated**
 >   from a `data-instruction` description; an unknown enum value **halts and asks**.
 > - **§9.4 control → two layers** — a "control" is not one atom. A sub-page function is a **function card**
->   (title + slot body) assembled from **sub-control atoms** (toggle/slider/segmented/…); the slot model
+>   (title + slot body) assembled from **component atoms** (toggle/slider/segmented/…); the slot model
 >   recurses into the card. See `function-card-architecture.md`.
 > - **§3.1 "no runtime show/hide" is OVERRIDDEN for in-panel interaction** — end-user interaction inside
 >   one device panel (segmented conditional panels, selected states, sub-function greying) DOES pre-embed +

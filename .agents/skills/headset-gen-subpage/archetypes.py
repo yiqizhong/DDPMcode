@@ -1,8 +1,8 @@
-"""Sub-control archetype catalog — the SINGLE SOURCE OF TRUTH for the contract that
+"""Component archetype catalog — the SINGLE SOURCE OF TRUTH for the contract that
 `validate-manifest.py` enforces (the machine-readable analog of a json-render `defineCatalog`).
 
 Adding a new archetype = add a block here AND add its snippet under
-`headset-shared/subcontrols/<archetype>.html`. The validator derives EVERY archetype rule
+`headset-shared/components/<archetype>.html`. The validator derives EVERY archetype rule
 from this dict — it hardcodes no archetype names, option caps, or width sets of its own.
 
 Per-archetype keys
@@ -28,7 +28,7 @@ Per-archetype keys
   when         one-line data-shape trigger ("use this archetype when …"). Only the mechanical
                part of control selection lives here; the FUZZY heuristics (segmented-vs-dropdown
                count, segmented-vs-preset-grid semantics, the acoustic-environment icon rule)
-               resist encoding and stay in prose — subcontrols/README.md + headset/AGENTS.md.
+               resist encoding and stay in prose — components/README.md + headset/AGENTS.md.
 
 Run `python3 archetypes.py` to print the authoritative contract table (the json-render
 `catalog.prompt()` analog) instead of hand-copying a parallel table into the docs.
@@ -108,12 +108,12 @@ def _required_props(name, spec):
 
 def render_table():
     lines = [
-        "# Sub-control archetype contract — DERIVED from archetypes.py",
+        "# Component archetype contract — DERIVED from archetypes.py",
         "",
         "> Authoritative + always in sync with the `validate-manifest.py` gate. Do NOT hand-copy a",
         "> parallel table into the docs; regenerate with `python3 archetypes.py`. The fuzzy heuristics",
         "> (segmented-vs-dropdown count, segmented-vs-preset-grid semantics, the acoustic-environment",
-        "> icon rule) are NOT mechanical and stay in prose — subcontrols/README.md + headset/AGENTS.md.",
+        "> icon rule) are NOT mechanical and stay in prose — components/README.md + headset/AGENTS.md.",
         "",
         "| Archetype | Use when (data shape) | Renders as | Conditional | Options | Required props |",
         "|---|---|---|---|---|---|",

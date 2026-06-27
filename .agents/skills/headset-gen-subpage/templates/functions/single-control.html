@@ -8,13 +8,13 @@
 
      toggle-info   (optional block)
                    Rendered in a .function-icons div after the title — the SAME placement as
-                   subcontrols/toggle.html (and examples/collaboration.html). Omit the ENTIRE
+                   components/toggle.html (and examples/collaboration.html). Omit the ENTIRE
                    .function-icons div when the manifest provides no info text; when present,
                    fill .info-tooltip-text with the tooltip string.
 
      header-control (structural slot)
                    The CONTROL START / CONTROL END block is a SWAPPABLE WIDGET. The full swap
-                   rule lives in ONE place — subcontrols/toggle.html — and applies here
+                   rule lives in ONE place — components/toggle.html — and applies here
                    verbatim: default toggle switch; swap ONLY to a compact header control
                    (currently dropdown.html); slider / segmented / preset-grid are full-width
                    and must NOT go in the header. The widget MUST carry margin-left:auto.
@@ -49,7 +49,7 @@
           </span>
         </div>
 
-        <!-- CONTROL START — swappable header control; see subcontrols/toggle.html for the rule -->
+        <!-- CONTROL START — swappable header control; see components/toggle.html for the rule -->
         <label class="switch">
           <input type="checkbox" class="switch-input" data-property="toggle-state">
           <span class="switch-state"></span>

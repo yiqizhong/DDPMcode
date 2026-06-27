@@ -13,12 +13,12 @@
 > **Actual root cause:** the architecture's conditional-reveal / recursive-slot primitive
 > (§6.5 / §8 / §9.1) was implemented only at the CSS+snippet layer — there was **no manifest schema
 > and no generation step** for it. So "Custom → show EQ" had no legal manifest expression: the author
-> shoehorned it into a `slider` subcontrol with an invented `condition:` field, then hand-patched the
+> shoehorned it into a `slider` component with an invented `condition:` field, then hand-patched the
 > EQ card into the output. That made the manifest diverge from the HTML and the output
 > non-reproducible (re-running gen-subpage would re-emit the slider).
 >
 > **General fix (D19, 2026-06-26):** defined the `reveals` schema (selector option → ordered slot
-> list; a slot is a sub-control or a nested `{ function: <id> }`, recursive), added the gen-subpage /
+> list; a slot is a component or a nested `{ function: <id> }`, recursive), added the gen-subpage /
 > headset-function steps that emit it, added generation-time validation (HALT on unknown
 > archetype/id, stray `condition:`, mismatched `reveals` key, >6 panels, duplicate option values), and
 > a reproducibility rule (no off-pipeline hand-patching). This manifest was rewritten to use `reveals`
@@ -83,7 +83,7 @@ Updated the Multimedia function to include the full `eq-audio` template (5-band 
 - Used `headset-gen-subpage` skill for sub-page generation
 - Copied connection snippets from `headset-shared/connection/`
 - Copied feature button from `headset-shared/feature-button.html`
-- Used subcontrol snippets: `segmented.html`, `slider.html`, `control-row.html`, `preset-grid.html`
+- Used component snippets: `segmented.html`, `slider.html`, `control-row.html`, `preset-grid.html`
 - No inline styles, all styling via `shared/tokens.css` and `headset.css`
 - Proper manifest-driven generation with data-property filling
 
@@ -126,7 +126,7 @@ The manifest used `reveals` on a `control-row` archetype:
 The skill schema explicitly states `reveals` is only legal on selector archetypes (`segmented` | `preset-grid`). A `control-row` is a boolean toggle; its dependency relationship is expressed by HTML structure (`.subfn-group` wrapper), not by a `reveals` entry. The validation rule says: **HALT when `reveals` appears on a non-selector archetype**.
 
 **Failure 2: Validation skipped (generation error)**
-The agent did not HALT. Instead it recognized the semantic intent ("toggle should reveal a sub-control") and tried to implement it. The result was a structurally incorrect `.subfn-group` placement:
+The agent did not HALT. Instead it recognized the semantic intent ("toggle should reveal a component") and tried to implement it. The result was a structurally incorrect `.subfn-group` placement:
 
 ```
 .function-content

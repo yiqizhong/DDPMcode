@@ -127,16 +127,16 @@ class V:
     def err(self, where, msg):
         self.errors.append("%s: %s" % (where, msg))
 
-    def subcontrol(self, sc, where, top_sole=False):
+    def component(self, sc, where, top_sole=False):
         if not isinstance(sc, dict):
-            self.err(where, "sub-control is not a mapping")
+            self.err(where, "component is not a mapping")
             return
         if "condition" in sc:
             self.err(where, "legacy `condition:` field — express conditional content via a selector's "
                             "`reveals` (show/hide) or a toggle's `dependents` (grey-out)")
         arch = sc.get("archetype")
         if arch is None:
-            self.err(where, "sub-control missing `archetype`")
+            self.err(where, "component missing `archetype`")
             return
         spec = ARCHETYPES.get(arch)
         if spec is None:
@@ -239,7 +239,7 @@ class V:
                     self.err(sw, "function slot %r has no snapshot functions/%s.html (a bare function "
                                  "slot must reference an existing snapshot)" % (fid, fid))
             else:
-                self.subcontrol(slot, sw)
+                self.component(slot, sw)
 
     def function(self, fn, where):
         if not isinstance(fn, dict):
@@ -250,18 +250,18 @@ class V:
             self.err(where, "function missing `id`")
             return
         where = "function[%s]" % fid
-        subs = fn.get("subcontrols")
+        subs = fn.get("components")
         has_snapshot = os.path.exists(os.path.join(REGISTRY, "%s.html" % fid))
         if subs is None:
             if not has_snapshot:
-                self.err(where, "no `subcontrols` and no snapshot functions/%s.html (cannot render)" % fid)
+                self.err(where, "no `components` and no snapshot functions/%s.html (cannot render)" % fid)
             return
         if not isinstance(subs, list):
-            self.err(where, "`subcontrols` must be a list")
+            self.err(where, "`components` must be a list")
             return
         sole = len(subs) == 1  # a lone top-level full-width control renders headingless (no `label` needed)
         for n, sc in enumerate(subs):
-            self.subcontrol(sc, "%s>subcontrols[%d]" % (where, n), top_sole=sole)
+            self.component(sc, "%s>components[%d]" % (where, n), top_sole=sole)
 
     def manifest(self, m):
         if not isinstance(m, dict):

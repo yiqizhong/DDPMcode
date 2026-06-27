@@ -467,7 +467,7 @@ body {
 /* ============================================================
    Function card — one card in a sub-page Content Area (one per
    functions[] item). Shell = title (+ ⓘ) over a vertical body
-   that stacks sub-controls; each sub-control row reuses the
+   that stacks components; each component row reuses the
    .function-header layout (label/title left, icons + control
    right). Copied as a snapshot from
    .agents/skills/headset-gen-subpage/templates/functions/<id>.html;
@@ -545,7 +545,7 @@ body {
   margin: 0;
 }
 
-/* Title heading for a NAMED full-width sub-control (segmented / slider / preset-grid) that is not
+/* Title heading for a NAMED full-width component (segmented / slider / preset-grid) that is not
    the card's sole control — i.e. one sitting in a reveal panel (.segment-panel) or a toggle
    dependent (.subfn-child). Both containers are flex-column gap:8px, so this sits above its control
    with correct spacing. A sole top-level control omits it (the card title labels it). */
@@ -705,7 +705,7 @@ body {
   visibility: visible;
 }
 
-/* Card body — sub-controls stack vertically here. */
+/* Card body — components stack vertically here. */
 .function-content {
   display: flex;
   flex-direction: column;
@@ -716,7 +716,7 @@ body {
   flex-shrink: 0;
 }
 
-/* --- Toggle sub-control — native <input type=checkbox> styled as a switch ---
+/* --- Toggle component — native <input type=checkbox> styled as a switch ---
    Zero JS: :checked drives the OFF/ON label, track colour, and thumb position.
    Initial state comes from the manifest (data-property on the input → add `checked` when ON). */
 .switch {
@@ -781,7 +781,7 @@ body {
   outline-offset: 2px;
 }
 
-/* --- Slider sub-control — native <input type=range> styled to match the design ---
+/* --- Slider component — native <input type=range> styled to match the design ---
    Drag + keyboard come free from the browser. The value bubble above the thumb is the one
    spot that needs JS: a one-line inline `oninput` updates --val (drives the track fill + bubble
    position) and the bubble text. Per-instance min/max/value live on BOTH the <input> attrs
@@ -917,7 +917,7 @@ body {
   pointer-events: none;
 }
 
-/* --- Segmented control sub-control — a row of 2–4 mutually-exclusive option buttons.
+/* --- Segmented control component — a row of 2–4 mutually-exclusive option buttons.
    Radio semantics, zero JS. Optional conditional panels below the control row (tab behavior):
    the Nth panel is shown when the Nth segment is checked — positional mapping, pure :has().
    When .segment-panels is absent the component is a plain value selector with no panel effect. */
@@ -1087,7 +1087,7 @@ body {
 .feature-zone[data-slot] { background: var(--color-zone-feature); }     /* dev tint — template only */
 .content-area[data-slot] { background: var(--color-zone-feature); min-height: 0; }  /* dev tint — template only; keep the scroll min-height */
 
-/* --- Dropdown sub-control — custom <details>/<summary> control with fixed-position list.
+/* --- Dropdown component — custom <details>/<summary> control with fixed-position list.
    Works standalone (full-width row) or as the CONTROL START/END swap in toggle /
    single-control (margin-left:auto pushes it right in the flex header). The snippet script should
    set list top/left when open so scroll containers cannot clip it. */

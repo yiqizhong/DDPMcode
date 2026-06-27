@@ -1,4 +1,6 @@
-# 组件清单（Component Catalog）· headset 品类
+# DDPM 组件清单（DDPM Component Catalog）· headset 品类
+
+> **术语**:卡内那些可复用控件(开关/滑杆/分段/预设网格/下拉)统称 **DDPM Component**(代码标识符 `component` / 字段 `components:` / 目录 `headset-shared/components/`)。曾用名 "sub-control / 子控件" 已废弃。
 
 > **性质**:一份**活清单**,记录当前所有可复用 UI 组件:它是什么、何时用、通用不通用、Agent 怎么调用。
 > **每次新增/改名/删除组件都要更新这里。** 类名用大白话,括号里是代码里的真实文件/术语(映射不丢)。
@@ -9,7 +11,7 @@
 
 | 类别 | 一句话是什么 | 数量 | 位置 |
 |---|---|---|---|
-| **① 卡内控件积木**(子控件 / `subcontrols/`) | 拼进功能卡里的小控件:开关、下拉、滑杆、分段… | 6 文件(+ 开关无独立文件) | `.agents/skills/headset-shared/subcontrols/` |
+| **① 卡内控件积木**(组件 / `components/`) | 拼进功能卡里的小控件:开关、下拉、滑杆、分段… | 6 文件(+ 开关无独立文件) | `.agents/skills/headset-shared/components/` |
 | **② 通用功能卡骨架**(空白卡壳 / `function-frame.html`) | 没现成卡时用的**空模板**:一个标题 + 空 body,往里塞积木拼出卡 | 1 | `.agents/skills/headset-function/templates/` |
 | **③ 可换内容的槽位 + 联动机制**(slot / CSS) | 模板里"能换内容 / 会联动"的位置 | 4 | 嵌在上面文件 + `headset.css` |
 
@@ -23,7 +25,7 @@
 
 ---
 
-## ① 卡内控件积木(子控件 · `subcontrols/`)
+## ① 卡内控件积木(组件 · `components/`)
 
 > 这些是拼进功能卡里的小控件。按"长什么样、放哪"分成四组——**A 是装控件的行,B/C 是控件本体,D 是辅助。**
 
@@ -56,7 +58,7 @@
 |---|---|---|---|
 | **信息提示**(`info-tooltip.html`) | 控件旁的 ⓘ 图标 + hover 说明 | ✅ 通用(可选) | 有说明才 copy 进该行 `.function-icons`;没有就删掉那个 div |
 
-**选哪个控件**(细则见 `subcontrols/README.md` + `headset/AGENTS.md` 选型表):
+**选哪个控件**(细则见 `components/README.md` + `headset/AGENTS.md` 选型表):
 开/关→**开关**;有序值→**滑杆**;2–3 项→**分段**;4 项看语义(模式切换→分段 / 预设→网格);5–6 项→**预设网格**;选项多或位置紧→**下拉**。
 
 ---
@@ -67,7 +69,7 @@
 
 | 件 | 是什么 / 何时用 | 通用性 | Agent 如何调用 |
 |---|---|---|---|
-| **空白功能卡壳**(`function-frame.html`) | 一个**空卡模板**:标题 + 可选 ⓘ 槽 + 空 body 槽。往 body 里按需 copy ①的积木,拼出一张新卡 | ✅ 通用(万能兜底) | `headset-function` 复制它,填标题,再往 `data-slot="subcontrols"` 按序 copy ①积木 |
+| **空白功能卡壳**(`function-frame.html`) | 一个**空卡模板**:标题 + 可选 ⓘ 槽 + 空 body 槽。往 body 里按需 copy ①的积木,拼出一张新卡 | ✅ 通用(万能兜底) | `headset-function` 复制它,填标题,再往 `data-slot="components"` 按序 copy ①积木 |
 
 ---
 
@@ -79,8 +81,8 @@
 |---|---|---|---|
 | **可换控件槽**(header 右侧的 `CONTROL START/END`) | header 右侧控件要从默认**开关**换成**下拉**时用 | ✅ 通用,但**只限紧凑控件**:开关 ↔ 下拉(滑杆/分段/预设是整宽,禁入 header) | 把 `CONTROL` 块整段换成开关或下拉。**换法规则只有一份权威:`toggle.html`**;single-control 引用它 |
 | **空卡的两个填充槽**(②骨架的 ⓘ 槽 / body 槽) | 用②空白卡壳现拼卡时 | ✅ 通用 | 往 body 槽按序 copy ①积木;有说明才往 ⓘ 槽放 info-tooltip |
-| **分段条件面板**(`segment-panels`,在分段/预设内) | 选某一段后**冒出**一组子控件(选 ANC 露出 XYZ) | ✅ 通用(上限 6) | 用结构表达:第 N 段选中→第 N 面板显示,纯 CSS `:has()`,0 JS |
-| **父子开关联动**(`subfn-group`) | 父开关 OFF 时**置灰**旗下子控件(Sidetone 关→滑杆变灰) | ✅ 通用 | 把父开关 + 依赖件包进 `.subfn-group`,纯 CSS `:has()` 置灰 |
+| **分段条件面板**(`segment-panels`,在分段/预设内) | 选某一段后**冒出**一组组件(选 ANC 露出 XYZ) | ✅ 通用(上限 6) | 用结构表达:第 N 段选中→第 N 面板显示,纯 CSS `:has()`,0 JS |
+| **父子开关联动**(`subfn-group`) | 父开关 OFF 时**置灰**旗下组件(Sidetone 关→滑杆变灰) | ✅ 通用 | 把父开关 + 依赖件包进 `.subfn-group`,纯 CSS `:has()` 置灰 |
 
 ---
 
@@ -124,6 +126,6 @@
 | **noise-control** | 1 开关+1 滑杆 | 弱模型测试用的**简化版**(≠ Figma 真三段降噪) | 真三段版待建 |
 
 > **已隔离(2026-06-26)**:B 组从 `functions/` 移到 `examples/`、摘出 id 路由;同步改了 4 处教学引用
-> (frame / SKILL / subcontrols README / single-control)+ `functions/README` + 预览宿主页;测试机型 **HS-DEMO** 的
+> (frame / SKILL / components README / single-control)+ `functions/README` + 预览宿主页;测试机型 **HS-DEMO** 的
 > manifest 已改为引用 A 组真实卡(`eq-audio` + `promotion-download`),旧生成页已删(可用 gen-subpage 重生成)。
 > 结果:教学范例 / swap 证明都保住,id 注册表只剩真实可用卡。

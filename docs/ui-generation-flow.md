@@ -11,8 +11,8 @@ flowchart TD
     P1_UNKNOWN[Author explicit new id]
     P1_SNAPSHOT{Snapshot functions/id.html exists?}
     P1_REF[Reference id plus rare overrides]
-    P1_AUTHOR[Author subcontrols]
-    P1_CHILD[For each sub-control slot]
+    P1_AUTHOR[Author components]
+    P1_CHILD[For each component slot]
     P1_SHAPE{Data shape?}
     P1_BOOL[Toggle family]
     P1_RANGE[Slider family]
@@ -33,7 +33,7 @@ flowchart TD
     P1_DEP[Write dependents]
     P1_CARD[Write nested function slot]
     P1_NEST{Nested slot has children?}
-    P1_MANIFEST[Manifest: title, functions, subcontrols, reveals, dependents]
+    P1_MANIFEST[Manifest: title, functions, components, reveals, dependents]
 
     P1_REQ --> P1_KNOWN
     P1_KNOWN -- "Yes, authoring only" --> P1_ID
@@ -123,13 +123,13 @@ flowchart TD
     P3_COPY[Copy card whole plus rare overrides]
     P3_ASSEMBLE[Assemble with headset-function]
     P3_SHELL[Copy function shell]
-    P3_SUB[Copy subcontrols/archetype.html and fill slots]
+    P3_SUB[Copy components/archetype.html and fill slots]
     P3_RENDER[Render compact row or stacked subfn-label]
-    P3_REVEALS{Sub-control has reveals?}
+    P3_REVEALS{Component has reveals?}
     P3_PANELS[Emit ordered segment-panels]
     P3_PANEL_FN{Panel slot is function?}
     P3_UNWRAP[Render function unwrapped]
-    P3_PANEL_SUB[Render sub-control slot]
+    P3_PANEL_SUB[Render component slot]
     P3_RECURSE[Recurse into panel slots]
     P3_DEP{Toggle has dependents?}
     P3_GROUP[Wrap toggle and dependents in subfn-group]

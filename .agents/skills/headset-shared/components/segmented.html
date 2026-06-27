@@ -14,7 +14,7 @@
        mode, mic pickup pattern, button assignment, language, LED levels, etc.
 
      CONDITIONAL PANELS (optional — the tab behavior):
-       Each segment can conditionally reveal a panel of sub-controls below the control row.
+       Each segment can conditionally reveal a panel of components below the control row.
        Panels are matched POSITIONALLY: the Nth .segment-panel is shown when the Nth segment
        is selected. Pure CSS :has(), zero JS.
        To opt in: keep the .segment-panels block and put content inside each .segment-panel.
@@ -30,7 +30,7 @@
      NAMED SUB-FUNCTION TITLE: if this control is a named sub-function (has a `label` and is not the
      card's sole control — i.e. it sits in a reveal `.segment-panel` or a toggle's `.subfn-child`),
      render `<p class="subfn-label">{label}</p>` as the first child of that wrapper, above this group.
-     A sole top-level control omits it (the card title labels it). See subcontrols/README.md.
+     A sole top-level control omits it (the card title labels it). See components/README.md.
 
      Icon source: COPY from `.agents/skills/headset-shared/segment-icons/<value>.svg` where
      <value> is the option's `value` field from the manifest (e.g. value="anc" → anc.svg).
@@ -64,7 +64,7 @@
 
   <!-- OPTIONAL conditional panels — DELETE this block entirely if no panel content is needed.
        Panel count must match segment count. Panels are positionally mapped (1st ↔ 1st, etc.).
-       Each panel can contain any sub-controls (toggle, slider, nested segmented, etc.). -->
+       Each panel can contain any components (toggle, slider, nested segmented, etc.). -->
   <div class="segment-panels">
     <div class="segment-panel">
       <!-- content shown when {label1} is selected -->

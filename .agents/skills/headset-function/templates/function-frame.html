@@ -1,10 +1,10 @@
 <!-- Function card SHELL — the canonical frame for ANY function card (Noise Control, Collaboration,
-     Multimedia…). A card = this shell + a vertical list of sub-controls inside .function-content.
+     Multimedia…). A card = this shell + a vertical list of components inside .function-content.
      HOW TO USE: COPY this shell, fill {function-title}; optionally add the title's ⓘ; then COPY one
-     headset-shared/subcontrols/<archetype>.html per sub-control into .function-content, in order.
+     headset-shared/components/<archetype>.html per component into .function-content, in order.
      A KNOWN function's assembled result is frozen as
      headset-gen-subpage/templates/functions/<id>.html and copied verbatim at generation time
-     (e.g. examples/collaboration.html is a worked example built from this shell + sub-controls;
+     (e.g. examples/collaboration.html is a worked example built from this shell + components;
      examples/ holds reference cards only — it is NOT id-routed by headset-gen-subpage).
      Styles: headset.css .function-container / .function-top-section / .function-header / .function-content. -->
 <div class="function-container">
@@ -16,11 +16,11 @@
         </div>
         <div class="function-icons" data-slot="function-info"
              data-instruction="OPTIONAL: if the function has info text, COPY
-               headset-shared/subcontrols/info-tooltip.html here and fill {info-text}; else DELETE this div.">
+               headset-shared/components/info-tooltip.html here and fill {info-text}; else DELETE this div.">
         </div>
       </div>
-      <div class="function-content" data-slot="subcontrols"
-           data-instruction="COPY one headset-shared/subcontrols/<archetype>.html per sub-control here
+      <div class="function-content" data-slot="components"
+           data-instruction="COPY one headset-shared/components/<archetype>.html per component here
              (toggle / slider / …), in order, filling each one's value slots. A toggle with a
              `dependents` field: wrap the toggle row AND its dependents in one .subfn-group (toggle
              <input> gets .subfn-toggle); wrap EACH dependent in a .subfn-child so it greys out when the

@@ -1,14 +1,14 @@
 <!-- Toggle component — compact boolean control rendered as a labeled row: name (+ optional ⓘ)
      on the left, native switch on the right. This is the default compact component; the other
      compact component is dropdown, which can swap into the same row widget slot.
-     COPY per a function's sub-control; fill {label} and {id}.
+     COPY per a function's component; fill {label} and {id}.
 
      PROPERTIES
      ──────────
      {label}         The control label string.
 
      ⓘ (optional block)
-                     If the control has info text, COPY subcontrols/info-tooltip.html into the
+                     If the control has info text, COPY components/info-tooltip.html into the
                      .function-icons div; otherwise delete the whole .function-icons div.
 
      CONTROL START / CONTROL END (structural slot)
@@ -28,7 +28,7 @@
     <p class="function-label">{label}</p>
   </div>
   <div class="function-icons">
-    <!-- optional: COPY subcontrols/info-tooltip.html here if this control has info; else delete this div -->
+    <!-- optional: COPY components/info-tooltip.html here if this control has info; else delete this div -->
   </div>
   <!-- CONTROL START — replace entire block with a different widget when needed -->
   <label class="switch">

@@ -1,14 +1,10 @@
-Model identity:
-  Marketing name: Dell Pro 3 Wireless ANC Headset
-  Model:          WL327
-  Firmware ver:   33.442.103.12
-
-Device image:
-  Main image:     images/product.png
-
-Connection method: bluetooth
-
-Battery: 76
-
-Features (top-level entry → subpage):
-  Entry 1 — Audio Settings → audio-settings.html
+marketing-name: Dell Pro 3 Wireless ANC Headset
+model-number: WL327
+firmware: 33.442.103.12
+image: images/product.png
+connectionType: bluetooth
+battery: 76
+features:
+  - label: Audio Settings
+    icon: audio
+    link: audio-settings.html

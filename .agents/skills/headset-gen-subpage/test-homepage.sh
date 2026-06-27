@@ -6,8 +6,9 @@ RENDERER="$ROOT/.agents/skills/headset-gen-subpage/render-home.py"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
+# Positive fixture: HS-DEMO (always clean). WL327 is the intentionally-broken instance;
+# its gate rejection is asserted in test-home.sh, so it is not a positive render case here.
 MODELS=(
-  "WL327"
   "HS-DEMO"
 )
 

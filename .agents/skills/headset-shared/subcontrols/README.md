@@ -28,6 +28,11 @@ shape → condition), see `headset/AGENTS.md` →
 > `<archetype>.html` here when a real design needs one (e.g. `dropdown.html`,
 > `preset-grid.html`). The control-selection rules (which archetype for which data shape) are in
 > docs §7. Unknown archetypes → the Layer-2 `headset-function` builder, then promote to a snippet here.
+>
+> **Adding an archetype is two edits kept in lockstep:** the snippet here (markup) **and** a block in
+> `.agents/skills/headset-gen-subpage/archetypes.py` — the machine-readable contract (width →
+> shape/label rule, conditional channel, options rule, required props) that the `validate-manifest.py`
+> gate derives every archetype rule from. The snippet without the block = the validator rejects it.
 
 ## Segmented control vs Preset grid — when to use which
 

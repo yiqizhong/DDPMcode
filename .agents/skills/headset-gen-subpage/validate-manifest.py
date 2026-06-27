@@ -11,10 +11,10 @@ import os
 import re
 import sys
 
-SELECTOR_ARCHETYPES = {"segmented", "preset-grid"}
-ALL_ARCHETYPES = {"toggle", "slider", "segmented", "preset-grid", "dropdown"}
-MAX_OPTIONS = 6  # headset.css positional :has() maps .segment / .segment-panel nth-child up to 6
-FULL_WIDTH = {"segmented", "preset-grid", "slider"}
+# The archetype contract is the single source of truth in archetypes.py (next to this
+# script); the validator derives every archetype rule from it and hardcodes none of its own.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from archetypes import ARCHETYPES, ALL_ARCHETYPES, SELECTOR_ARCHETYPES, MAX_OPTIONS
 
 REGISTRY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates", "functions")
 
@@ -127,7 +127,7 @@ class V:
     def err(self, where, msg):
         self.errors.append("%s: %s" % (where, msg))
 
-    def subcontrol(self, sc, where):
+    def subcontrol(self, sc, where, top_sole=False):
         if not isinstance(sc, dict):
             self.err(where, "sub-control is not a mapping")
             return
@@ -138,33 +138,68 @@ class V:
         if arch is None:
             self.err(where, "sub-control missing `archetype`")
             return
-        if arch not in ALL_ARCHETYPES:
+        spec = ARCHETYPES.get(arch)
+        if spec is None:
             self.err(where, "unknown archetype %r (allowed: %s)" % (arch, ", ".join(sorted(ALL_ARCHETYPES))))
+            return
 
+        # Required props — checked by KEY PRESENCE so a numeric/bool prop may be 0 / false.
+        for prop in spec["required"]:
+            if prop not in sc:
+                self.err(where, "`%s` is missing required prop `%s`" % (arch, prop))
+
+        # Label — positional: a compact row always needs one; a full-width control needs one
+        # unless it is the card's sole top-level control (then the card title covers it).
+        if (spec["width"] == "compact" or not top_sole) and not sc.get("label"):
+            if spec["width"] == "compact":
+                self.err(where, "`%s` renders as a labeled row and needs a non-empty `label`" % arch)
+            else:
+                self.err(where, "full-width `%s` is not the card's sole control here, so it needs a "
+                                "`label` (rendered as its .subfn-label heading; a missing one is "
+                                "dropped data — the BUG-002 class)" % arch)
+
+        # Options — governed by the catalog's per-archetype rule; selectors are capped, dropdown is not.
         opts = sc.get("options")
-        if arch in SELECTOR_ARCHETYPES:
-            if not isinstance(opts, list) or not opts:
-                self.err(where, "selector `%s` must have a non-empty `options` list" % arch)
-                opts = []
-            if len(opts) > MAX_OPTIONS:
+        opt_rule = spec["options"]
+        if opt_rule == "forbidden":
+            if opts is not None:
+                self.err(where, "`options` is not valid on `%s`" % arch)
+            opts = []
+        elif opts is None:
+            if opt_rule == "required":
+                self.err(where, "`%s` must have a non-empty `options` list" % arch)
+            opts = []
+        elif not isinstance(opts, list) or not opts:
+            self.err(where, "`options` on `%s` must be a non-empty list" % arch)
+            opts = []
+        else:
+            if arch in SELECTOR_ARCHETYPES and len(opts) > MAX_OPTIONS:
                 self.err(where, "%d options exceeds the max of %d (CSS :has() maps nth-child up to 6)"
                          % (len(opts), MAX_OPTIONS))
-            seen_v, seen_l = set(), set()
+            seen_v, seen_l, n_selected = set(), set(), 0
             for o in opts:
                 if not isinstance(o, dict):
+                    self.err(where, "each option must be a mapping with `label` and `value`")
                     continue
                 v, l = o.get("value"), o.get("label")
-                if v in seen_v:
+                if v is None:
+                    self.err(where, "an option is missing `value`")
+                elif v in seen_v:
                     self.err(where, "duplicate option value %r" % v)
-                if l in seen_l:
+                if l is None or l == "":
+                    self.err(where, "an option is missing `label`")
+                elif l in seen_l:
                     self.err(where, "duplicate option label %r" % l)
+                if o.get("selected") is True:
+                    n_selected += 1
                 seen_v.add(v)
                 seen_l.add(l)
-        elif opts is not None:
-            self.err(where, "`options` is only valid on a selector (segmented | preset-grid), not `%s`" % arch)
+            if n_selected > 1:
+                self.err(where, "%d options marked `selected` — at most one may be pre-selected" % n_selected)
 
+        # reveals — only on the archetypes whose conditional channel is "reveals".
         if "reveals" in sc:
-            if arch not in SELECTOR_ARCHETYPES:
+            if spec["conditional"] != "reveals":
                 self.err(where, "`reveals` is only valid on a selector (segmented | preset-grid); for a "
                                 "toggle's grey-out children use `dependents` on a toggle")
             else:
@@ -179,10 +214,11 @@ class V:
                                      % (key, ", ".join(sorted(option_values)) or "none"))
                         self.slots(slots, "%s>reveals[%s]" % (where, key))
 
+        # dependents — only on the archetype whose conditional channel is "dependents" (toggle).
         if "dependents" in sc:
-            if arch != "toggle":
-                self.err(where, "`dependents` is only valid on a `toggle`; `%s` is not a toggle "
-                                "— a selector's conditional children use `reveals`" % arch)
+            if spec["conditional"] != "dependents":
+                alt = "`reveals`" if spec["conditional"] == "reveals" else "no conditional channel"
+                self.err(where, "`dependents` is only valid on a `toggle`; `%s` carries %s" % (arch, alt))
             self.slots(sc.get("dependents"), "%s>dependents" % where)
 
     def slots(self, slots, where):
@@ -223,8 +259,9 @@ class V:
         if not isinstance(subs, list):
             self.err(where, "`subcontrols` must be a list")
             return
+        sole = len(subs) == 1  # a lone top-level full-width control renders headingless (no `label` needed)
         for n, sc in enumerate(subs):
-            self.subcontrol(sc, "%s>subcontrols[%d]" % (where, n))
+            self.subcontrol(sc, "%s>subcontrols[%d]" % (where, n), top_sole=sole)
 
     def manifest(self, m):
         if not isinstance(m, dict):

@@ -72,16 +72,23 @@ It enforces the rules below deterministically (zero-dependency, stdlib only — 
 the generated HTML), then re-run. The HALT directive is no longer prose a weak model can reason
 around — the script is the gate. (If python3 is somehow unavailable, fail closed: do not generate.)
 
-Generation is deterministic; an out-of-contract manifest is an authoring bug. The script HALTs when:
+Generation is deterministic; an out-of-contract manifest is an authoring bug. Every archetype rule
+is derived from one machine-readable contract — `archetypes.py` (next to the validator); add a new
+archetype there + its snippet, never by hardcoding. The script HALTs when:
 
-- `archetype` is not in the enum {toggle, slider, segmented, preset-grid, dropdown}.
+- `archetype` is not in the catalog {toggle, slider, segmented, preset-grid, dropdown}.
 - A subcontrol carries a legacy `condition:` field → migrate it to a selector's `reveals` or a toggle's `dependents`.
+- A required prop is missing — `slider` without `min`/`max`/`value`; a `dropdown` without `options`.
+- A `label` is missing where one renders — any compact row (`toggle`/`dropdown`), and any full-width
+  control (`slider`/`segmented`/`preset-grid`) that is NOT its card's sole top-level control (a lone
+  top-level full-width control renders headingless and legitimately omits it). A dropped heading is the BUG-002 class.
 - `reveals` appears on a non-selector archetype (incl. a `toggle`); for a toggle's grey-out
   dependents use `dependents` (reveals is selector-only). Or a `reveals` key matches no option `value`.
 - `dependents` appears on any archetype other than `toggle`.
 - A selector has more than **6** `options` (headset.css positional `:has()` maps `.segment` /
-  `.segment-panel` `nth-child` only up to 6; panels are 1:1 with options).
-- Two options in one selector share the same `value` (or the same `label`) — a data error; ask which is correct.
+  `.segment-panel` `nth-child` only up to 6; panels are 1:1 with options). Dropdown option lists are uncapped.
+- An option is missing its `value` or `label`; two options share the same `value` (or `label`); or
+  more than one option is marked `selected` — a data error; ask which is correct.
 - A bare `function` slot's id has no `functions/<id>.html` snapshot.
 
 ## Procedure

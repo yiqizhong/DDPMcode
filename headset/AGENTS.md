@@ -119,10 +119,14 @@ do not duplicate that full rule here.
   deterministic and invents nothing (D8). Before generating a sub-page, run
   `python3 .agents/skills/headset-gen-subpage/validate-manifest.py headset/models/<MODEL>/<SUBPAGE>.manifest`
   — non-zero exit = HALT (fix the manifest at source; never hand-edit the generated HTML). The script
-  is the enforcement (zero-dependency, always runs), not prose. It catches: unknown `archetype`, stray
-  `condition:`, `reveals` on a `toggle` (use `dependents` for toggle grey-out), `dependents` on a
-  non-toggle, a `reveals` key matching no option, >6 options, duplicate option values, and a `function`
-  slot with no snapshot.
+  is the enforcement (zero-dependency, always runs), not prose; every archetype rule is derived from one
+  contract file, `archetypes.py` (add a new archetype there + its snippet — nothing about archetypes is
+  hardcoded in the validator). It catches: unknown `archetype`, stray `condition:`, a missing required
+  prop (`slider` min/max/value, `dropdown` options), a missing `label` where one renders (compact rows,
+  and non-sole full-width controls — the BUG-002 class), `reveals` on a `toggle` (use `dependents` for
+  toggle grey-out), `dependents` on a non-toggle, a `reveals` key matching no option, >6 selector
+  options, a missing/duplicate option value or label, >1 option `selected`, and a `function` slot with
+  no snapshot.
 
 - **Slots:** single value → `data-property="<name>"`; region (variant/list) → `data-slot` +
   `data-instruction`. Names map 1:1 to manifest fields. Fill by name, never by guessing.

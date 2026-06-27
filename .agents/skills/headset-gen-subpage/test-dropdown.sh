@@ -162,11 +162,11 @@ if $ALL_SAME; then
 fi
 
 # ---------------------------------------------------------------------------
-# 5. Regression: WL327 and HS-DEMO must produce the SAME sha as before change.
+# 5. Regression: WL327 tracks the segment-icon asset baseline; HS-DEMO stays unchanged.
 # ---------------------------------------------------------------------------
-echo "--- 5. regression: WL327 and HS-DEMO unchanged ---"
+echo "--- 5. regression: WL327 icon baseline and HS-DEMO unchanged ---"
 
-WL327_EXPECTED="c3030d1edcb98213733cb76a5912ee4332d42fea12284c248f99bf39fe53e160"
+WL327_EXPECTED="5f77a7f226ea1de161529beae1729a645ae8dc2411636b006a3f6f9e7a76a277"
 WL327_SHA=""
 WL327_ALL_SAME=true
 for i in $(seq 1 10); do
@@ -182,7 +182,7 @@ if $WL327_ALL_SAME; then
     ok "WL327 renders are 10x byte-identical (sha256: ${WL327_SHA:0:16}…)"
 fi
 if [ "$WL327_SHA" = "$WL327_EXPECTED" ]; then
-    ok "WL327 sha256 matches pre-change baseline"
+    ok "WL327 sha256 matches current segment-icon baseline"
 else
     fail "WL327 sha256 CHANGED: got $WL327_SHA, expected $WL327_EXPECTED"
 fi

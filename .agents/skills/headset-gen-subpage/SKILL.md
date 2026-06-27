@@ -97,6 +97,7 @@ archetype there + its snippet, never by hardcoding. The script HALTs when:
   `.segment-panel` `nth-child` only up to 6; panels are 1:1 with options). Dropdown option lists are uncapped.
 - An option is missing its `value` or `label`; two options share the same `value` (or `label`); or
   more than one option is marked `selected` — a data error; ask which is correct.
+- A function id resolves to a snapshot `functions/<id>.html` but also declares `components:` — snapshots carry their own structure.
 - A bare `function` slot's id has no `functions/<id>.html` snapshot.
 
 ## Procedure
@@ -199,4 +200,5 @@ archetype there + its snippet, never by hardcoding. The script HALTs when:
 - Every conditional reveal came from a `reveals` entry (positional `.segment-panel`s, count = option
   count) — no hand-embedded panel, no added JS?
 - Output reproducible: would re-running this skill on the manifest produce this exact HTML? (No off-pipeline edits.)
+- After generation, run `python3 .agents/skills/headset-gen-subpage/verify-model.py $1`; non-zero means output drifted from the manifest (hand-edited or stale) — regenerate via `render-model.py`, never hand-edit.
 - Back link to `index.html` present? Nothing fabricated? `data-slot`/`data-instruction`/`data-property` stripped?

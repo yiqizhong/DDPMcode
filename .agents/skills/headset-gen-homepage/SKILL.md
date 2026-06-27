@@ -96,3 +96,4 @@ with them.
 - Exactly one connection block, matching `connectionType`?
 - Every feature button a real `<a href>` whose target sub-page was **actually built this run** (step 7), not left dangling?
 - Zero `display`-hidden variants, zero inline `<style>`?
+- After generation, run `python3 .agents/skills/headset-gen-subpage/verify-model.py $1`; non-zero means output drifted from the manifest (hand-edited or stale) — regenerate via `render-model.py`, never hand-edit.

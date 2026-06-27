@@ -35,6 +35,8 @@ from `headset.css` classes, each model-specific value marked `data-property="<na
 > manifest** — it helps you pick the correct `id` for a function. It is **not executed at
 > generation time**. The weak model generating a sub-page does NOT perform keyword matching;
 > it only looks up `functions/<manifest.id>.html` as described above (D8).
+> `keywords.py` is the machine-readable source for the validator's warn-only advisory; keep this
+> human table mirrored to it.
 
 The keywords below are **whole-word / phrase matches** (case-insensitive). They are not partial
 substring matches — e.g. `equalizer` does not trigger on `frequency` or `request`.

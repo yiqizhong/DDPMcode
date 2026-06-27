@@ -32,7 +32,8 @@ Never invent or draw an icon. If the key has no file → HALT and ask.
 
 **Key:** option `value` from the manifest (e.g. `value: anc` → `segment-icons/anc.svg`).  
 **Scope:** ONLY for acoustic-environment segmented controls (`icons: true`). All other segmented controls have no icons.  
-**Size:** 24×24 (width/height), viewBox 0 0 16 16 (dds2 source), fill `#0E0E0E`.  
+**Size:** 24×24 (width/height), viewBox 0 0 16 16 (dds2 source), fill `currentColor`.
+**Theme rule:** icons placed where CSS sets `color` (segment icons, selected states) MUST use `fill="currentColor"`, never a hardcoded hex.
 **Aliases:** `transparency` and `pass-through` both resolve to `hear-through.svg` — do NOT create separate files for them.
 
 | value(s) | File | Visual | dds2 source |
@@ -42,7 +43,7 @@ Never invent or draw an icon. If the key has no file → HALT and ask.
 | `hear-through`, `transparency`, `pass-through` | `segment-icons/hear-through.svg` | Ear — external sound let in | `dds2_ear.svg` |
 | `ambient` | `segment-icons/ambient.svg` | Speaker with levels — ambient | `dds2_audio-speaker-levels.svg` |
 
-> To add: pick the right `dds2/` source, copy it at 24×24 / `#0E0E0E` into `segment-icons/`,
+> To add: pick the right `dds2/` source, copy it at 24×24 / `currentColor` into `segment-icons/`,
 > add a row here. If the new value is an alias of an existing one, add it to the aliases column
 > instead of creating a new file.
 

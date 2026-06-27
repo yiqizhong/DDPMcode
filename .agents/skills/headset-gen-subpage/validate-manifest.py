@@ -17,6 +17,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from archetypes import ARCHETYPES, ALL_ARCHETYPES, SELECTOR_ARCHETYPES, MAX_OPTIONS
 
 REGISTRY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates", "functions")
+sys.path.insert(0, REGISTRY)
+from keywords import SNAPSHOT_KEYWORDS
 
 
 # ---- minimal YAML-subset parser (block maps, block seqs, scalars, inline {flow}) ----
@@ -118,14 +120,37 @@ def parse_manifest(text):
     return val
 
 
+def keyword_matches(text, keyword):
+    words = [re.escape(part) for part in str(keyword).lower().split()]
+    if not words:
+        return False
+    pattern = r"(?<![a-z0-9])" + r"[^a-z0-9]+".join(words) + r"(?![a-z0-9])"
+    return re.search(pattern, str(text).lower()) is not None
+
+
 # ---- validation ----
 
 class V:
     def __init__(self):
         self.errors = []
+        self.advisories = []
 
     def err(self, where, msg):
         self.errors.append("%s: %s" % (where, msg))
+
+    def advisory(self, msg):
+        self.advisories.append(msg)
+
+    def snapshot_keyword_advisory(self, fn, function_id):
+        haystack = "%s %s" % (function_id, fn.get("title", ""))
+        for snapshot_id, keywords in SNAPSHOT_KEYWORDS.items():
+            for keyword in keywords:
+                if keyword_matches(haystack, keyword):
+                    self.advisory(
+                        "ADVISORY: function '%s' matches snapshot '%s' (keyword '%s') — "
+                        "consider setting id to it." % (function_id, snapshot_id, keyword)
+                    )
+                    return
 
     def component(self, sc, where, top_sole=False):
         if not isinstance(sc, dict):
@@ -250,8 +275,14 @@ class V:
             self.err(where, "function missing `id`")
             return
         where = "function[%s]" % fid
-        subs = fn.get("components")
         has_snapshot = os.path.exists(os.path.join(REGISTRY, "%s.html" % fid))
+        if not has_snapshot:
+            self.snapshot_keyword_advisory(fn, fid)
+        if has_snapshot and "components" in fn:
+            self.err(where, "snapshot functions/%s.html carries its own structure; remove `components:` "
+                            "from function `%s`" % (fid, fid))
+            return
+        subs = fn.get("components")
         if subs is None:
             if not has_snapshot:
                 self.err(where, "no `components` and no snapshot functions/%s.html (cannot render)" % fid)
@@ -298,6 +329,8 @@ def main(argv):
         return 1
     v = V()
     v.manifest(manifest)
+    for advisory in v.advisories:
+        print(advisory, file=sys.stderr)
     if v.errors:
         print("HALT — %s is out of contract (%d issue(s)):" % (path, len(v.errors)), file=sys.stderr)
         for e in v.errors:

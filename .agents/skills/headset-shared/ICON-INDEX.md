@@ -23,6 +23,7 @@ Never invent or draw an icon. If the key has no file → HALT and ask.
 | id | File | Visual |
 |---|---|---|
 | `audio` | `icons/audio.svg` | Speaker — Audio Settings |
+| `settings` | `icons/settings.svg` | Gear — Device Settings |
 
 > To add: drop `<id>.svg` (24×24, `#0E0E0E`) into `icons/`, add a row here.
 

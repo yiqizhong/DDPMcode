@@ -81,10 +81,10 @@ connectionType: wired
 MANIFEST
 
 expect_pass "$ROOT/headset/models/HS-DEMO/home.manifest" "HS-DEMO"
-# WL327 is the intentionally-broken instance: home.manifest references icons/settings.svg
-# (which does not exist). The gate MUST reject it — this is the negative fixture that proves
-# verify/validate catches a drifted/broken model. Do NOT "fix" WL327 to make this pass.
-expect_halt "$ROOT/headset/models/WL327/home.manifest" "WL327-broken-instance" 'has no asset icons/settings.svg'
+# WL327 home is clean (its Device Settings icon `settings` is now in the registry). WL327 is still a
+# broken instance, but its breakage is in device-settings.manifest (the promotion routing), which is
+# caught by validate-manifest.py — see test-keyword-advisory.sh, not here. Negative home cases below.
+expect_pass "$ROOT/headset/models/WL327/home.manifest" "WL327"
 expect_halt "$TMPDIR/missing-model.manifest" "missing-model-number" 'missing required field `model-number`'
 expect_halt "$TMPDIR/unknown-connection.manifest" "unknown-connectionType" 'connectionType `satellite` has no snippet connection/satellite.html'
 expect_halt "$TMPDIR/feature-missing-icon.manifest" "feature-missing-icon" 'features[0]: feature missing `icon`'

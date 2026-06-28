@@ -99,6 +99,7 @@ archetype there + its snippet, never by hardcoding. The script HALTs when:
   more than one option is marked `selected` — a data error; ask which is correct.
 - A function id resolves to a snapshot `functions/<id>.html` but also declares `components:` — snapshots carry their own structure.
 - A bare `function` slot's id has no `functions/<id>.html` snapshot.
+- An assembled function's `id` or `title` matches a registered snapshot keyword (e.g. "promotion" → `promotion-download`) and no valid opt-out is present. Fix: set `id: <snapshot-id>` and remove `components:`, OR add `snapshot-opt-out: <snapshot-id>` (must equal the matched snapshot) and a non-empty `opt-out-reason`. A `snapshot-opt-out` with no keyword match, or naming the wrong snapshot, or with an empty reason, is itself an error.
 
 ## Procedure
 

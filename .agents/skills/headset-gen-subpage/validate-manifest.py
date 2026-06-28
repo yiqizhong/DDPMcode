@@ -141,16 +141,66 @@ class V:
     def advisory(self, msg):
         self.advisories.append(msg)
 
-    def snapshot_keyword_advisory(self, fn, function_id):
+    def snapshot_keyword_check(self, fn, function_id):
+        """Check whether an assembled function's id/title matches a registered snapshot keyword.
+
+        If matched and no valid opt-out is present → blocking HALT.
+        If matched and a valid opt-out is present → advisory only (exit 0).
+        If not matched but snapshot-opt-out is present → stale/blanket opt-out → blocking HALT.
+        """
         haystack = "%s %s" % (function_id, fn.get("title", ""))
+        matched_snapshot = None
+        matched_keyword = None
         for snapshot_id, keywords in SNAPSHOT_KEYWORDS.items():
             for keyword in keywords:
                 if keyword_matches(haystack, keyword):
-                    self.advisory(
-                        "ADVISORY: function '%s' matches snapshot '%s' (keyword '%s') — "
-                        "consider setting id to it." % (function_id, snapshot_id, keyword)
-                    )
-                    return
+                    matched_snapshot = snapshot_id
+                    matched_keyword = keyword
+                    break
+            if matched_snapshot:
+                break
+
+        opt_out = fn.get("snapshot-opt-out")
+        opt_reason = fn.get("opt-out-reason", "")
+
+        if opt_out is not None:
+            # opt-out present — validate it regardless of whether there's a keyword match
+            if matched_snapshot is None:
+                self.err(
+                    "function[%s]" % function_id,
+                    "`snapshot-opt-out: %s` is present but function '%s' does not match any "
+                    "registered snapshot keyword — remove stale opt-out" % (opt_out, function_id)
+                )
+                return
+            if opt_out != matched_snapshot:
+                self.err(
+                    "function[%s]" % function_id,
+                    "`snapshot-opt-out: %s` does not match the keyword-matched snapshot '%s' — "
+                    "set `snapshot-opt-out: %s` or correct the id" % (opt_out, matched_snapshot, matched_snapshot)
+                )
+                return
+            if not opt_reason or not str(opt_reason).strip():
+                self.err(
+                    "function[%s]" % function_id,
+                    "`snapshot-opt-out` requires a non-empty `opt-out-reason` explaining why "
+                    "the assembled path is correct instead of snapshot '%s'" % matched_snapshot
+                )
+                return
+            # Valid opt-out — downgrade to advisory
+            self.advisory(
+                "ADVISORY: function '%s' matches snapshot '%s' (keyword '%s') — "
+                "consider setting id to it." % (function_id, matched_snapshot, matched_keyword)
+            )
+            return
+
+        if matched_snapshot is not None:
+            self.err(
+                "function[%s]" % function_id,
+                "id/title matches snapshot '%s' (keyword '%s') — set `id: %s` and remove "
+                "`components:`, OR add `snapshot-opt-out: %s` with a non-empty `opt-out-reason` "
+                "to confirm this is an assembled control, not the snapshot card"
+                % (matched_snapshot, matched_keyword, matched_snapshot, matched_snapshot)
+            )
 
     def component(self, sc, where, top_sole=False):
         if not isinstance(sc, dict):
@@ -277,7 +327,7 @@ class V:
         where = "function[%s]" % fid
         has_snapshot = os.path.exists(os.path.join(REGISTRY, "%s.html" % fid))
         if not has_snapshot:
-            self.snapshot_keyword_advisory(fn, fid)
+            self.snapshot_keyword_check(fn, fid)
         if has_snapshot and "components" in fn:
             self.err(where, "snapshot functions/%s.html carries its own structure; remove `components:` "
                             "from function `%s`" % (fid, fid))

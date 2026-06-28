@@ -28,9 +28,23 @@ this first.
 - Render a **function** inside a sub-page → **copy**
   `headset-gen-subpage/templates/functions/<id>.html` if it exists; otherwise (no snapshot)
   `@skills:headset-function`. **Never** hand-roll an ad-hoc function from a description.
-  Function routing only recognizes the manifest's explicit `id` (D8). Keyword tables are
-  authoring-time hints for choosing that id; generation never matches names/descriptions or
-  overrides the manifest id.
+  Function routing only recognizes the manifest's explicit `id` (D8). Generation never matches
+  names/descriptions or overrides the manifest id — so choosing the right `id` is an AUTHORING
+  responsibility, governed by the next rule.
+
+- **MANDATORY: look a function up in the snapshot registry BEFORE you invent an `id`.** For every
+  function, first check the keyword registry —
+  `.agents/skills/headset-gen-subpage/templates/functions/keywords.py` (machine source) /
+  `functions/README.md` (human table). If the requirement matches a registered snapshot's keyword, you
+  **MUST** set `id` to that snapshot id and you **MUST NOT** add a `components:` list to it — the
+  snapshot already defines its own structure. Do not invent a new id and assemble a control by guessing.
+  - Example (the exact recurring bug): "Dell Audio Promotion" → keyword `promotion` →
+    use `id: promotion-download` (a fixed promo card: app icon + description + QR/download CTA + close
+    button; it has **NO** toggle). Writing `id: dell-audio-promotion` + `archetype: toggle` is WRONG.
+  - This is mechanically enforced: `validate-manifest.py` **HALTs** when an assembled function's
+    `id`/`title` matches a registered snapshot keyword, and the render pipeline then refuses to
+    generate. The only ways past it are the real fix (use the snapshot id, drop `components`) or an
+    explicit, justified `snapshot-opt-out: <snapshot-id>` + non-empty `opt-out-reason:` on that function.
 
 If a relevant skill exists but was not used, that is a violation — redo it through the skill.
 

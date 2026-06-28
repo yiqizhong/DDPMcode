@@ -1,0 +1,45 @@
+<!-- One walkthrough step. COPIED per steps[] entry by render-walkthrough.py; never written from a
+     description (the §9.7.4 "copy, don't create" rule, same as connection/*.html and feature-button).
+
+     Left column (.wt-col-text) follows the Figma walkthrough frame (node 67:1274):
+       progress bar  ->  (64px gap)  ->  text block (eyebrow + title + body)  ->  buttons at the bottom.
+     Right column (.wt-col-image) is the step image.
+
+     PROPERTIES
+       {progress}  this step's progress as a percentage (index / count * 100), set on the fill width.
+       {title}     step heading (Display-3, Roboto Light 56).
+       {body}      step description paragraph.
+
+     The eyebrow ".wt-eyebrow" is a FIXED template label ("FEATURE HIGHLIGHT") — same on every step,
+     not a manifest field.
+
+     .wt-media — the image box. The renderer fills {image} when the step has an `image`; when it has
+     none it drops the <img> but KEEPS the .wt-media box as a uniform light-gray placeholder.
+
+     .wt-nav (data-slot="nav") — the renderer fills this per position: Next (primary, + arrow) ->
+     next step, Skip (tertiary) -> the manifest's done-link; the LAST step gets the final CTA (primary,
+     + arrow, -> done-link) and no Skip. Styles: shared/walkthrough.css. -->
+<section class="wt-step" data-slot="step">
+  <div class="wt-col-text">
+    <div class="wt-text-top">
+      <div class="wt-progress">
+        <div class="wt-progress-fill" style="width:{progress}%"></div>
+      </div>
+      <div class="wt-textblock">
+        <div class="wt-title-group">
+          <p class="wt-eyebrow">FEATURE HIGHLIGHT</p>
+          <h1 class="wt-title">{title}</h1>
+        </div>
+        <p class="wt-text">{body}</p>
+      </div>
+    </div>
+    <div class="wt-nav" data-slot="nav">
+      <!-- renderer fills Next / Skip / final CTA here -->
+    </div>
+  </div>
+  <div class="wt-col-image">
+    <div class="wt-media">
+      <img class="wt-image" src="{image}">
+    </div>
+  </div>
+</section>

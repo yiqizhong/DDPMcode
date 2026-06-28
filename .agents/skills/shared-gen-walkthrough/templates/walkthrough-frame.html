@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-property="walkthrough-title">Walkthrough</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <!-- Preview-in-place paths (depth 4 from this template). render-walkthrough.py rewrites them to
+         the model-output depth (depth 3, <category>/models/<MODEL>/) on render. Do not hand-fix.
+         THREE stylesheets: tokens (shared), category shell (frame+masthead), walkthrough content area.
+         The category link below uses "headset" so the template previews correctly in the headset skill
+         tree; the renderer substitutes the actual <category> arg on render. -->
+    <link rel="stylesheet" href="../../../../shared/tokens.css">
+    <link rel="stylesheet" href="../../../../headset/headset.css">
+    <link rel="stylesheet" href="../../../../shared/walkthrough.css">
+</head>
+<body>
+    <div class="frame">
+        <div class="masthead">
+            <div class="masthead-controls">
+                <button class="control-button" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M2.5 7.39001H13.5V8.61001H2.5V7.39001Z" fill="#0E0E0E"/>
+                    </svg>
+                </button>
+                <button class="control-button" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M16 2V14H0V2H16ZM1 13H15V3H1V13Z" fill="#0E0E0E"/>
+                    </svg>
+                </button>
+                <button class="control-button" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <g clip-path="url(#clip0_24_166)">
+                            <path d="M16 0.82L15.18 0L8 7.2L0.82 0.05L0 0.87L7.15 8L0.05 15.13L0.87 16L8 8.85L15.13 16L15.95 15.18L8.8 8L16 0.82Z" fill="#0E0E0E"/>
+                        </g>
+                        <defs>
+                            <clipPath id="clip0_24_166">
+                                <rect width="16" height="16" fill="white"/>
+                            </clipPath>
+                        </defs>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <main class="wt-content-area" data-slot="walkthrough">
+            <!-- render-walkthrough.py fills this: one .wt-radio per step (first checked),
+                 a .wt-stage of step panels, and a .wt-dots progress row. -->
+        </main>
+    </div>
+</body>
+</html>

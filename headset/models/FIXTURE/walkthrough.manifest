@@ -1,0 +1,13 @@
+title: Get Started with Your Headset
+cta: Finish
+done-link: index.html
+steps:
+  - title: Welcome
+    body: Let's get your headset set up in three quick steps. It only takes a minute.
+    image: ../../../headset/assets/dell-audio-icon.png
+  - title: Pair your device
+    body: Press and hold the power button for 3 seconds until the LED flashes blue, then select the headset from your computer's Bluetooth menu.
+    image: ../../../headset/assets/dell-audio-icon.png
+  - title: You're all set
+    body: Your headset is ready to use. You can adjust noise control, audio, and device settings any time from the home screen.
+    image: ../../../headset/assets/dell-audio-icon.png

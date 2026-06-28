@@ -1,0 +1,234 @@
+/* ============================================================
+   Walkthrough — CROSS-CATEGORY shared layout.
+   Third shared-layer file, after tokens.css. Linked by any
+   <category>/models/<MODEL>/walkthrough.html alongside the
+   category stylesheet (e.g. headset/headset.css) which provides
+   the .frame, .masthead shell.
+
+   This file is CONTENT-AREA ONLY: it styles .wt-content-area
+   (the full-width region below the masthead) and the 2-col
+   text/image stepper inside it. Frame and masthead styles come
+   from the category stylesheet — do NOT duplicate them here.
+
+   The .frame is flex-column; .wt-content-area takes flex:1 to
+   fill the remaining height below the 64px masthead.
+
+   JS-free stepper: hidden .wt-radio inputs + CSS :checked reveal
+   one .wt-step at a time (the D11/D12 runtime-reveal pattern).
+   Step->panel mapping is POSITIONAL (:nth-of-type / :nth-child)
+   and capped at 6 — keep in lock-step with render-walkthrough.py
+   MAX_STEPS.
+   ============================================================ */
+
+/* ---- Content area ---- */
+/* Fills remaining height inside .frame (flex-column, defined in category CSS).
+   Padding: 0 top (flush to masthead), 64px L/R/B. */
+.wt-content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 64px 64px 64px;
+  min-height: 0;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* hidden step state inputs — toggled by .wt-dot / .wt-btn labels' for= */
+.wt-radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Stage fills all remaining height above the dots row */
+.wt-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* every step hidden by default; the active one is revealed positionally below */
+.wt-step {
+  display: none;
+  position: absolute;
+  inset: 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.wt-content-area:has(.wt-radio:nth-of-type(1):checked) .wt-stage .wt-step:nth-child(1),
+.wt-content-area:has(.wt-radio:nth-of-type(2):checked) .wt-stage .wt-step:nth-child(2),
+.wt-content-area:has(.wt-radio:nth-of-type(3):checked) .wt-stage .wt-step:nth-child(3),
+.wt-content-area:has(.wt-radio:nth-of-type(4):checked) .wt-stage .wt-step:nth-child(4),
+.wt-content-area:has(.wt-radio:nth-of-type(5):checked) .wt-stage .wt-step:nth-child(5),
+.wt-content-area:has(.wt-radio:nth-of-type(6):checked) .wt-stage .wt-step:nth-child(6) {
+  display: grid;
+}
+
+/* ---- Left column: follows the Figma walkthrough frame (node 67:1274) ----
+   progress bar (top) -> 64px gap -> text block (eyebrow + title + body) -> buttons (bottom). */
+.wt-col-text {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;                     /* Figma: gap between Content and Buttons */
+  min-height: 0;
+}
+
+/* the part above the buttons grows so the nav sits at the bottom */
+.wt-text-top {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 64px;                     /* Figma: Content gap (size/3xl) between progress + text */
+}
+
+/* --- Progress bar (281x6 track; the brand fill width is baked per step) --- */
+.wt-progress {
+  width: 281px;
+  height: 6px;
+  flex-shrink: 0;
+  background: #c5d4e3;           /* DDS progress-track color — no token exists; fill uses --color-accent */
+  overflow: hidden;
+}
+
+.wt-progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+}
+
+/* --- Text block --- */
+.wt-textblock {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.wt-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wt-eyebrow {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: var(--fw-regular);
+  color: var(--color-text);
+}
+
+.wt-title {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: 56px;
+  line-height: 68px;
+  font-weight: 300;              /* Roboto Light (Display 3) */
+  letter-spacing: -0.5px;
+  color: var(--color-text-strong);
+}
+
+.wt-text {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.15px;
+  color: var(--color-text);
+}
+
+/* --- Buttons (Figma: Next primary + arrow, Skip tertiary; left-aligned, gap 10) --- */
+.wt-nav {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.wt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.07px;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.wt-next,
+.wt-done {
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  color: var(--color-surface);
+}
+
+/* Back — icon-only, accent-outlined (per Figma): 48×40, padding 8 12, 1px #0063B8 border,
+   accent arrow (currentColor), transparent fill, 2px radius (from .wt-btn). */
+.wt-back {
+  width: 48px;
+  height: 40px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+.wt-skip {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-accent);
+}
+
+/* Next/CTA arrow — inherits the button's text color */
+.wt-btn-arrow {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.wt-btn-arrow svg {
+  display: block;
+}
+
+/* ---- Right column: image ---- */
+.wt-col-image {
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+}
+
+/* --- Media (image box). When a step has no image the renderer drops the <img> but KEEPS this box,
+   so the empty state is a uniform light-gray placeholder (--color-surface-muted). --- */
+.wt-media {
+  width: 100%;
+  flex: 1;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wt-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}

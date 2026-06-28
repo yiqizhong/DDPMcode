@@ -33,7 +33,9 @@ style suggestions (methodology §9.7.1 / §9.7.3).
 ### Naming taxonomy: `<category>-<role>-<name>`
 
 - `<category>` — the device category (`headset`, `mouse`, …). Always first, so the root
-  list sorts into per-category clusters (`headset-*` together, then `mouse-*`, …).
+  list sorts into per-category clusters (`headset-*` together, then `mouse-*`, …). The reserved
+  prefix `shared` marks a **cross-category** skill (e.g. `shared-gen-walkthrough`) — a
+  category-agnostic template that links only the shared layer, not any category stylesheet.
 - `<role>` — `gen` (page framework) or `function` (a sub-page function/setting module).
 - `<name>` — for `gen`: `homepage` | `subpage`. For `function`: omitted for the template-backed
   generator (`headset-function`). A per-function skill name such as `headset-function-eq` is rare
@@ -116,3 +118,8 @@ This is §9.7.4's "copy, don't create" — the structural defense against markup
   (`headset-gen-homepage`, `headset-gen-subpage`, `headset-function`) plus two committed **test
   fixture** models (`FIXTURE`, `HS-DEMO`) under `headset/models/`; no real product-model data yet and
   no dedicated `headset-function-<id>` skills; known functions default to snapshots that grow from real manifests.
+- **Cross-category (`shared-*`)** — category-agnostic templates that link only the shared layer
+  (`shared/tokens.css` + their own shared stylesheet), never a category's CSS. Current:
+  `shared-gen-walkthrough` (multi-step walkthrough / onboarding; styles in `shared/walkthrough.css`,
+  per-model instances at `<category>/models/<MODEL>/walkthrough.manifest`). A deliberate, scoped
+  exception to category isolation — only for genuine UX shells whose layout is not device-specific.

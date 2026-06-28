@@ -112,6 +112,7 @@ This is §9.7.4's "copy, don't create" — the structural defense against markup
 
 ## Categories
 
-- `headset/` — **pilot** category. See `headset/AGENTS.md`. Framework skills + rules only
-  (`headset-gen-homepage`, `headset-gen-subpage`, `headset-function`); no model data and no
-  dedicated `headset-function-<id>` skills; known functions default to snapshots that grow from real manifests.
+- `headset/` — **pilot** category. See `headset/AGENTS.md`. Framework skills + rules
+  (`headset-gen-homepage`, `headset-gen-subpage`, `headset-function`) plus two committed **test
+  fixture** models (`FIXTURE`, `HS-DEMO`) under `headset/models/`; no real product-model data yet and
+  no dedicated `headset-function-<id>` skills; known functions default to snapshots that grow from real manifests.

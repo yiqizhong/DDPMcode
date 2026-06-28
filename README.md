@@ -32,8 +32,9 @@ the isolation intent is preserved via naming; only the folder location differs. 
 `headset-gen-subpage`, `headset-function`), layout, and category rules. It now has a few **real,
 usable cards** in `templates/functions/` (`eq-audio`, `promotion-download`, `single-control`) plus
 **reference/demo cards** in `templates/examples/` (`collaboration`, `auto-power-off`, `noise-control`
-— NOT id-routed), and one local throwaway model `headset/models/HS-DEMO/` (gitignored). There are
-**no dedicated `headset-function-<id>` skills** — known functions default to `functions/<id>.html`
+— NOT id-routed), plus two committed **test fixture** models (`FIXTURE`, `HS-DEMO`) under
+`headset/models/` whose manifests are tracked while their generated `.html`/`READ-LOG` are gitignored.
+There are **no dedicated `headset-function-<id>` skills** — known functions default to `functions/<id>.html`
 snapshots that grow from real manifests (methodology §9.4). Other device categories get their own
 isolated folder later, sharing only `shared/tokens.css`.
 
@@ -52,7 +53,7 @@ shared/tokens.css                     # design-token layer
 headset/
   AGENTS.md                           # category map: routing + non-negotiables
   headset.css                         # category layout (uses tokens via var())
-  models/HS-DEMO/                     # one local throwaway model (gitignored)
+  models/FIXTURE/ models/HS-DEMO/     # committed test fixtures: manifests tracked, generated .html/READ-LOG gitignored
 docs/                                 # navigation.md (map) · component-catalog.md · function-card-architecture.md (journal) · methodology.md (reference)
 AGENTS.md                             # cross-category map
 README.md                             # this file

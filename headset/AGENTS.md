@@ -11,8 +11,9 @@ this first.
 > methodology's isolation/on-demand intent is preserved via naming + scoped descriptions;
 > only the folder location differs.
 
-> **Status: pilot skeleton.** Framework skills (`headset-gen-homepage`,
-> `headset-gen-subpage`, `headset-function`) and `headset.css` exist; there is **no model data
+> **Status: pilot.** Framework skills (`headset-gen-homepage`,
+> `headset-gen-subpage`, `headset-function`) and `headset.css` exist, plus two committed **test
+> fixture** models (`FIXTURE`, `HS-DEMO`) under `models/`; there is **no real product-model data
 > yet** and **no dedicated `headset-function-<id>` skills**. Function snapshots exist and grow
 > organically from real manifests (methodology §9.4) — do not pre-create
 > them speculatively.
@@ -206,5 +207,5 @@ do not duplicate that full rule here.
 headset/
   AGENTS.md                    # this map
   headset.css                  # category layout (references shared/tokens.css)
-  models/                      # one folder per model (manifests + generated pages); none yet
+  models/                      # one folder per model (manifests + generated pages); FIXTURE + HS-DEMO test fixtures so far, no real product model yet
 ```

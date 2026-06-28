@@ -1,0 +1,7 @@
+title: Audio Settings
+
+# References only REAL cards in templates/functions/ (id-routed).
+# The old ids (noise-control, collaboration) moved to templates/examples/ — no longer routed.
+functions:
+  - id: eq-audio
+  - id: promotion-download

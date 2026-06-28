@@ -1,0 +1,9 @@
+marketing-name: DDPM Headset
+model-number: HS-DEMO
+firmware: 1.0.0.0
+connectionType: wired
+
+features:
+  - label: Audio Settings
+    icon: audio
+    link: audio-settings.html

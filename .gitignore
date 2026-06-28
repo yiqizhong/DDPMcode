@@ -4,7 +4,11 @@
 .claude/launch.json
 headset/_preview-*.html
 
-# throwaway demo/validation model (kept local, not committed)
-headset/models/HS-DEMO/
+# committed test fixtures: track manifests, ignore generated output
+headset/models/HS-DEMO/*.html
+headset/models/HS-DEMO/READ-LOG.md
 headset/models/FIXTURE/*.html
 headset/models/FIXTURE/READ-LOG.md
+
+# local archive of throwaway test instances / unused files
+_archive/

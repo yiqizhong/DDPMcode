@@ -1,0 +1,19 @@
+title: Device Settings
+functions:
+  - id: auto-off
+    title: Auto Off
+    components:
+      - archetype: dropdown
+        label: Auto Off Time
+        options:
+          - value: 30min
+            label: 30 mins
+          - value: 1hour
+            label: 1 hour
+            selected: true
+          - value: 2hours
+            label: 2 hours
+          - value: 3hours
+            label: 3 hours
+  - id: promotion-download
+    title: Dell Audio Promotion

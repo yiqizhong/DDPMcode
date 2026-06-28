@@ -7,7 +7,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$HERE/../../.." && pwd)"
 RENDERER="$HERE/render-content.py"
 VALIDATOR="$HERE/validate-manifest.py"
-MANIFEST=/tmp/test-dropdown-manifest.manifest
+MANIFEST="$REPO_ROOT/headset/models/FIXTURE/device-settings.manifest"
 SCRATCHPAD=/tmp/test-dropdown-scratch
 
 cd "$REPO_ROOT"
@@ -19,32 +19,10 @@ ok()   { echo "[PASS] $*"; PASS=$((PASS + 1)); }
 fail() { echo "[FAIL] $*"; FAIL=$((FAIL + 1)); }
 
 # ---------------------------------------------------------------------------
-# Write the test manifest to a temp path (no model directory pollution).
+# Use the stable fixture model's device-settings manifest so the dropdown
+# regression does not depend on volatile model instances.
 # ---------------------------------------------------------------------------
-cat > "$MANIFEST" <<'EOF'
-title: Power Settings
-
-functions:
-  - id: auto-power-off
-    title: Auto Power-Off
-    components:
-      - archetype: dropdown
-        label: Turn off after
-        options:
-          - label: 15 minutes
-            value: 15min
-          - label: 30 minutes
-            value: 30min
-          - label: 1 hour
-            value: 1h
-          - label: 2 hours
-            value: 2h
-          - label: 4 hours
-            value: 4h
-            selected: true
-          - label: 8 hours
-            value: 8h
-EOF
+test -f "$MANIFEST" || fail "missing fixture manifest: $MANIFEST"
 
 # ---------------------------------------------------------------------------
 # 1. Gate: validate-manifest.py accepts the dropdown manifest.
@@ -103,20 +81,20 @@ else
     fail "no dropdown-item--selected class found in output"
 fi
 
-# 3c. Selected item (4 hours) is the one marked.
+# 3c. Selected item (1 hour) is the one marked.
 SELECTED_LINE=$(echo "$OUTPUT" | grep 'dropdown-item--selected' | head -1)
-if echo "$SELECTED_LINE" | grep -q '4 hours'; then
-    ok "correct option (4 hours) is marked as selected"
+if echo "$SELECTED_LINE" | grep -q '1 hour'; then
+    ok "correct option (1 hour) is marked as selected"
 else
-    fail "wrong option marked as selected — expected '4 hours', got: $SELECTED_LINE"
+    fail "wrong option marked as selected — expected '1 hour', got: $SELECTED_LINE"
 fi
 
-# 3d. All six options are present.
+# 3d. All four options are present.
 OPTION_COUNT=$(echo "$OUTPUT" | grep -c 'class="dropdown-item')
-if [ "$OPTION_COUNT" -eq 6 ]; then
-    ok "all 6 options are rendered"
+if [ "$OPTION_COUNT" -eq 4 ]; then
+    ok "all 4 options are rendered"
 else
-    fail "expected 6 dropdown-item elements, got $OPTION_COUNT"
+    fail "expected 4 dropdown-item elements, got $OPTION_COUNT"
 fi
 
 # 3e. No leftover {placeholder} strings.
@@ -162,29 +140,29 @@ if $ALL_SAME; then
 fi
 
 # ---------------------------------------------------------------------------
-# 5. Regression: WL327 tracks the segment-icon asset baseline; HS-DEMO stays unchanged.
+# 5. Regression: FIXTURE tracks the dropdown/snapshot baseline; HS-DEMO stays unchanged.
 # ---------------------------------------------------------------------------
-echo "--- 5. regression: WL327 icon baseline and HS-DEMO unchanged ---"
+echo "--- 5. regression: FIXTURE dropdown baseline and HS-DEMO unchanged ---"
 
-WL327_EXPECTED="5f77a7f226ea1de161529beae1729a645ae8dc2411636b006a3f6f9e7a76a277"
-WL327_SHA=""
-WL327_ALL_SAME=true
+FIXTURE_EXPECTED="ab0ef42d208e78971e9f650454f06af03e7afc404887d5b00c6f18e3edb18819"
+FIXTURE_SHA=""
+FIXTURE_ALL_SAME=true
 for i in $(seq 1 10); do
-    SHA=$(python3 "$RENDERER" headset/models/WL327/audio-settings.manifest 2>/dev/null | sha256sum | awk '{print $1}')
-    if [ -z "$WL327_SHA" ]; then
-        WL327_SHA="$SHA"
-    elif [ "$SHA" != "$WL327_SHA" ]; then
-        WL327_ALL_SAME=false
-        fail "WL327 render $i non-deterministic: $SHA vs $WL327_SHA"
+    SHA=$(python3 "$RENDERER" headset/models/FIXTURE/device-settings.manifest 2>/dev/null | sha256sum | awk '{print $1}')
+    if [ -z "$FIXTURE_SHA" ]; then
+        FIXTURE_SHA="$SHA"
+    elif [ "$SHA" != "$FIXTURE_SHA" ]; then
+        FIXTURE_ALL_SAME=false
+        fail "FIXTURE device render $i non-deterministic: $SHA vs $FIXTURE_SHA"
     fi
 done
-if $WL327_ALL_SAME; then
-    ok "WL327 renders are 10x byte-identical (sha256: ${WL327_SHA:0:16}…)"
+if $FIXTURE_ALL_SAME; then
+    ok "FIXTURE device renders are 10x byte-identical (sha256: ${FIXTURE_SHA:0:16}…)"
 fi
-if [ "$WL327_SHA" = "$WL327_EXPECTED" ]; then
-    ok "WL327 sha256 matches current segment-icon baseline"
+if [ "$FIXTURE_SHA" = "$FIXTURE_EXPECTED" ]; then
+    ok "FIXTURE device sha256 matches current dropdown baseline"
 else
-    fail "WL327 sha256 CHANGED: got $WL327_SHA, expected $WL327_EXPECTED"
+    fail "FIXTURE device sha256 CHANGED: got $FIXTURE_SHA, expected $FIXTURE_EXPECTED"
 fi
 
 HSDEMO_SHA=""

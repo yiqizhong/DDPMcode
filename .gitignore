@@ -6,3 +6,5 @@ headset/_preview-*.html
 
 # throwaway demo/validation model (kept local, not committed)
 headset/models/HS-DEMO/
+headset/models/FIXTURE/*.html
+headset/models/FIXTURE/READ-LOG.md

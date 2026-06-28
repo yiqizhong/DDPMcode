@@ -6,9 +6,7 @@ RENDERER="$ROOT/.agents/skills/headset-gen-subpage/render-subpage.py"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
-# Positive fixture: HS-DEMO (always clean). WL327 is the intentionally-broken instance
-# (home.manifest -> missing icons/settings.svg); its gate rejection is asserted in test-home.sh,
-# so it is not a positive render case here.
+# Positive fixture: HS-DEMO (always clean).
 CASES=(
   "HS-DEMO audio-settings"
 )

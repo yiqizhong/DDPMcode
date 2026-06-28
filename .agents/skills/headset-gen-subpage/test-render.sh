@@ -8,7 +8,8 @@ TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
 MANIFESTS=(
-  "headset/models/WL327/audio-settings.manifest"
+  "headset/models/FIXTURE/audio-settings.manifest"
+  "headset/models/FIXTURE/device-settings.manifest"
   "headset/models/HS-DEMO/audio-settings.manifest"
 )
 
@@ -32,10 +33,19 @@ assert_snippet_sourced() {
   local out="$2"
 
   case "$manifest" in
-    headset/models/WL327/audio-settings.manifest)
-      grep -Fq '<div class="segmented-group">' "$out" || fail "WL327 missing segmented snippet markup"
-      grep -Fq '<div class="slider-input-wrap" style="--min:1;--max:5;--val:3;">' "$out" || fail "WL327 missing slider snippet markup"
-      grep -Fq '<svg id="eq-audio"' "$out" || fail "WL327 missing unwrapped eq-audio snapshot"
+    headset/models/FIXTURE/audio-settings.manifest)
+      grep -Fq '<div class="segmented-group">' "$out" || fail "FIXTURE audio missing segmented snippet markup"
+      grep -Fq '<span class="segment-icon">' "$out" || fail "FIXTURE audio missing segment icon markup"
+      grep -Fq '<div class="segment-panel">' "$out" || fail "FIXTURE audio missing reveal segment panel"
+      grep -Fq '<div class="slider-input-wrap" style="--min:1;--max:5;--val:3;">' "$out" || fail "FIXTURE audio missing slider snippet markup"
+      grep -Fq '<div class="subfn-group">' "$out" || fail "FIXTURE audio missing dependent sub-function group"
+      grep -Fq '<p class="subfn-label">Canceling Strength</p>' "$out" || fail "FIXTURE audio missing dependent sub-function label"
+      grep -Fq '<div class="preset-grid">' "$out" || fail "FIXTURE audio missing preset-grid snippet markup"
+      grep -Fq '<svg id="eq-audio"' "$out" || fail "FIXTURE audio missing unwrapped eq-audio snapshot"
+      ;;
+    headset/models/FIXTURE/device-settings.manifest)
+      grep -Fq '<details class="dropdown">' "$out" || fail "FIXTURE device missing dropdown snippet markup"
+      grep -Fq 'Download Dell Audio' "$out" || fail "FIXTURE device missing promotion-download snapshot"
       ;;
     headset/models/HS-DEMO/audio-settings.manifest)
       grep -Fq '<svg id="eq-audio"' "$out" || fail "HS-DEMO missing eq-audio snapshot"

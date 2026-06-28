@@ -47,17 +47,28 @@ grep -Fq "promotion" "$MATCH_ERR" \
   || fail "HALT message should name the matched keyword 'promotion'"
 echo "PASS assembled keyword match with no opt-out HALTs and names promotion-download"
 
-# Sanity: the REAL WL327/device-settings.manifest (dell-audio-promotion + toggle) also HALTs
-REAL_DEVICE="$ROOT/headset/models/WL327/device-settings.manifest"
-REAL_OUT="$TMPDIR/real.out"
-REAL_ERR="$TMPDIR/real.err"
-if run_validator "$REAL_DEVICE" "$REAL_OUT" "$REAL_ERR"; then
-  cat "$REAL_OUT" "$REAL_ERR" >&2
-  fail "WL327/device-settings.manifest should HALT (dell-audio-promotion has no opt-out)"
+# Sanity: a self-contained device-settings manifest with this bad authoring also HALTs.
+SELF_DEVICE="$TMPDIR/device-settings-keyword-halt.manifest"
+cat >"$SELF_DEVICE" <<'YAML'
+title: Device Settings
+functions:
+  - id: dell-audio-promotion
+    title: Dell Audio Promotion
+    components:
+      - archetype: toggle
+        label: Show promotion
+        value: true
+YAML
+
+SELF_OUT="$TMPDIR/self-device.out"
+SELF_ERR="$TMPDIR/self-device.err"
+if run_validator "$SELF_DEVICE" "$SELF_OUT" "$SELF_ERR"; then
+  cat "$SELF_OUT" "$SELF_ERR" >&2
+  fail "self-contained device-settings keyword manifest should HALT (dell-audio-promotion has no opt-out)"
 fi
-grep -Fq "promotion-download" "$REAL_ERR" \
-  || fail "WL327/device-settings.manifest HALT message should name promotion-download"
-echo "PASS WL327/device-settings.manifest HALTs as expected"
+grep -Fq "promotion-download" "$SELF_ERR" \
+  || fail "self-contained device-settings HALT message should name promotion-download"
+echo "PASS self-contained device-settings keyword manifest HALTs as expected"
 
 # ---- Case 2: keyword match WITH valid opt-out → advisory only, exit 0 ---------------
 OPTOUT="$TMPDIR/optout.manifest"
@@ -182,8 +193,12 @@ if grep -Fq "ADVISORY:" "$NO_MATCH_ERR"; then
 fi
 echo "PASS assembled function without keyword match has no HALT and no advisory"
 
-# ---- Case 7: regression — real subpage manifests still pass -------------------------
-for manifest in "$ROOT/headset/models/WL327/audio-settings.manifest" "$ROOT/headset/models/HS-DEMO/audio-settings.manifest"; do
+# ---- Case 7: regression — committed subpage manifests still pass --------------------
+for manifest in \
+  "$ROOT/headset/models/FIXTURE/audio-settings.manifest" \
+  "$ROOT/headset/models/FIXTURE/device-settings.manifest" \
+  "$ROOT/headset/models/HS-DEMO/audio-settings.manifest"
+do
   OUT="$TMPDIR/$(basename "$(dirname "$manifest")").out"
   ERR="$TMPDIR/$(basename "$(dirname "$manifest")").err"
   if ! run_validator "$manifest" "$OUT" "$ERR"; then

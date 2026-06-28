@@ -81,9 +81,11 @@ functions:
 MANIFEST
 
 python3 "$VALIDATOR" "$TMP_VALID_MANIFEST" >/dev/null || fail "snapshot manifest without components should pass"
-python3 "$VALIDATOR" "$ROOT/headset/models/WL327/audio-settings.manifest" >/dev/null || fail "WL327 audio-settings regression should pass"
+python3 "$VALIDATOR" "$ROOT/headset/models/FIXTURE/audio-settings.manifest" >/dev/null || fail "FIXTURE audio-settings regression should pass"
+python3 "$VALIDATOR" "$ROOT/headset/models/FIXTURE/device-settings.manifest" >/dev/null || fail "FIXTURE device-settings regression should pass"
 python3 "$VALIDATOR" "$ROOT/headset/models/HS-DEMO/audio-settings.manifest" >/dev/null || fail "HS-DEMO audio-settings regression should pass"
 echo "PASS B.2 valid and regression manifests"
 
-assert_hash_prefix "headset/models/WL327/audio-settings.manifest" "5f77a7f226ea"
+assert_hash_prefix "headset/models/FIXTURE/audio-settings.manifest" "379d0479bae7"
+assert_hash_prefix "headset/models/FIXTURE/device-settings.manifest" "ab0ef42d208e"
 assert_hash_prefix "headset/models/HS-DEMO/audio-settings.manifest" "d8aa56479f4b"

@@ -1,0 +1,44 @@
+title: Audio Settings
+functions:
+  - id: noise-control
+    title: Noise Control
+    components:
+      - archetype: segmented
+        icons: true
+        options:
+          - {label: ANC, value: anc, selected: true}
+          - {label: "Off", value: off}
+        reveals:
+          anc:
+            - archetype: slider
+              label: ANC Strength
+              min: 1
+              max: 5
+              value: 3
+  - id: collaboration
+    title: Collaboration
+    components:
+      - archetype: toggle
+        label: Mic Noise Canceling
+        value: true
+        dependents:
+          - archetype: segmented
+            label: Canceling Strength
+            options:
+              - {label: Low, value: low}
+              - {label: Medium, value: medium, selected: true}
+              - {label: High, value: high}
+  - id: multimedia
+    title: Multimedia
+    components:
+      - archetype: preset-grid
+        label: Presets
+        options:
+          - {label: Default, value: default, selected: true}
+          - {label: Bass Boost, value: bass-boost}
+          - {label: Speech Boost, value: speech-boost}
+          - {label: Treble Boost, value: treble-boost}
+          - {label: Custom, value: custom}
+        reveals:
+          custom:
+            - {function: eq-audio}

@@ -6,8 +6,7 @@ RENDERER="$ROOT/.agents/skills/headset-gen-subpage/render-home.py"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
-# Positive fixture: HS-DEMO (always clean). WL327 is the intentionally-broken instance;
-# its gate rejection is asserted in test-home.sh, so it is not a positive render case here.
+# Positive fixture: HS-DEMO (always clean).
 MODELS=(
   "HS-DEMO"
 )
@@ -78,9 +77,9 @@ require("<style" not in doc.lower(), "inline style block present")
 ctype = home["connectionType"]
 if ctype == "bluetooth":
     battery = str(home.get("battery", "—")) + "%"
-    require('class="bluetooth-icon"' in doc, "WL327 bluetooth connection block missing")
-    require(f'<span class="battery-text">{battery}</span>' in doc, "WL327 battery value missing")
-    require('class="unpair-button"' in doc and "Unpair" in doc, "WL327 Unpair is missing")
+    require('class="bluetooth-icon"' in doc, "bluetooth connection block missing")
+    require(f'<span class="battery-text">{battery}</span>' in doc, "bluetooth battery value missing")
+    require('class="unpair-button"' in doc and "Unpair" in doc, "bluetooth Unpair is missing")
 elif ctype == "wired":
     require('class="wired-icon"' in doc, "HS-DEMO wired connection block missing")
     require('<span class="battery-text">USB-C</span>' in doc, "HS-DEMO USB-C label missing")

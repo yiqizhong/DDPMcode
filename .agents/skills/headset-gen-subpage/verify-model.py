@@ -28,6 +28,10 @@ validate_home = load_module("validate_home", os.path.join(HERE, "validate-home.p
 render_home = load_module("render_home_for_verify", os.path.join(HERE, "render-home.py"))
 render_subpage = load_module("render_subpage_for_verify", os.path.join(HERE, "render-subpage.py"))
 render_model = load_module("render_model_for_verify", os.path.join(HERE, "render-model.py"))
+render_walkthrough = load_module(
+    "render_walkthrough_for_verify",
+    os.path.join(HERE, "..", "shared-gen-walkthrough", "render-walkthrough.py"),
+)
 
 
 def rel(path):
@@ -112,6 +116,12 @@ def expected_pages(model, home):
             raise ValueError("duplicate feature target %r; refusing to verify the same page twice" % link)
         seen.add(page)
         pages.append((page, render_subpage, ["render-subpage.py", model, subpage]))
+    # A model may also carry a cross-category walkthrough page (rendered by the shared
+    # shared-gen-walkthrough skill). When its manifest is present, verify walkthrough.html too so the
+    # byte gate covers it instead of flagging it as an unexpected on-disk page.
+    if os.path.exists(os.path.join(MODEL_ROOT, model, "walkthrough.manifest")):
+        pages.append(("walkthrough.html", render_walkthrough,
+                      ["render-walkthrough.py", "headset", model, "-"]))
     return pages
 
 

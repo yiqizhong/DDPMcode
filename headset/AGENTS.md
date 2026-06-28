@@ -147,6 +147,14 @@ do not duplicate that full rule here.
   options, a missing/duplicate option value or label, >1 option `selected`, and a `function` slot with
   no snapshot.
 
+- **The deliverable is the rendered HTML on disk, not the manifest — RUN the renderer.** Writing the
+  `.manifest` is the halfway point; the task is complete ONLY when
+  `python3 .agents/skills/headset-gen-subpage/render-model.py <MODEL>` has been RUN, the page files
+  (`index.html` + every sub-page `.html`) exist in `headset/models/<MODEL>/`, and `verify-model.py`
+  passes. Stopping after the manifest and waiting to be asked for the HTML is an INCOMPLETE task, not a
+  handoff — a manifest with no rendered page is a violation, not a TODO. Run the executor as the final
+  step, every time.
+
 - **Slots:** single value → `data-property="<name>"`; region (variant/list) → `data-slot` +
   `data-instruction`. Names map 1:1 to manifest fields. Fill by name, never by guessing.
 - **No hiding for cross-model variant axes:** connection blocks, function lists, and other
@@ -179,6 +187,7 @@ do not duplicate that full rule here.
 
 ## Self-check (after generating)
 
+- **Did you RUN the renderer?** The page `.html` files must exist on disk now — not just the manifests. If only manifests were written, the task is NOT done: run `render-model.py <MODEL>`.
 - Did every step go through its skill (no hand-written home/sub-page/function)?
 - Every feature entry a real `<a href>` whose target sub-page was **actually built this run**
   (not left as a dangling route / TODO), and every sub-page links back to `index.html`?

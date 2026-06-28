@@ -16,13 +16,19 @@ A sub-page SHARES the model's device identity, connection, and feature list with
 Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
 (e.g. `@skills:headset-gen-subpage HS1234 mic-settings`).
 
-## Deterministic executor (preferred)
+## Deterministic executor (REQUIRED — the page is not done until this runs)
 
-The canonical, reproducible generation path is now the render scripts:
+The canonical, reproducible generation path is the render scripts:
 `python3 .agents/skills/headset-gen-subpage/render-model.py <MODEL>` builds the whole model, or
 `python3 .agents/skills/headset-gen-subpage/render-subpage.py <MODEL> <SUBPAGE>` renders this
 single sub-page. The Procedure below is the human-readable SPEC those scripts implement and must
 stay in lock-step with them.
+
+**Authoring the `.manifest` is NOT the deliverable — the rendered `.html` on disk is.** Writing the
+manifest is the halfway point: you MUST then RUN the executor so that
+`headset/models/<MODEL>/<SUBPAGE>.html` actually exists in the model folder, then confirm with
+`verify-model.py`. Do NOT stop after the manifest and wait to be asked for the HTML — running the
+render is part of THIS task, not an optional follow-up. (Definition of Done: see Hard rules.)
 
 ## Inputs
 
@@ -187,6 +193,10 @@ archetype there + its snippet, never by hardcoding. The script HALTs when:
   cannot express, the gap is in the manifest/schema/snippets — fix it THERE (add a `reveals` entry, a
   snippet, an archetype), never by editing the generated HTML directly. Conditional content (a
   reveal) lives in `reveals`, not as a hand-placed `.segment-panel`.
+- **Definition of Done = rendered HTML on disk, not the manifest.** The task is complete ONLY when
+  `render-model.py <MODEL>` (or `render-subpage.py`) has been RUN, `headset/models/<MODEL>/<SUBPAGE>.html`
+  exists, and `verify-model.py` passes. Authoring the manifest and stopping — leaving the render "for
+  when asked" — is an INCOMPLETE task, not a handoff. Run the executor as the final step, every time.
 
 ## Self-check
 
@@ -201,5 +211,6 @@ archetype there + its snippet, never by hardcoding. The script HALTs when:
 - Every conditional reveal came from a `reveals` entry (positional `.segment-panel`s, count = option
   count) — no hand-embedded panel, no added JS?
 - Output reproducible: would re-running this skill on the manifest produce this exact HTML? (No off-pipeline edits.)
+- **Did you actually RUN the renderer?** `headset/models/$1/$2.html` must exist on disk now — not just the manifest. If you only wrote the manifest, the task is NOT done: run `render-model.py $1`.
 - After generation, run `python3 .agents/skills/headset-gen-subpage/verify-model.py $1`; non-zero means output drifted from the manifest (hand-edited or stale) — regenerate via `render-model.py`, never hand-edit.
 - Back link to `index.html` present? Nothing fabricated? `data-slot`/`data-instruction`/`data-property` stripped?

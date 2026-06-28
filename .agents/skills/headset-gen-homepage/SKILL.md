@@ -11,13 +11,19 @@ slots from the model manifest. **Copy + fill — never generate the frame from s
 
 Invoke: `@skills:headset-gen-homepage <MODEL>` (e.g. `@skills:headset-gen-homepage HS1234`).
 
-## Deterministic executor (preferred)
+## Deterministic executor (REQUIRED — the page is not done until this runs)
 
-The canonical, reproducible generation path is now the render scripts:
+The canonical, reproducible generation path is the render scripts:
 `python3 .agents/skills/headset-gen-subpage/render-model.py <MODEL>` builds the whole model, or
 `python3 .agents/skills/headset-gen-subpage/render-home.py <MODEL>` renders this single home page.
 The Procedure below is the human-readable SPEC those scripts implement and must stay in lock-step
 with them.
+
+**Authoring the `.manifest` is NOT the deliverable — the rendered `index.html` on disk is.** Writing
+the manifest is the halfway point: you MUST then RUN the executor so that
+`headset/models/<MODEL>/index.html` (and every feature sub-page, per step 7) actually exists in the
+model folder, then confirm with `verify-model.py`. Do NOT stop after the manifest and wait to be asked
+for the HTML — running the render is part of THIS task, not an optional follow-up.
 
 ## Inputs
 
@@ -89,6 +95,10 @@ with them.
 - After the copy, the output's CSS links must be `../../../shared/tokens.css` and
   `../../headset.css` (the `sed` in step 1 handles this). Never leave the 4-up preview paths.
 - Invent nothing — every value comes from the manifest.
+- **Definition of Done = rendered HTML on disk, not the manifest.** The task is complete ONLY when
+  `render-model.py <MODEL>` (or `render-home.py`) has been RUN, `headset/models/<MODEL>/index.html`
+  plus every feature sub-page exist, and `verify-model.py` passes. Stopping after the manifest —
+  leaving the render "for when asked" — is an INCOMPLETE task. Run the executor as the final step.
 
 ## Self-check
 
@@ -96,4 +106,5 @@ with them.
 - Exactly one connection block, matching `connectionType`?
 - Every feature button a real `<a href>` whose target sub-page was **actually built this run** (step 7), not left dangling?
 - Zero `display`-hidden variants, zero inline `<style>`?
+- **Did you actually RUN the renderer?** `headset/models/$1/index.html` must exist on disk now — not just the manifest. If you only wrote the manifest, the task is NOT done: run `render-model.py $1`.
 - After generation, run `python3 .agents/skills/headset-gen-subpage/verify-model.py $1`; non-zero means output drifted from the manifest (hand-edited or stale) — regenerate via `render-model.py`, never hand-edit.

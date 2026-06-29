@@ -1,4 +1,6 @@
 .DS_Store
+__pycache__/
+*.pyc
 
 # dev-only preview artifacts
 .claude/launch.json

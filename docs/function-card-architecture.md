@@ -1,537 +1,533 @@
-# 功能卡片(Function Card)架构 · 设计讨论与决策记录
+# Function Card Architecture · Design Discussion and Decision Record
 
-> **文档性质**:这不是最终规范(spec),而是一份**思考过程记录(thinking log / design journal)**。
-> 它如实记录我们围绕"子页面里的功能卡片到底是什么、怎么组织、怎么交互"这一主题、跨几十轮
-> 的讨论:每一步提出了什么、考虑过哪些方案、争论的焦点、做出的决定,以及**我中途几次推翻自己
-> 的判断**。刻意写得啰嗦、丰富,优先保真而非简洁。
+> **Nature of this document**: This is not a final spec; it is a **thinking log / design journal**.
+> It faithfully records the discussions — spanning dozens of turns — around "what exactly is a function card inside a sub-page, how is it organized, how does it interact": what was proposed at each step, what options were considered, the points of contention, the decisions made, and **several times I reversed my own judgment**. Written intentionally in a verbose, rich style, prioritizing fidelity over brevity.
 >
-> **状态**:架构仍在收敛中,文末"待办/未决"列出尚未落地的部分。**以现有 codebase 为准**;
-> 与 [`methodology.md`](methodology.md) 冲突时,codebase 优先(那份方法论部分章节已过时)。
+> **Status**: The architecture is still converging; the "To-do / Open items" at the end lists what has not yet landed. **The codebase is the source of truth**;
+> where it conflicts with [`methodology.md`](methodology.md), the codebase wins (parts of that methodology are now outdated).
 >
-> **怎么读**:第 0 节交代起点;第 1–8 节是按时间顺序的讨论演变;第 4、5 节是你点名要单独记录
-> 的两个争议(Skill/Snippet/Snapshot、Slot vs 其他形态);第 9 节是当前收敛出的模型;第 10 节是
-> 决策日志(含被撤销的决定);第 11 节待办;第 12 节术语表。
+> **How to read**: §0 provides the starting point; §1–8 are the discussion evolution in chronological order; §4 and §5 are the two disputes you called out for separate recording (Skill/Snippet/Snapshot, and Slot vs other forms); §9 is the current converged model; §10 is
+> the decision log (including revoked decisions); §11 to-do; §12 glossary.
 
 ---
 
-## 0. 起点与背景
+## 0. Starting point and background
 
-### 0.1 三层架构与"以 codebase 为准"
+### 0.1 Three-layer architecture and "the codebase is the source of truth"
 
-整个产品 UI 生成系统是三层:
+The entire product UI generation system has three layers:
 
-- **设计令牌层** `shared/tokens.css` —— 颜色/字体/圆角/阴影等视觉常量,全品类共享,极少改。
-- **品类模板层** —— 每个品类(headset/mouse/…)自己的页面骨架 + 布局样式;以 headset 为 pilot。
-- **机型数据层** —— 每个具体机型一份 manifest(清单)+ 生成出来的内容烤死的成品页。
+- **Design-token layer** `shared/tokens.css` — visual constants (color/font/radius/shadow etc.), shared across all categories, rarely changes.
+- **Category-template layer** — each category's (headset/mouse/…) own page skeleton + layout styles; headset is the pilot.
+- **Model-data layer** — one manifest per concrete model + the content-baked finished pages that are generated from it.
 
-有一份外部方法论文档(`docs/methodology.md`,"Product UI Generation Methodology v1.0"),是**参照,不是法律**。它部分框架已过时;**与现有 codebase 冲突时以 codebase 为准**。已确认的几处分歧:
-- §9.5 把 skill 嵌在品类目录下;**codebase 把所有 skill 平铺在仓库根** `.agents/skills/`,用 `<category>-...` 前缀命名(Devin 只发现 depth-1 的 `SKILL.md`,嵌套实测失败,2026-06-24)。
-- 方法论用 "Mouse" 举例;**真实 pilot 是 headset**。
-- §3 倾向 `data-instruction` 让 AI 生成;**codebase 更严:markup 一律从预写片段逐字复制,不按描述生成**,未知 enum 就 HALT 问。
+There is an external methodology document (`docs/methodology.md`, "Product UI Generation Methodology v1.0") that is **a reference, not law**. Parts of its framework are now outdated; **the codebase wins on any conflict**. Confirmed divergences:
+- §9.5 nests skills inside the category directory; **the codebase lays all skills flat at the repo root** `.agents/skills/`, named with a `<category>-...` prefix (Devin only discovers `SKILL.md` at depth 1; nesting empirically failed, 2026-06-24).
+- The methodology uses "Mouse" as an example; **the real pilot is headset**.
+- §3 favors `data-instruction` to let the AI generate; **the codebase is stricter: markup is always copied verbatim from pre-written snippets, never generated from a description**; unknown enum → HALT and ask.
 
-### 0.2 讨论开始前的代码现状
+### 0.2 Code state before the discussion started
 
-讨论"功能卡片"之前,headset 品类只有 4 个 skill:
-- `headset-gen-homepage` —— 从 `home.manifest` 生成主页 `index.html`。
-- `headset-gen-subpage` —— 从子页 manifest 生成任意子页(一个框架装所有子页)。
-- `headset-control-generic` —— **未知控件的兜底生成器**(§9.4 的 fallback)。
-- `headset-shared` —— 不是 skill,是共享片段:`connection/`(wired/bluetooth/unpair)、`icons/`、`feature-button.html`。
+Before the "function card" discussion, the headset category had only 4 skills:
+- `headset-gen-homepage` — generates the home page `index.html` from `home.manifest`.
+- `headset-gen-subpage` — generates any sub-page from a sub-page manifest (one framework for all sub-pages).
+- `headset-control-generic` — **fallback generator for unknown controls** (§9.4 fallback).
+- `headset-shared` — not a skill; shared snippets: `connection/` (wired/bluetooth/unpair), `icons/`, `feature-button.html`.
 
-注册表 `headset-gen-subpage/templates/controls/` 当时**是空的**(只有 README);`headset/models/` 没有任何真实 manifest;icons 只有 `audio.svg` 一个。
+The registry `headset-gen-subpage/templates/controls/` was **empty at that point** (README only); `headset/models/` had no real manifest; icons had only `audio.svg`.
 
-### 0.3 用到的方法论章节(贯穿全程)
+### 0.3 Methodology sections referenced (throughout)
 
-- **§3 槽机制**:模板只留"空槽 + 标记",数据在生成期填进去。
-- **§4 变体(variant)**:从有限互斥的枚举里选一个(如连接方式 wired/bluetooth),用离散状态机,按 enum 选对应整块。
-- **§5 列表(list)**:同类、数量不定的集合(如功能按钮 2/3/4 个),数据驱动循环渲染。
-- **§5.2 注册表(registry)**:同一东西只定义一次,按 id 引用,防 drift。
-- **§9.3**:子页不需要专属 skill,一个框架 skill + manifest 就够。
-- **§9.4 控件层**:已知→带预置模板的片段/skill;未知→兜底生成;高频→提升固化。
-- **§9.7**:强触发词 + 硬路由 + 显式调用 + 自检 + "copy 不 create" 防弱模型瞎编。
-
----
-
-## 1. 缘起:从"feature generated skills"问起
-
-**你的输入(大意)**:方法论里写了一些 skill,记得有一块"feature generated skills",是用来生成产品 function/feature 能力的吧?子页 feature content 里那些 function,是有类似 skill 规划的吧?
-
-**辨析的关键点 ——"feature" 被用在两层**:
-- **Feature Zone / feature 按钮(§5)**:主页上点进子页的入口按钮(Mic Settings、EQ…)。它们是**列表项**,从 `home.manifest` 的 `features[]` 数据驱动、复制同一个 `feature-button.html`。**不是 skill。**
-- **子页内部的"功能/控件"(§9.4)**:真正实现产品 function 能力的交互件。**这才是有 skill 规划的那块** = control 层。
-
-**当时结论(已确认)**:control 层基本是空的——只有兜底 `headset-control-generic`,没有任何具体控件快照,也没有专用 `headset-control-<id>` skill。这是 §9.4 "按需生长" 的设计:先有框架和兜底,具体控件等真实 manifest 出现再补。
+- **§3 Slot mechanism**: templates leave only "empty slots + markers"; data is filled at generation time.
+- **§4 Variant**: pick one from a finite, mutually exclusive enum (e.g. connection type wired/bluetooth); discrete state machine, select the matching whole block per enum.
+- **§5 List**: a same-kind set of indefinite count (e.g. 2/3/4 feature buttons); data-driven loop rendering.
+- **§5.2 Registry**: each thing defined once, referenced by id, prevents drift.
+- **§9.3**: a sub-page needs no dedicated skill; one framework skill + manifest is enough.
+- **§9.4 Control layer**: known → snippet/skill with preset template; unknown → fallback generation; high-frequency → promote and solidify.
+- **§9.7**: strong trigger words + hard routing + explicit invocation + self-check + "copy not create" to prevent weak-model hallucination.
 
 ---
 
-## 2. 第一次落地:`control-generic` → `headset-function`
+## 1. Origin: asking about "feature generated skills"
 
-**你的输入**:就是那个 `headset-control-generic`,改个名,"Control Generic"太宽泛 —— 改成 **`headset-function`**。先写个模板,因为之后会有很多不同的功能,大概 5、6、7、8 个。
+**Your input (paraphrased)**: The methodology mentions some skills; there was a block for "feature generated skills" used to generate product function/feature capabilities, right? The functions inside sub-page feature content must have a similar skill plan, right?
 
-**我的处理与判断**:
-- 提醒:这个 skill 原定位是"未知控件的兜底生成器";直接改名 + 写模板,顺势把它升级为"按统一模板生成一个功能模块"的生成器。
-- 做了 **control → function 的全量词汇迁移**(连接区 `control-zone` 是另一个概念,保持不动):
+**Key distinction — "feature" is used at two levels**:
+- **Feature Zone / feature buttons (§5)**: the entry buttons on the home page that navigate to sub-pages (Mic Settings, EQ…). These are **list items**, data-driven from `home.manifest`'s `features[]`, copying the same `feature-button.html`. **Not a skill.**
+- **The "functions/controls" inside a sub-page (§9.4)**: the interactive elements that actually implement a product function. **This is the block that has a skill plan** = the control layer.
+
+**Conclusion at the time (confirmed)**: The control layer was basically empty — only the fallback `headset-control-generic`, no concrete control snapshots, no dedicated `headset-control-<id>` skill. This is the §9.4 "grow on demand" design: first the framework and fallback; specific controls are added when real manifests appear.
+
+---
+
+## 2. First landing: `control-generic` → `headset-function`
+
+**Your input**: Rename `headset-control-generic` — "Control Generic" is too broad — rename it to **`headset-function`**. Write a template first, since there will be many different functions later, roughly 5, 6, 7, 8 of them.
+
+**My handling and judgment**:
+- Note: this skill was originally positioned as "fallback generator for unknown controls"; renaming it + writing a template naturally upgrades it to "a generator that produces a function module per a unified template."
+- Performed a **full vocabulary migration from control → function** (the connection zone `control-zone` is a separate concept and was left alone):
   - skill `headset-control-generic` → `headset-function`
-  - 注册表目录 `templates/controls/` → `templates/functions/`
-  - manifest 字段 `controls[]` → `functions[]`;slot `data-slot="controls"` → `data-slot="functions"`
-  - 未来专用 skill 命名 `headset-control-<id>` → `headset-function-<id>`
-  - 同步更新:根 `AGENTS.md`、`headset/AGENTS.md`、`README.md`、`headset/models/README.md`、`gen-subpage` 的 SKILL + frame、registry README;`docs/methodology.md` 不动(参照原文)。
-- 新增 `headset-function/templates/function-frame.html` 和 `headset.css` 里的 `.function-module` 等样式。
+  - Registry directory `templates/controls/` → `templates/functions/`
+  - Manifest field `controls[]` → `functions[]`; slot `data-slot="controls"` → `data-slot="functions"`
+  - Future dedicated skill naming `headset-control-<id>` → `headset-function-<id>`
+  - Sync-updated: root `AGENTS.md`, `headset/AGENTS.md`, `README.md`, `headset/models/README.md`, `gen-subpage` SKILL + frame, registry README; `docs/methodology.md` left unchanged (reference only).
+- Added `headset-function/templates/function-frame.html` and `.function-module` styles etc. in `headset.css`.
 
-**当时给的 function 形态 = 单行模块**:`.function-module` = label + 可选 description + 一个 affordance 区(单行)。**⚠️ 这个形态后来被证明错了**(见第 5 节)。
+**Function form given at the time = single-line module**: `.function-module` = label + optional description + one affordance area (single line). **⚠️ This form was later proven wrong** (see §5).
 
-**状态**:这批改名 `git add` 了但**没 commit**(随后你转入架构讨论,一直没回到这批;它至今未提交,见第 11 节)。
-
----
-
-## 3. 关键背景输入:两层架构 + 10–20 个功能
-
-**你的输入(大意)**:耳机的 feature/function 通常固定,约 **10–20 个**;不同型号各异,但有一批像模板一样是标配。架构记得是**两层**(之前可能想过三层):
-1. **第一层:已有的模板 Skill** —— 生成固定功能。比如 Collaboration,排版/布局/架构/内部小功能都预先设计固定;新耳机需求里提到 Collaboration,就直接调用对应 Skill,把模板整段复制进来,模板存在就不用改。
-2. **第二层:处理新/未知功能** —— 出现库里找不到的新功能名,就新建一个 Skill 专门构建这个未知功能。
-
-**我的映射 + 当时疑问**:
-- 第二层 = 我们刚改名的 `headset-function`(自带兜底模板)。已经有了。
-- 第一层(已知功能库) = 目前空的,我留的位置是 `functions/<id>.html` 快照注册表。
-- 抛出一个结构疑问:第一层应该是"独立 skill"还是"快照文件"?数字应改 5-8 → 10-20;并提出"已设计好的已知功能预先建出来不算投机"。
+**Status**: This batch of renames was `git add`-ed but **never committed** (you then moved into architecture discussion and never returned to this batch; it remains uncommitted as of §11).
 
 ---
 
-## 4. 【争议 A】Skill vs 片段(Snippet)vs 快照(Snapshot)
+## 3. Key background input: two-layer architecture + 10–20 functions
 
-> 这是你点名要单独记录的争议之一。下面把三个词的定义、你态度的演变、完整优劣对比、以及最终
-> 判定都记下来。
+**Your input (paraphrased)**: Headset features/functions are usually fixed, roughly **10–20**; they vary by model, but a batch is a standard set like a template. The architecture, as you recalled, is **two layers** (you may have thought of three earlier):
+1. **Layer 1: existing template Skills** — generate fixed functions. For example, Collaboration: its layout/structure/internal sub-functions are all pre-designed and fixed; when a new headset requirement mentions Collaboration, invoke the corresponding Skill, copy the template in wholesale, and the template doesn't need to change.
+2. **Layer 2: handle new/unknown functions** — when a function name not in the library appears, create a new Skill specifically to build that unknown function.
 
-### 4.1 三个词到底指什么
-
-- **快照(Snapshot)/ 片段(Snippet)文件**:一段**静态 HTML + 值槽**(`data-property=...`),放在注册表目录里(如 `functions/collaboration.html` 或 `headset-shared/connection/bluetooth.html`)。`gen-subpage`/`gen-homepage` 按 id 查到就 **copy + 填值**。它**不做任何决策**,就是被复制的素材。(本文里"快照"和"片段"基本同义,都指这种"被复制的静态素材";细微差别是"快照"更强调"某个已知东西冻结下来的成品长相"。)
-- **独立 Skill**:一个带 `SKILL.md` 的**文件夹**,Devin 会发现它、可 `@skills:` 点名调用。它能**跑逻辑、做判断、调用别的 skill**,文件夹里还能放模板片段等素材。
-
-**关键洞察**:如果一个已知功能是"固定写死"的,把它做成 Skill,等于"快照文件 + 一层 SKILL.md 外壳 + 一份发现成本",外壳并没换来新能力。**Skill 只在"要做静态文件做不到的事(逻辑/判断/调子 skill)"时才回本。**
-
-### 4.2 你态度的演变(如实记录)
-
-- 起初(第 3 节)你描述第一层是"调用对应的 Skill",我据此一度推荐"每个已知功能一个独立 Skill"。
-- 你随后问"快照文件注册表是什么意思?",我解释了(就是 4.1 的快照那条 + `gen-subpage` 按 id 查找复制的流程)。
-- 然后你明确松口:"**把固定不变的内容放到 `headset-gen-subpage` 下面 template 里的 function 中,也没问题。直接复制也可以,哪怕有 10 个 function 也没关系。其实不同路径的逻辑都是一致的,思维方式也一样,只是存放的路径不同而已。**"
-- 也就是说:**Skill vs 快照不是这套架构的胜负手——两条路逻辑相同,只是存放位置不同**;你倾向用快照,数量多也无所谓。
-
-### 4.3 完整优劣对比
-
-**方案 A:快照文件**
-
-优点:
-- **零常驻上下文成本**:Devin 不发现它,描述不进 session 开场预算;只有真被 copy 时才进上下文。再多也不占开场。
-- **没有"AI 跳过 skill"的毛病**:`gen-subpage` 一条硬指令"按 id copy `functions/<id>.html`",是确定性路径查找,不存在"AI 自己决定要不要用"这个失败面(§9.7 的核心痛点)。
-- **轻**:一个功能 = 一个 HTML 文件,无 frontmatter/description/procedure/self-check 样板。改功能 = 改这一个文件。
-- **与现有代码库一致**:`connection/*.html`、`feature-button.html`、`icons/*.svg` 现在就是这么干的——copy 片段、各自都没有独立 skill。
-- **扩展无上限不污染命名空间**:加第 21 个 = 丢一个文件,skill 列表纹丝不动。
-
-缺点:
-- **装不下逻辑**:只能"复制 + 填值";要条件渲染/调子 skill/多步决策,它做不到。
-- **自我广告弱**:得 `ls functions/` 才知道有哪些(靠 README/约定记录),不像 skill 的 description 自报"我何时该被用"。
-
-**方案 B:每个已知功能一个独立 Skill**
-
-优点:
-- **能装逻辑**:SKILL.md 可写生成步骤、条件判断、`@skills:` 调组件——适合需要现搭/组合的复杂功能。
-- **自描述/可点名**:description 摆明"何时用我",显式调用,目录即功能目录。
-- **强隔离**:每功能自带模板 + 规则 + 自检,边界清楚。
-
-缺点:
-- **常驻上下文成本 × N**:Devin 开场加载每个 skill 的 name+description;10–20 个就是 10–20 行常驻,还加重"skill 太多→选择瘫痪"(§9.7.3 自己警告的)。
-- **重新引入"AI 跳过 skill"失败面**:skill 是"AI 自己判断要不要调",正是它会"假装没看见"的那条路;要靠强触发词 + 硬路由 + 自检堵。
-- **样板重**:每功能一份完整 SKILL.md,10–20 份要写要维护。
-- **对固定功能是纯浪费**:写死的功能套个 skill 外壳只增成本不增能力。
-- **与现有模式不一致**:出现"连接块用快照、function 用 skill"两套并行,正是 drift。
-- **不能嵌套**:Devin 只认 depth-1(实测过),只能平铺在根。
-
-### 4.4 判定与后续精化
-
-**判定标准(一句话)**:**功能是"固定写死的素材" → 快照文件;功能"需要跑生成逻辑" → Skill。**
-- 已知功能默认用**快照/数据**,**不为每个功能开 skill**。
-- 需要逻辑的只有一处——"现搭未知功能"——已由**单个** `headset-function`(第二层)兜住,逻辑集中在这一个 skill。
-- 这就是"§9.4 说做成 skill,但 codebase 改成快照"那个已确认的"以 codebase 为准"点。
-
-**后续精化(第 8 节之后)**:被当快照存的,**精确地说是"组件片段"`components/<type>.html`,不是整个 function**。function 不再是冻结快照,而是"数据驱动拼装"(见第 5、9 节)。
+**My mapping + question at the time**:
+- Layer 2 = the `headset-function` we just renamed (comes with a fallback template). Already exists.
+- Layer 1 (known-function library) = currently empty; the slot I reserved is the `functions/<id>.html` snapshot registry.
+- Raised a structural question: should Layer 1 be "independent skills" or "snapshot files"? Also noted the number should be updated from 5–8 → 10–20; and proposed "pre-building already-designed known functions is not speculative."
 
 ---
 
-## 5. 【争议 B】它是"一个整块"还是"槽位列表"?(形态之争)
+## 4. [Dispute A] Skill vs Snippet vs Snapshot
 
-> 你点名的另一个争议。这一节如实记录"功能卡片到底长什么形态"的认知演变,**包括我两次推翻
-> 自己**。
+> This is one of the two disputes you called out for separate recording. Below: definitions of the three terms, the evolution of your position, the full pros/cons comparison, and the final ruling.
 
-### 5.1 形态 v1:单行模块(改名那轮)
+### 4.1 What the three terms actually mean
 
-第 2 节里我把 function 做成单行 `.function-module`(label + description + 一个 affordance)。**错在**:把"功能"想成了一个单一控件。
+- **Snapshot / Snippet file**: A piece of **static HTML + value slots** (`data-property=...`), stored in the registry directory (e.g. `functions/collaboration.html` or `headset-shared/connection/bluetooth.html`). `gen-subpage`/`gen-homepage` looks it up by id and **copies + fills values**. It **makes no decisions** — it is simply material to be copied. (In this document "snapshot" and "snippet" are basically synonymous, both referring to this "static material to be copied"; the subtle difference is "snapshot" more strongly implies "the frozen finished appearance of a known thing.")
+- **Independent Skill**: A **folder** with a `SKILL.md`, discoverable by Devin, callable via `@skills:`. It can **run logic, make decisions, invoke other skills**, and the folder can hold template snippets and other assets.
 
-### 5.2 形态 v2:function = 一整块 Content Area 模板;并(错误地)提出 1:1
+**Key insight**: If a known function is "hard-coded and fixed," making it a Skill equals "snapshot file + a SKILL.md wrapper layer + discovery cost" — the wrapper adds no new capability. **A Skill only pays off when it needs to do something a static file cannot (logic/decisions/invoking sub-skills).**
 
-**你的输入(大意)**:独立 Skill 里也有 Template、有写好的 HTML;流程是查到对应 Skill,**这个 Skill 其实就是子页面,也就是 Content Area 的内容**;按功能/内容查 Skill,有的已有模板,直接复制粘贴。
+### 4.2 Evolution of your position (recorded faithfully)
 
-我据此**推断 1:1**:一个子页 = 一个功能 = 一整块 Content Area 模板,并提议**撤掉 `functions[]` 列表**。**⚠️ 这一步后来被截图推翻(下一小节)。** 当时我已明说这是【推断】并请你确认是否 1:1。
+- Initially (§3) you described Layer 1 as "invoking the corresponding Skill"; I accordingly recommended "one independent Skill per known function."
+- You then asked "what does the snapshot-file registry mean?" — I explained (the snapshot item in 4.1 + the flow of `gen-subpage` looking up by id and copying).
+- You then explicitly relaxed: "**Putting the fixed, unchanging content into the function templates under `headset-gen-subpage` is also fine. Copying directly works; even 10 functions is no problem. Actually the logic of both paths is the same, the thinking is the same — it's just a different storage location.**"
+- In other words: **Skill vs snapshot is not the deciding factor in this architecture — both paths have the same logic, only the storage location differs**; you lean toward snapshots, and count doesn't matter.
 
-### 5.3 形态 v3:截图推翻 1:1 —— Content Area 是"功能列表"
+### 4.3 Full pros/cons comparison
 
-**你的输入**:发来一张 **Audio Settings** 子页截图,并指出:不是 1:1。子页的 Content Area 里可能有 1/2/3 个功能,不固定。这张图里有三个功能:**Noise Control、Collaboration、Multimedia**。
+**Option A: Snapshot files**
 
-**这直接证明**:
-- 一个子页(Audio Settings)的 Content Area = **一列功能**(数量可变),不是单一功能。
-- 我上一轮的"1:1、撤掉列表"**作废**;**最初那版 `functions[]` 列表方向是对的**,该保留。
-- 要修的是:一个"功能"是**有标题、内部带多个组件的整块卡片**(Collaboration = 标题 + 两个开关 + 滑杆),不是单行。所以 v1 的 `.function-module`/`function-frame.html` 形态要升级成"卡片块"。
+Pros:
+- **Zero resident-context cost**: Devin doesn't discover them; their descriptions don't enter the session's opening budget; they only enter context when actually copied. No matter how many there are, they don't cost the session opening.
+- **No "AI skips the skill" failure mode**: `gen-subpage` has one hard instruction "copy `functions/<id>.html` by id" — it's a deterministic path lookup; "the AI deciding for itself whether to use it" doesn't exist as a failure surface (the core pain point of §9.7).
+- **Lightweight**: one function = one HTML file; no frontmatter/description/procedure/self-check boilerplate. Changing a function = changing that one file.
+- **Consistent with the existing codebase**: `connection/*.html`, `feature-button.html`, `icons/*.svg` already work this way — copy snippets, none have independent skills.
+- **Unlimited extension without polluting the namespace**: adding the 21st = dropping one file; the skill list doesn't change.
 
-四级层级因此定死:**Feature(主页按钮/子页)→ Content Area(装 1~N 个功能)→ Function(有标题的卡片)→ Component(功能内部的小控件)。**
+Cons:
+- **Cannot hold logic**: can only "copy + fill values"; conditional rendering / invoking sub-skills / multi-step decisions are not possible.
+- **Weak self-advertisement**: you need `ls functions/` to know what exists (relies on README/convention); unlike a skill's description announcing "when I should be used."
 
-### 5.4 形态 v4:冻结快照不行 → 数据驱动拼装
+**Option B: One independent Skill per known function**
 
-在此之前我推荐"已知功能 = 冻结快照、原样复制"。**你用真实 case 戳穿了它**:
+Pros:
+- **Can hold logic**: SKILL.md can write generation steps, conditional logic, `@skills:` component invocation — suitable for complex functions that need to be assembled on the spot.
+- **Self-describing / callable by name**: description states "when to use me"; explicit invocation; the directory is the function directory.
+- **Strong isolation**: each function ships its own template + rules + self-check; boundaries are clear.
 
-**你的输入(几个真实 use case)**:
-- 下一款耳机有 Collaboration 和 Mic Noise Cancellation,但**没有 Sidetone**。(删组件)
-- 或:有 Collaboration,但没有 Mic Noise Cancellation 和 Sidetone;它把 Mic Noise Cancellation **改名叫 Noise Cancellation**——名字像,但**根本不是同一个功能**。(换成另一个)
-- Noise Control:大多产品有 ANC/Transparency/Off 三个模式;下一个可能有**第 4、第 5 个模式**;或反过来**只要 ANC + Transparency,删掉 Off**。(组件内部选项数在变)
+Cons:
+- **Resident context cost × N**: Devin loads each skill's name+description at session start; 10–20 means 10–20 lines always resident, and aggravates "too many skills → choice paralysis" (§9.7.3's own warning).
+- **Re-introduces the "AI skips the skill" failure mode**: a skill is "the AI judges for itself whether to invoke it" — exactly the path it will "pretend not to see"; requires strong trigger words + hard routing + self-check to close.
+- **Heavy boilerplate**: one full SKILL.md per function; 10–20 to write and maintain.
+- **Pure waste for fixed functions**: wrapping a hard-coded function in a skill shell adds cost without adding capability.
+- **Inconsistent with the existing pattern**: having "connection blocks use snapshots, functions use skills" running in parallel is exactly drift.
+- **Cannot nest**: Devin only recognizes depth-1 (empirically tested); must be laid flat at the root.
 
-**我承认 v4 修正**(这是细化粒度,不是又翻案,核心原则"固定结构 + 差异进数据"没变,只是我把"固定"放错了层级):
-- 一份"写死的 collaboration.html"没法原样复制——一复制就要删元素/改名/改选项数,等于在拷贝出来的 HTML 上打补丁,又脆又乱。
-- **把"固定素材"下沉到组件层**:固定的是 `components/<type>.html`(toggle/slider/segmented/preset-grid 的**外形**);**function = 数据驱动的拼装**(卡片外壳 + 按列表拷组件片段)。
-- **身份认 id,不认名字**:"看起来像但不是同一个" → 不同 id → 不同片段(未知→第二层现搭);永远不是"改名复用"。
-- 你的删/改/增全是改数据,素材一行不动。
+### 4.4 Ruling and subsequent refinement
 
-### 5.5 形态 v5(收敛):递归槽位
+**Ruling criterion (one sentence)**: **function is "fixed, hard-coded material" → snapshot file; function "needs to run generation logic" → Skill.**
+- Known functions default to **snapshot/data**; **no skill per function**.
+- The only place that needs logic is "assembling unknown functions on the spot" — already covered by **a single** `headset-function` (Layer 2); logic is concentrated in that one skill.
+- This is the confirmed "codebase wins" point where "§9.4 says make it a skill, but the codebase changed it to snapshots."
 
-**你的输入**:这种功能卡片本质上由一个个"**槽位**"组成,从上到下排列:第一个槽放什么功能、第二个、第三个;有时一个槽,有时两个,不固定。
+**Subsequent refinement (after §8)**: What is stored as snapshots is **precisely "component snippets" `components/<type>.html`, not whole functions**. A function is no longer a frozen snapshot but "data-driven assembly" (see §5, §9).
 
-**我确认并补一刀:槽位是递归的。** 这正是方法论的槽(§3)+ 列表(§5),你自己重新推导了出来。整套架构坍缩成**一个原语**:
+---
 
-> **有序的槽位列表;每个槽由数据决定填什么;数量可变;可递归。**
+## 5. [Dispute B] Is it "one whole block" or "a slot list"? (form dispute)
 
-并且:你说的"槽位"就是模板里**已有的 `data-slot`**(主页 `feature-zone`、子页 `functions` 区都是槽),只是现在递归用到了功能卡片内部。这说明模型自洽:从 Content Area 到最里层组件,全程只有"槽 + 数据填充"这一件事。
+> The other dispute you called out. This section faithfully records the evolution of understanding of "what form a function card actually takes," **including two times I reversed myself**.
 
-### 5.6 形态演变小结
+### 5.1 Form v1: single-line module (rename round)
 
-| 版本 | 形态 | 触发/依据 | 结局 |
+In §2 I made a function a single-line `.function-module` (label + description + one affordance). **The error**: treating "function" as a single control.
+
+### 5.2 Form v2: function = one whole Content Area template; and (incorrectly) proposing 1:1
+
+**Your input (paraphrased)**: An independent Skill also has a Template and pre-written HTML; the flow is to look up the corresponding Skill — **this Skill is actually the sub-page, i.e. the content of the Content Area**; look up the Skill by function/content; if it already has a template, copy-paste directly.
+
+Based on this I **inferred 1:1**: one sub-page = one function = one whole Content Area template, and proposed **removing the `functions[]` list**. **⚠️ This step was later overturned by a screenshot (next subsection).** At the time I clearly stated this was an [inference] and asked you to confirm whether it was 1:1.
+
+### 5.3 Form v3: screenshot overturns 1:1 — Content Area is a "function list"
+
+**Your input**: You sent an **Audio Settings** sub-page screenshot and pointed out: it's not 1:1. The Content Area of a sub-page can hold 1/2/3 functions — the count is not fixed. This screenshot has three functions: **Noise Control, Collaboration, Multimedia**.
+
+**This directly proved**:
+- One sub-page's (Audio Settings) Content Area = **a list of functions** (variable count), not a single function.
+- My previous-round "1:1, remove the list" **is void**; **the original `functions[]` list direction was correct** and should be kept.
+- What needs to change: a "function" is **a whole card with a title and multiple components inside** (Collaboration = title + two toggles + slider), not a single line. So the v1 `.function-module`/`function-frame.html` form needs to be upgraded to a "card block."
+
+The four-level hierarchy was therefore fixed: **Feature (home button/sub-page) → Content Area (holds 1~N functions) → Function (titled card) → Component (small controls inside a function).**
+
+### 5.4 Form v4: frozen snapshot doesn't work → data-driven assembly
+
+Until this point I recommended "known function = frozen snapshot, copy as-is." **You exposed this with real cases**:
+
+**Your input (several real use cases)**:
+- The next headset has Collaboration and Mic Noise Cancellation but **no Sidetone**. (delete a component)
+- Or: has Collaboration but no Mic Noise Cancellation and no Sidetone; it renames Mic Noise Cancellation to **Noise Cancellation** — similar name, but **a completely different function**. (swap for another)
+- Noise Control: most products have ANC/Transparency/Off (3 modes); the next one might have a **4th or 5th mode**; or the reverse — **only ANC + Transparency, removing Off**. (option count inside a component is changing)
+
+**I conceded the v4 correction** (this is a granularity refinement, not another reversal; the core principle "fixed structure + differences go into data" didn't change — I just put "fixed" at the wrong layer):
+- A "hard-coded collaboration.html" cannot be copied as-is — the moment you copy it you need to delete elements / rename / change option counts, which means patching the copied HTML — fragile and messy.
+- **Push "fixed material" down to the component layer**: what's fixed is `components/<type>.html` (the **shape** of toggle/slider/segmented/preset-grid); **function = data-driven assembly** (card shell + copy component snippets per a list).
+- **Identity by id, not name**: "looks similar but is not the same thing" → different id → different snippet (unknown → Layer 2 assembles on the spot); never "rename and reuse."
+- Your delete/change/add operations are all data changes; the material stays untouched.
+
+### 5.5 Form v5 (converged): recursive slot list
+
+**Your input**: This kind of function card is fundamentally made up of individual "**slots**," arranged top to bottom: what goes in the first slot, the second, the third; sometimes one slot, sometimes two — not fixed.
+
+**I confirmed and added a point: slots are recursive.** This is exactly the methodology's slot (§3) + list (§5) — you rederived it yourself. The entire architecture collapses into **one primitive**:
+
+> **An ordered slot list; what fills each slot is decided by data; the count is variable; it is recursive.**
+
+And: the "slots" you described are the **already-existing `data-slot`** in the templates (the home page `feature-zone` and sub-page `functions` zone are both slots) — now just applied recursively inside function cards. This shows the model is self-consistent: from Content Area down to the innermost component, the only thing happening throughout is "slot + data fill."
+
+### 5.6 Form evolution summary
+
+| Version | Form | Trigger / basis | Outcome |
 |---|---|---|---|
-| v1 | 单行 `.function-module` | 改名那轮顺手做的 | 被 v3 升级 |
-| v2 | function = 整块 Content Area;**1:1** | 你说"Skill 就是子页" | **被 v3 推翻** |
-| v3 | Content Area = 功能列表;function = 卡片 | Audio Settings 截图 | 保留(回到列表) |
-| v4 | function = 数据驱动拼装;固定素材下沉到组件 | 删/改/增真实 case | 保留 |
-| v5 | **递归槽位列表**(综合) | 你的"槽位"心智 | **当前收敛** |
+| v1 | Single-line `.function-module` | Done opportunistically during the rename round | Upgraded by v3 |
+| v2 | function = whole Content Area; **1:1** | You said "Skill is the sub-page" | **Overturned by v3** |
+| v3 | Content Area = function list; function = card | Audio Settings screenshot | Kept (back to list) |
+| v4 | function = data-driven assembly; fixed material pushed to component layer | Real delete/change/add use cases | Kept |
+| v5 | **Recursive slot list** (synthesized) | Your "slot" mental model | **Current converged form** |
 
 ---
 
-## 6. 真实用例与数据(固化讨论中出现的所有具体素材)
+## 6. Real use cases and data (solidifying all concrete material that appeared in the discussion)
 
-### 6.1 Audio Settings 截图(参考规格)
+### 6.1 Audio Settings screenshot (reference spec)
 
-子页标题 **Audio Settings**,Content Area 三个功能:
+Sub-page title **Audio Settings**, Content Area with three functions:
 
-1. **Noise Control** —— 三选一分段控件,3 张带图标的卡片:**ANC**(选中,蓝底白字,耳机图标)、**Transparency**(白,图标)、**Off**(白,图标)。
-2. **Collaboration** —— 标题 + ⓘ 信息图标;内含:**Mic Noise Cancellation**(右侧 OFF + 开关)、**Sidetone**(右侧 OFF + 开关),下方一个**滑杆 1—2—3**(当前在 2)。
-3. **Multimedia** —— 标题 + ⓘ;预设网格:**Default**(选中,蓝)、**Bass Boost**、**Speech Boost**、**Treble Boost**,底部 **Custom**(整行)。
+1. **Noise Control** — three-way segmented control, 3 icon cards: **ANC** (selected, blue background/white text, headset icon), **Transparency** (white, icon), **Off** (white, icon).
+2. **Collaboration** — title + ⓘ info icon; contains: **Mic Noise Cancellation** (OFF + toggle on right), **Sidetone** (OFF + toggle on right), below a **slider 1—2—3** (currently at 2).
+3. **Multimedia** — title + ⓘ; preset grid: **Default** (selected, blue), **Bass Boost**, **Speech Boost**, **Treble Boost**, **Custom** at the bottom (full row).
 
-→ 形态归纳:这一屏只用了 **3~4 种 archetype**:segmented(带图标卡片)、`toggle`、slider、option-grid(预设)。名字(ANC、Mic Noise Cancellation、Bass Boost)和选项数都是**数据**,不是新素材。
+→ Form summary: this screen uses only **3~4 archetypes**: segmented (icon cards), `toggle`, slider, option-grid (presets). Names (ANC, Mic Noise Cancellation, Bass Boost) and option counts are all **data**, not new material.
 
-### 6.2 Collaboration 的"固定基座 + 机型增量"
+### 6.2 Collaboration's "fixed base + model-specific increments"
 
-- 基座 = Mic Noise Cancellation + Sidetone + 滑杆,10 款通用。
-- 未来某款要在 Collaboration 下**加一个专属子功能** → 在大模板基础上加 nuance/alternative。
-- 处理:基座固定组件 + 一个 **extra 槽**;增量/替代来自 manifest 数据,**基座文件不动**;新组件若库里没有 → 第二层现搭再塞进槽。(这是 v4/v5 的"槽 + 数据"在组件层的体现。)
+- Base = Mic Noise Cancellation + Sidetone + slider, shared across 10 models.
+- A future model adds a **dedicated sub-function under Collaboration** → add a nuance/alternative on top of the base template.
+- Handling: fixed base components + one **extra slot**; the increment/alternative comes from manifest data, **the base file stays untouched**; if the new component isn't in the library → Layer 2 assembles it and inserts it into the slot. (This is v4/v5's "slot + data" applied at the component layer.)
 
-### 6.3 变体 case 清单(全靠改数据)
+### 6.3 Variant case inventory (all handled by changing data only)
 
-| case | 处理 |
+| Case | Handling |
 |---|---|
-| Collaboration 没有 Sidetone | 该功能的组件(槽)列表去掉 `sidetone` |
-| Noise Control 只要 ANC + Transparency(删 Off) | segmented 的 `modes` 列表 = `[anc, transparency]` |
-| Noise Control 加第 4/5 个模式 | `modes` 列表加项 |
-| Mic Noise Cancellation → Noise Cancellation(不是同一个) | 换成另一个 id `noise-cancellation`;已知→拷片段,未知→`headset-function` 现搭 |
+| Collaboration without Sidetone | Remove `sidetone` from that function's component (slot) list |
+| Noise Control with only ANC + Transparency (remove Off) | `modes` list of segmented = `[anc, transparency]` |
+| Noise Control adding a 4th/5th mode | Add an item to the `modes` list |
+| Mic Noise Cancellation → Noise Cancellation (not the same function) | Switch to a different id `noise-cancellation`; known → copy snippet, unknown → `headset-function` assembles on the spot |
 
-### 6.4 Sidetone 5 模式:Dropdown 还是 Slider?
+### 6.4 Sidetone 5 modes: Dropdown or Slider?
 
-判据是**这 5 个是不是有序档位**:有序(1–5 级)→ Slider;无序命名(5 个预设)→ Dropdown。"有序与否"是数据属性。你也提到"按习惯 Sidetone 必须用 slider"——那就当成一条**写死的领域约定**。
+The criterion is **whether those 5 are ordered steps**: ordered (levels 1–5) → Slider; unordered named items (5 presets) → Dropdown. "Ordered or not" is a data property. You also noted "by convention Sidetone must use a slider" — treat that as a **hard domain convention**.
 
-### 6.5 条件显隐:选 ANC 冒出子功能(可变、可嵌套)
+### 6.5 Conditional reveal: selecting ANC exposes sub-functions (variable, nestable)
 
-**你的输入**:选 ANC 模式后,会出现一些可开关的子功能;**这些是编造的例子**——实际可能有、可能没有、可能冒出两个,甚至子功能里再套子功能一/二。有没有、有几个、套几层,全是按产品变的数据。
+**Your input**: After selecting ANC mode, some toggle-able sub-functions appear; **these are made-up examples** — in practice there may be some, may be none, may be two, or even sub-functions nested inside sub-functions one or two levels deep. Whether they exist, how many, how many levels — all are data that varies by product.
 
-→ 模型落点:这是"槽"往下嵌套一层。某个 mode 选中后,从它内部的**条件槽**里按数据冒出 0/1/2+ 个子功能(还是 §5 列表);子功能本身又可以是"带槽位的卡片"(递归)。弱模型不决定有没有/几个/几层,数据说了算。
+→ Model landing point: this is "slots" nesting one level deeper. When a mode is selected, 0/1/2+ sub-functions (still §5 lists) emerge from its internal **conditional slot** per data; the sub-function itself can also be "a card with slots" (recursive). The weak model doesn't decide whether they exist / how many / how deep — the data decides.
 
-### 6.6 功能预设与标准框架(default-dominant —— 默认占绝大多数)
+### 6.6 Function presets and the standard framework (default-dominant — defaults are the vast majority)
 
-**你的输入(背景补充)**:功能卡只要能对应到 ID,**几乎都有预设的显示状态和组合;除非用户特别提出修改,否则大部分是固定搭配("雷打不动")**。也就是:**预设(default)占绝大多数,覆盖(override)是例外。**
+**Your input (background context)**: As long as a function card can be matched to an ID, **it almost always has a preset display state and composition; unless the user explicitly requests a change, most combinations are fixed ("rock solid")**. In other words: **preset (default) is the vast majority; override is the exception.**
 
-**标准组件框架(最常见的槽形态)**:**左边 Title(功能名),右边组件(Toggle / Dropdown)**。大部分"开关类"功能都用这个标准行;它就是组件层最高频的那个 archetype。
+**Standard component framework (most common slot form)**: **Title (function name) on the left, component (Toggle / Dropdown) on the right**. Most "toggle-type" functions use this standard row; it is the highest-frequency archetype at the component layer.
 
-**几个功能的预设(authored once,机型默认直接用)**:
-| 功能 | archetype | 默认组成 | 可变范围(仅在明确要求时) |
+**Presets for several functions (authored once, models use the default directly)**:
+| Function | Archetype | Default composition | Variability range (only when explicitly requested) |
 |---|---|---|---|
-| Noise Control | Segment Control(固定用) | 3 张大卡片:ANC / Transparency / Off | 增减其中某一项(±1) |
-| Multimedia | 模式网格 | 默认 5 个模式 | 最多 6 个(2×3 布局);默认通常雷打不动 |
-| Sidetone | 复合(两个槽) | 上 Toggle + 下 Slider | 产品支持即固定此布局 |
+| Noise Control | Segment Control (fixed) | 3 large cards: ANC / Transparency / Off | Add/remove one item (±1) |
+| Multimedia | Mode grid | 5 modes by default | Up to 6 (2×3 layout); default is usually rock solid |
+| Sidetone | Compound (two slots) | Top: Toggle + Bottom: Slider | Fixed layout once the product supports it |
 
-**含义,以及它如何解开 §4 的"快照 vs 数据"之争**:常规机型"支持某功能 = 引用 ID = 拿到固定预设",体验上等于"复制现成的";只有明确要求改时才在 manifest 里覆盖。所以:
-- **预设就是当初想要的那个"快照"**,但**存成数据(组成定义)**,因此可覆盖。
-- 常规走预设 → **快照般简单**(引用 ID 即得固定搭配);例外走覆盖 → **数据般灵活**(删/改/增)。
-- 这也校正了 §5.4 的语气:那一节为了说明"覆盖是真实存在的",把可变性讲得很重;**实际权重是反过来的——默认固定占绝大多数,可变是少数**。两者不矛盾:固定的是"默认",灵活的是"覆盖时";关键是预设存成数据、而非冻结 HTML,所以两头都成立。
+**The implication, and how it resolves the §4 "snapshot vs data" debate**: for a standard model, "supports a function = reference its ID = get the fixed preset" — the experience is equivalent to "copy a ready-made one"; override in the manifest only when an explicit change is requested. Therefore:
+- **The preset is exactly the "snapshot" originally wanted**, but **stored as data (composition definition)** so it can be overridden.
+- Standard path through preset → **simple like a snapshot** (referencing the ID gives the fixed composition); exception via override → **flexible like data** (delete/change/add).
+- This also corrects the tone of §5.4: that section, to illustrate that overriding is real, made variability sound very significant; **the actual weight is the reverse — fixed defaults are the vast majority, variability is the minority**. The two are not contradictory: "fixed" applies to the default; "flexible" applies when overriding; the key is that the preset is stored as data rather than frozen HTML, so both ends hold.
 
-**对工作量的含义**:这意味着授权成本可控——把 ~10–20 个功能的预设组成各 authored 一次,机型大多只是"引用 ID",不用每台重写。
+**Implication for workload**: authoring cost is manageable — author each of the ~10–20 functions' preset compositions once; most models just "reference the ID," no need to rewrite for each device.
 
 ---
 
-### 6.7 Collaboration 参考实现(已建并验证 2026-06-25)
+### 6.7 Collaboration reference implementation (built and verified 2026-06-25)
 
-Collaboration 卡已按本架构从 Figma 导出**完整建出 + 逐项验证**(浏览器实测渲染、computed 颜色/尺寸、交互状态)。第一张走通"快照"全链路的卡,并产出可复用 building blocks。
+The Collaboration card was **fully built + verified item-by-item** from Figma per this architecture (browser-tested rendering, computed colors/dimensions, interaction states). The first card to walk the full "snapshot" end-to-end pipeline, producing reusable building blocks.
 
-**可复用件(已建):**
-- 卡壳 `headset-function/templates/function-frame.html`(标题 + 可选 ⓘ 槽 + 组件 body 槽)。
-- 组件 `headset-shared/components/`:`toggle.html` / `slider.html` / `info-tooltip.html` + README。
-- 样式全在 `headset.css`;新增 token `--color-control-inactive`、`--radius-card`。
-- `headset-function`(Layer-2)SKILL 改成"卡壳 + 复制组件"装配模型。
+**Reusable pieces built:**
+- Card shell `headset-function/templates/function-frame.html` (title + optional ⓘ slot + component body slot).
+- Components `headset-shared/components/`: `toggle.html` / `slider.html` / `info-tooltip.html` + README.
+- All styles in `headset.css`; new tokens `--color-control-inactive`, `--radius-card`.
+- `headset-function` (Layer-2) SKILL updated to the "shell + copy components" assembly model.
 
-**成品样板:** `functions/collaboration.html`(现移至 `examples/collaboration.html`,作教学范例、不参与 id 路由) = 卡壳 + 2×`toggle`(Mic Noise Cancellation / Sidetone)+ 1×slider;Sidetone 行 + slider 包在 `.subfn-group`;每行带可选 ⓘ。纯 HTML + data-property,无内联样式,交互全靠原生控件 + CSS(仅 slider 一行 `oninput`)。
+**Finished reference card:** `functions/collaboration.html` (now moved to `examples/collaboration.html` as a teaching example, not id-routed) = shell + 2×`toggle` (Mic Noise Cancellation / Sidetone) + 1×slider; Sidetone row + slider wrapped in `.subfn-group`; every row has an optional ⓘ. Pure HTML + data-property, no inline styles; interaction driven entirely by native controls + CSS (only one `oninput` line for the slider).
 
-**review 决策(已落地):**
-| 项 | 决定 |
+**Review decisions (landed):**
+| Item | Decision |
 |---|---|
-| 外壳面板底色 | 保持原灰;一度改白后**撤回**,模版零原色改动 |
-| 控件 | 原生 checkbox 开关(`:checked` 驱动)、range slider(蓝填充 `--color-accent` + 一行 oninput 气泡) |
-| ⓘ | 可选 property,有 info 才渲染;必带 hover tooltip |
-| tooltip | firmware ⓘ 与卡片 ⓘ **合并成一套** `.info-tooltip*`;位置同 firmware;**min 220 / max 250px** |
-| 联动 | toggle 关 → 旗下子功能置灰,`.subfn-group` + `:has()` 纯 CSS(Sidetone 关→slider 灰) |
+| Shell panel background color | Kept original grey; briefly changed to white then **reverted** — zero primary-color changes in the template |
+| Controls | Native checkbox switch (`:checked` driven), range slider (blue fill `--color-accent` + one-line `oninput` bubble) |
+| ⓘ | Optional property; only rendered when info is present; must include a hover tooltip |
+| Tooltip | Firmware ⓘ and card ⓘ **merged into one set** `.info-tooltip*`; same position as firmware; **min 220 / max 250px** |
+| Wiring | Toggle off → child sub-functions grey out; `.subfn-group` + `:has()` pure CSS (Sidetone off → slider greys) |
 
-**验证手段:** 一次性预览宿主页 `headset/_preview-collaboration.html`(fetch 注入片段 + link 真 CSS),用 `preview_screenshot/inspect/eval` 实测。dev 产物(预览页 + `.claude/launch.json`)已 gitignore。
-
----
-
-### 6.8 弱模型验证(Haiku 4.5,2026-06-25)
-
-把"建一张新卡"的活交给 **Haiku 4.5**(冷启动子 agent,只给 `headset-function` skill + `components/` 积木 + 卡壳 + 一张参考卡 `collaboration.html`),需求:一个 Noise Control 卡 = Mic Noise Cancellation 开关 + 强度 slider(1–3),开关 OFF 时 slider 置灰。
-
-**结果:通过。** Haiku 全靠**复制**卡壳 + `toggle` + `slider` 装出 `functions/noise-control.html`(现移至 `examples/noise-control.html`)——`.subfn-group` 联动接对(开关 `.subfn-toggle`、slider `.subfn-child`)、原生控件、零内联样式、零瞎编;浏览器实测渲染正确,灰/恢复(opacity 0.4↔1)正确。**证明"copy-not-generate + 可复用积木"对弱模型友好**——这是整套架构最想要的性质。
-
-小毛病(无害):多建了个 `_preview-*`(已 gitignore);没 info 的 `.function-icons` 留成空 div 没删。
-
-> 注:此 `noise-control.html` 是**简化测试版**(开关 + 强度),与 Figma 真 Noise Control 的三选一 segmented(ANC/Transparency/Off)不同;**保留中**,名字待真 segmented 版出现时再处理。
+**Verification method:** One-off preview host page `headset/_preview-collaboration.html` (fetch-injected snippets + linked real CSS), verified with `preview_screenshot/inspect/eval`. Dev artifacts (preview page + `.claude/launch.json`) are gitignored.
 
 ---
 
-## 7. 控件选型:什么时候 toggle / slider / dropdown(写死 vs 推断)
+### 6.8 Weak-model validation (Haiku 4.5, 2026-06-25)
 
-**你的输入(大意)**:LLM 有时需要基于逻辑的合理推断。比如 on/off 用什么 UI、子功能怎么显示、切模式怎么布局、Sidetone 5 模式用 dropdown 还是 slider……有些逻辑可以写死(Sidetone→slider),有些不能写死就得让大模型推。到底什么时候用 toggle/dropdown/slider?
+Handed "build a new card" to **Haiku 4.5** (cold-start sub-agent, given only the `headset-function` skill + `components/` building blocks + card shell + one reference card `collaboration.html`). Requirement: a Noise Control card = Mic Noise Cancellation toggle + intensity slider (1–3), slider greys when toggle is OFF.
 
-**我给的框架 —— 分两个"时刻"**:
+**Result: passed.** Haiku assembled `functions/noise-control.html` (now moved to `examples/noise-control.html`) purely by **copying** the shell + `toggle` + `slider` — `.subfn-group` wiring correct (toggle `.subfn-toggle`, slider `.subfn-child`), native controls, zero inline styles, zero hallucination; browser-tested rendering correct, grey/restore (opacity 0.4↔1) correct. **Proved that "copy-not-generate + reusable building blocks" is weak-model-friendly** — the most desired property of the entire architecture.
 
-| | 编写期(设计稿 → 数据) | 生成期(数据 → HTML) |
+Minor issues (harmless): created an extra `_preview-*` (gitignored); left an empty `.function-icons` div on a row with no info.
+
+> Note: this `noise-control.html` is a **simplified test version** (toggle + intensity), different from the real Figma Noise Control's three-way segmented (ANC/Transparency/Off); **kept as-is**, name to be resolved when the real segmented version appears.
+
+---
+
+## 7. Control selection: when to use toggle / slider / dropdown (hard-coded vs inferred)
+
+**Your input (paraphrased)**: An LLM sometimes needs logic-based reasonable inference. For example: what UI for on/off, how sub-functions display, how mode-switching is laid out, whether Sidetone 5 modes uses dropdown or slider… Some logic can be hard-coded (Sidetone → slider), some can't be hard-coded and the strong model has to infer. When exactly do you use toggle/dropdown/slider?
+
+**My framework — split into two "moments"**:
+
+| | Authoring time (design → data) | Generation time (data → HTML) |
 |---|---|---|
-| 谁干 | 强模型 + 人审 | 弱模型,照单拼装 |
-| 认知 | 高:可推理、判断 | 零:确定性 copy + fill |
-| 产出 | 显式可审的组成数据 + 规则表 | 页面 |
+| Who acts | Strong model + human review | Weak model, assembles from data |
+| Cognition | High: can reason and judge | Zero: deterministic copy + fill |
+| Output | Explicit, reviewable composition data + rule tables | Page HTML |
 
-**结论**:**LLM 该推理,但推理只发生在编写期,且结果必须冻结成数据;生成期不再推。**
+**Conclusion**: **LLMs should reason, but reasoning happens only at authoring time, and the result must be frozen into data; generation time does not reason.**
 
-**多数"用哪个控件"其实是规则,不是逐个猜。规则有两层。**
+**Most "which control to use" decisions are actually table lookups, not per-case guessing. The rules have two levels.**
 
-**第一层:数据形状 → archetype 家族**
+**Level 1: data shape → archetype family**
 
-| 参数的形状 | 控件家族 | 性质 |
+| Shape of the parameter | Control family | Nature |
 |---|---|---|
-| 开/关(布尔,2 个互斥) | Toggle | 写死规则 |
-| 一个值落在**有序**区间/档位 | Slider | 写死规则 |
-| 从 N 个**无序**项选 1 | **Select 家族**(见第二层) | 写死规则 |
-| 一个可点击的动作/入口 | **Button 家族**(见第二层) | 写死规则 |
-| 一组预设、卡片平铺 | Option-grid | 默认规则,可覆盖 |
+| On/off (boolean, 2 mutually exclusive) | Toggle | Hard-coded rule |
+| A value along an **ordered** range/step | Slider | Hard-coded rule |
+| Pick 1 from N **unordered** items | **Select family** (see Level 2) | Hard-coded rule |
+| A clickable action / entry point | **Button family** (see Level 2) | Hard-coded rule |
+| A set of presets, tiled cards | Option-grid | Default rule, overridable |
 
-**第二层:家族内选哪个呈现**(同一数据形状下、可互换的呈现;判据大半可写死)
+**Level 2: which presentation within a family** (interchangeable presentations for the same data shape; most criteria can be hard-coded)
 
-| 场景 | 选项 | 判据(写死的规则) | 默认 |
+| Scenario | Options | Criterion (hard-coded rule) | Default |
 |---|---|---|---|
-| 单选枚举(Select 家族) | **Segmented vs Dropdown** | 数量 + 空间:≤5~6 个、要全部可见 / 带图标卡片 → Segmented;数量更多或位置紧 → Dropdown | 视数量,常规 Segmented |
-| 动作/入口(Button 家族) | **Button vs Hyperlink-button** | 语义:跳到另一个页面/视图 → Hyperlink(真 `<a href>`,与现有 `feature-button` 一致);原地执行动作(应用/重置/某开关行为)→ Button | 导航默认 Hyperlink |
+| Single-select enum (Select family) | **Segmented vs Dropdown** | Count + space: ≤5~6 items, all must be visible / icon cards → Segmented; more items or tight space → Dropdown | Segmented for typical counts |
+| Action / entry (Button family) | **Button vs Hyperlink-button** | Semantics: navigates to another page/view → Hyperlink (real `<a href>`, consistent with existing `feature-button`); executes an in-place action (apply/reset/toggle behavior) → Button | Navigation defaults to Hyperlink |
 
-> 注:button/link 这条代码库里已半 embodied —— 现有 `feature-button.html` 就是 `<a href>`(导航用 hyperlink),第二层只是把现状写成明文。
+> Note: the button/link rule is already half-embodied in the codebase — the existing `feature-button.html` is an `<a href>` (navigation uses hyperlink); Level 2 just writes the current state down explicitly.
 
-**三张表覆盖后,绝大多数"用哪个控件"从"推断"变"查表"**:①第一层 形状→家族;②第二层 家族内呈现(segmented/dropdown、button/link);③领域约定表(Sidetone→slider、降噪→带图标 segmented、on/off→toggle…)。剩下真模糊的,**编写期让强模型推一次 → 写成显式数据 → 人复核**;之后生成期照数据出,不再推。
+**With the three tables in place, most "which control to use" shifts from "inference" to "table lookup"**: ① Level 1 shape → family; ② Level 2 presentation within family (segmented/dropdown, button/link); ③ domain convention table (Sidetone → slider, noise reduction → icon segmented, on/off → toggle…). For anything still genuinely ambiguous, **let the strong model infer once at authoring time → write it as explicit data → human review**; thereafter generation time reads the data and doesn't infer.
 
-**关键原则**:**数据里显式写明 archetype id = 唯一真相;三张表只是编写期的指南 + 默认值,不是运行时裁决者。** 不做"magic 自动选组件"引擎——呈现选择部分是规则(数量/空间)、部分是设计意图(icon 卡片 vs 文字网格 vs 下拉),全自动会抹掉设计意图(§2.1 错误抽象比重复更贵)。
+**Key principle**: **the archetype id written explicitly in the data = the single source of truth; the three tables are only authoring-time guides + defaults, not runtime arbiters.** No "magic auto-select component" engine — presentation choice is partly rules (count/space) and partly design intent (icon cards vs text grid vs dropdown); full automation would erase design intent (§2.1: wrong abstraction costs more than duplication).
 
-> 把这三张表正式写进 `AGENTS.md` 是待办(第 11 节)——它们是"保证 AI 选对控件"的机制载体,且**只在编写期用、生成期不查**。
+> Formally writing these three tables into `AGENTS.md` is a to-do (§11) — they are the mechanism carrier for "ensuring the AI picks the right control," and they are **used only at authoring time, not consulted at generation time**.
 
 ---
 
-## 8. 交互模型:从"静态烤死"到"真交互"再到"原生组件"
+## 8. Interaction model: from "baked static" to "real interaction" to "native components"
 
-### 8.1 出发点:方法论主张生成期烤死
+### 8.1 Starting point: methodology advocates baking at generation time
 
-§3.1 把数据消费从"运行时"移到"生成期":一次生成一个状态、内容烤死、不做运行时 show/hide。前提是"一次一个机型、一种连接状态、静态展示"。
+§3.1 moves data consumption from "runtime" to "generation time": generate one state at a time, bake content in, no runtime show/hide. The premise is "one model at a time, one connection state, static display."
 
-### 8.2 你选了"真交互"
+### 8.2 You chose "real interaction"
 
-针对"选 ANC 实时冒出 XYZ、切模式重绘"这类动态行为,我给了 A(静态稿)/ B(真交互)两条路,**你选 B:真交互。**
+For dynamic behaviors like "selecting ANC immediately reveals XYZ, switching modes redraws," I offered two paths — A (static mockup) / B (real interaction) — **you chose B: real interaction.**
 
-**边界划清——两种 state,只有一种变交互**:
+**Boundary clarification — two kinds of state, only one becomes interactive**:
 
-| state 的轴 | 处理 | 变不变 |
+| State axis | Handling | Changes? |
 |---|---|---|
-| 跨产品/型号/连接(哪台机、wired/bluetooth、有哪些功能) | 生成期烤死一个(§3.1 仍管) | 不变,静态 |
-| 单台机面板内、终端用户操作(拨开关、选模式、拖 slider、条件显隐) | 运行时 | ✅ 真交互 |
+| Cross-product/model/connection (which device, wired/bluetooth, which functions exist) | Baked in at generation time (§3.1 still applies) | No change, static |
+| Inside a single device panel, end-user operations (toggle switch, select mode, drag slider, conditional reveal) | Runtime | ✅ Real interaction |
 
-诚实标注:选真交互,就意味着在控件这层**确实要"预埋 + 运行时 show/hide"**(XYZ 先在 DOM、选 ANC 才显示)——这正是 §3.1 当初说别干的。这是**明知故犯的覆盖**,理由是 §3.1 假设"静态展示页",不适用"可操作控制面板";以产品决策为准。
+Honest note: choosing real interaction means the control layer **does need "pre-embedded + runtime show/hide"** (XYZ pre-exists in the DOM; selecting ANC reveals it) — which is exactly what §3.1 originally said not to do. This is a **deliberate, knowing override**, justified because §3.1 assumed "static display page," which does not apply to "an operable control panel"; the product decision takes precedence.
 
-### 8.3 你的关键洞察:行为是组件原生自带的 → 用原生表单控件,零 JS
+### 8.3 Your key insight: behavior is native to the components → use native form controls, zero JS
 
-**你的输入(大意)**:真交互不需要弱模型猜/重建,这些交互是组件原生自带的:Toggle 必然有开/关;Segmented/Button 必然有选中/未选中(顶多加 hover);Slider 必然有拖动/更新数值。用了组件,状态就在里面了,没必要为弱模型再做一套。并再次确认:纯前端、不入库、不持久化,刷新回默认。
+**Your input (paraphrased)**: Real interaction doesn't require the weak model to guess or reconstruct — these interactions are native to the components: a Toggle inherently has on/off; Segmented/Button inherently has selected/unselected (hover at most); a Slider inherently has drag/value update. Use the component and the state is already inside it — no need to build a separate layer for the weak model. And confirmed again: pure front-end, no persistence, resets to default on refresh.
 
-**我确认并升级(承认这比我提的 `headset.js` 运行时更好)**:用**原生 HTML 表单控件**,行为是浏览器给的:
+**I confirmed and upgraded (conceding this is better than the `headset.js` runtime I had proposed)**: use **native HTML form controls** — behavior provided by the browser:
 
-| 组件 | 原生元素 | 自带行为(0 JS) |
+| Component | Native element | Built-in behavior (0 JS) |
 |---|---|---|
-| Toggle | `<input type="checkbox">`(CSS 描成开关) | 勾/取消、选中态 |
-| Segmented | 一组 `<input type="radio" name=…>` | 单选互斥、选中态 |
-| Slider | `<input type="range">` | 拖动、数值更新 |
-| Dropdown | 有意的自定义件:`<details>/<summary>` + CSS + 少量脚本 | 保留 Figma 自定义列表外观;浮层定位见 C1 |
+| Toggle | `<input type="checkbox">` (CSS-styled as a switch) | check/uncheck, selected state |
+| Segmented | A group of `<input type="radio" name=…>` | mutually exclusive single-select, selected state |
+| Slider | `<input type="range">` | drag, value update |
+| Dropdown | Intentional custom: `<details>/<summary>` + CSS + minimal script | preserves Figma's custom list appearance; float positioning see C1 |
 
-- 选中/hover 用 CSS(`:checked`/`:hover`)写进 `headset.css`。
-- **连"选 ANC 冒出 XYZ"都能纯 CSS**:`#mode-anc:checked ~ .anc-extra { display:block }`(兄弟选择器,0 JS)。
-- 因此**撤掉 `headset.js` 那一层**。诚实保留的极少数例外(都是一行原生属性,不是框架):想让 slider 实时显示数字 → 一个 `oninput`;条件元素必须是触发控件的 CSS 兄弟节点,排不开的个别情况一行 JS 兜底。
-- **Dropdown 例外登记:** Dropdown 不是原生 `<select>`;它有意保留 `<details>/<summary>` + 自定义列表 + 少量脚本,因为需要匹配 Figma 的自定义列表外观。这是"原生优先/几乎零 JS"模型里登记在案的例外;由此带来的浮层裁剪处理见 C1。
+- Selected/hover states written into `headset.css` via CSS (`:checked`/`:hover`).
+- **Even "selecting ANC reveals XYZ" can be pure CSS**: `#mode-anc:checked ~ .anc-extra { display:block }` (sibling selector, 0 JS).
+- Therefore **the `headset.js` layer is removed**. Honestly noted exceptions retained (all one-liner native attributes, not a framework): display slider value in real time → one `oninput`; when a conditional element cannot be a CSS sibling of the trigger, one JS line as fallback.
+- **Dropdown registered exception:** Dropdown is not a native `<select>`; it intentionally uses `<details>/<summary>` + custom list + minimal script to match Figma's custom list appearance. This is a registered exception in the "native-first / near-zero JS" model; the resulting float-clipping handling is addressed in C1.
 
-### 8.4 嵌套条件显隐的深度边界
+### 8.4 Depth boundary for nested conditional reveal
 
-- **浅层(模式 → 直接挂的子功能,一层)**:纯 CSS `:checked ~`,0 JS。
-- **深层嵌套(子功能里再按状态露更深的东西)**:CSS 兄弟链会变脆。这种用**一个通用的声明式显隐引擎**更稳——markup 写 `data-show-when="mode==anc"`,一段写一次的通用 JS 读它干活。**仍是通用引擎读数据、弱模型只声明关系、不写专属 JS。**
+- **Shallow (mode → directly attached sub-functions, one level)**: pure CSS `:checked ~`, 0 JS.
+- **Deep nesting (reveal even deeper things based on state inside a sub-function)**: CSS sibling chains become brittle. Use **a generic declarative show/hide engine** for this — markup writes `data-show-when="mode==anc"`, one general-purpose JS block written once reads and acts. **Still: generic engine reads data, weak model only declares the relationship, no bespoke JS.**
 
-### 8.5 scope 确认
+### 8.5 Scope confirmed
 
-**纯前端、不入库、不持久化、刷新回默认**——一个可操作的 UI 面板演示。(你确认两次。)
-
----
-
-## 9. 当前收敛出的模型(综合)
-
-### 9.1 一个原语:递归槽位列表
-
-```
-Content Area      = 一列槽位 → 每个槽放一张功能卡片(Noise Control / Collaboration / …)
-  └─ 功能卡片      = 一列槽位 → 每个槽放一个组件(toggle / slider / segmented / …)
-       └─ 某个槽   = 也可以放"又带槽位的卡片"(嵌套:选 ANC 冒出的那组子功能)
-            └─ …   递归下去
-```
-
-> **有序的槽位列表;每个槽由数据决定填什么;数量可变;可递归。**
-
-弱模型从头到尾只做一件事:**看到一个槽 → 按数据里的 archetype 拷对应片段 → 填值。** 有几个槽、填什么、要不要嵌套——全是数据。
-
-**两条原则钉死(D20,2026-06-26):**
-1. **嵌套能力是普适的、行为是数据驱动的。** 每张**装配卡**的卡身都是槽列表,任何槽都能放组件、或一张**嵌套的功能卡**(它又有自己的槽,递归无上限);没有 per-function 特例,卡壳(`function-frame.html`)对所有卡一致。子功能**显示/隐藏/置灰/常驻**不是卡的属性,而是按需写进 manifest 的数据:需求="选某项才出现"→ `reveals`(显隐);需求="开关关了仍可见但失效"→ `dependents`(置灰);需求="一直在"→ 普通槽。生成期不决定,照数据渲染。
-2. **快照卡(Layer-1,如 `eq-audio`)是冻结的叶子。** 整段复制、不读 manifest 的 `components`/`reveals`/`dependents`;其内部嵌套(若有)烤死在快照 HTML 里,不按机型授权。递归槽位逻辑对**装配卡**完全普适;快照卡是**有意的终点**(保 D18 的"生成期极简")。要让快照卡也承载按需嵌套槽 = 重开 D18,**暂不做**(以稳定为先)。
-
-### 9.2 层结构(模板/规则侧 ↔ 数据侧)
-
-```
-模板/规则侧                                  数据侧(manifest)
-──────────────────────────────────────     ──────────────────────────────────
-1. tokens.css      设计常量                  (无)
-2. headset.css     布局 + 组件样式          (无)
-                   + :checked/:hover 状态
-                   + 浅层条件显隐
-3. page frames     gen-homepage/gen-subpage  home.manifest: identity+connection+features[]
-   (骨架 + 槽 data-slot,copy+fill)           <subpage>.manifest: title + functions[](槽列表)
-4. Functions       卡片外壳(标题+ⓘ)         每个功能: id + 组件槽列表(+ 默认组成可覆盖)
-   = 数据驱动拼装
-5. Components    components/<type>.html    每个组件: archetype + 值(label/选项/默认/有序?)
-   (原生表单控件片段,行为浏览器自带)         + 可选 reveals(条件子槽,0/N,可嵌套)
-```
-
-### 9.3 两层(known/unknown)落在"组件 archetype"
-
-- **已知 archetype**(`toggle` / segmented/slider/preset-grid…)→ 有片段 → copy + 填(第一层)。archetype 数量少而有界(十种上下),按需生长,补得完。
-- **未知 archetype** → `headset-function`(第二层)现搭;复现了再固化成片段(§9.4)。
-- **已知功能的"默认组成"**(标准 Collaboration = 哪几个组件)= 数据(注册表,§5.2),按 id 引用,机型可覆盖(删/改/增)。
-- **preset-first(默认占绝大多数,见 §6.6)**:每个功能 ID 都有一份固定预设组成("雷打不动");常规机型只是"引用 ID 拿预设",覆盖是例外。预设存成数据而非冻结 HTML,所以常规简单 + 例外可改两头都成立。
-- **最高频的组件 archetype = 标准行**:左 Title + 右组件(Toggle/Dropdown)。Sidetone 这类则是固定的复合(上 Toggle + 下 Slider);Noise Control 固定 Segment Control;Multimedia 固定模式网格(默认 5、最多 6 的 2×3)。
-- **archetype 清单是开放/临时的(用户确认 2026-06-25)**:目前列出的(`toggle`、segmented、slider、dropdown、option-grid/preset-grid、标准行……)只是当下想到的**起点,不是封闭枚举**——以后会补充或修改。增/改一个 archetype 走"未知 → 现搭 → 复现后固化"那条路(§9.4),并**顺带更新 §7 的两层决策表和受影响的预设**。这正是"按需生长"的体现,不需要一开始就枚举全。
-
-### 9.4 与方法论的映射
-
-- 对齐:§3(槽)、§4(变体:archetype enum 选片段)、§5(列表:槽列表、模式列表)、§5.2(注册表:默认组成按 id)、§9.3(子页一个框架 skill)、§9.4(已知片段/未知兜底/高频提升)、§9.7.4(copy 不 create)。
-- **扩展**(codebase 比方法论细一层):方法论把"控件"当单层原子;真实 function 是**复合**的,故拆成 **function 卡片 + component 原子两层**,并递归用到卡片内部。
-- **覆盖**:§3.1 "生成期烤死、不做运行时显隐" 在**控件交互层被真交互覆盖**(8.2);跨型号/连接仍烤死。
-
-### 9.5 诚实的边界与风险
-
-- **抽象会漏**:若两个视觉模式真不同(Noise Control 带图标卡片 vs Multimedia 纯文字网格),就做成两个 archetype,别硬并(§2.1"错误的抽象比重复更贵")。archetype 数量因此会多一两个,但仍有界。
-- **深层嵌套显隐**:纯 CSS 兄弟链会脆,需要通用声明引擎兜底(8.4)。
-- **真交互违背 §3.1**:已知故犯,见 8.2。
+**Pure front-end, no persistence, resets to default on refresh** — an operable UI panel demo. (Confirmed by you twice.)
 
 ---
 
-## 10. 决策日志
+## 9. Current converged model (synthesized)
 
-| # | 决定 | 出现轮次 | 理由 | 状态 |
+### 9.1 One primitive: recursive slot list
+
+```
+Content Area      = an ordered slot list → each slot holds one function card (Noise Control / Collaboration / …)
+  └─ Function card  = an ordered slot list → each slot holds one component (toggle / slider / segmented / …)
+       └─ A slot     = can also hold "a card that itself has slots" (nested: the sub-functions revealed on selecting ANC)
+            └─ …     recurse down
+```
+
+> **An ordered slot list; what fills each slot is decided by data; the count is variable; it is recursive.**
+
+The weak model does exactly one thing from start to finish: **see a slot → copy the matching snippet per the archetype in the data → fill values.** How many slots, what fills each, whether to nest — all data.
+
+**Two principles locked in (D20, 2026-06-26):**
+1. **Nesting capability is universal; behavior is data-driven.** Every **assembled card**'s body is a slot list; any slot can hold a component or a **nested function card** (which has its own slots, recursion without limit); no per-function special cases; the card shell (`function-frame.html`) is consistent across all cards. Sub-function **show/hide/grey-out/always-visible** is not a property of the card; it is data written into the manifest as needed: requirement = "appears when an option is selected" → `reveals` (show/hide); requirement = "still visible but disabled when toggle is off" → `dependents` (grey-out); requirement = "always present" → plain slot. Generation time does not decide — it renders from data.
+2. **Snapshot cards (Layer 1, e.g. `eq-audio`) are frozen leaves.** Copied wholesale; the manifest's `components`/`reveals`/`dependents` are not read; any internal nesting (if present) is baked into the snapshot HTML and is not model-specific. Recursive slot logic applies fully to **assembled cards**; snapshot cards are **intentional endpoints** (preserving D18's "minimal generation"). Making a snapshot card also carry on-demand nested slots = re-opening D18 — **not doing this for now** (stability first).
+
+### 9.2 Layer structure (template/rule side ↔ data side)
+
+```
+Template / rule side                              Data side (manifest)
+────────────────────────────────────────         ──────────────────────────────────
+1. tokens.css      Design constants               (none)
+2. headset.css     Layout + component styles      (none)
+                   + :checked/:hover states
+                   + shallow conditional reveal
+3. Page frames     gen-homepage/gen-subpage        home.manifest: identity+connection+features[]
+   (skeleton + data-slot slots, copy+fill)         <subpage>.manifest: title + functions[] (slot list)
+4. Functions       Card shell (title + ⓘ)          Each function: id + component slot list (+ default composition, overridable)
+   = data-driven assembly
+5. Components      components/<type>.html          Each component: archetype + values (label/options/default/ordered?)
+   (native form control snippets,                  + optional reveals (conditional sub-slots, 0/N, nestable)
+    behavior provided by browser)
+```
+
+### 9.3 Two layers (known/unknown) land on "component archetype"
+
+- **Known archetypes** (`toggle` / segmented/slider/preset-grid…) → snippet exists → copy + fill (Layer 1). Archetype count is small and bounded (~10), grows on demand, completable.
+- **Unknown archetype** → `headset-function` (Layer 2) assembles on the spot; solidified into a snippet once it recurs (§9.4).
+- **Known functions' "default composition"** (standard Collaboration = which components) = data (registry, §5.2), referenced by id, overridable per model (delete/change/add).
+- **Preset-first (defaults are the vast majority, see §6.6)**: each function ID has a fixed preset composition ("rock solid"); standard models just "reference the ID to get the preset"; overrides are the exception. Presets stored as data rather than frozen HTML, so both "standard = simple" and "exception = changeable" hold.
+- **Highest-frequency component archetype = standard row**: Title on left + component on right (Toggle/Dropdown). Sidetone is a fixed compound (top Toggle + bottom Slider); Noise Control uses fixed Segment Control; Multimedia uses fixed mode grid (default 5, max 6 in a 2×3 layout).
+- **The archetype list is open / provisional (user confirmed 2026-06-25)**: the archetypes listed (`toggle`, segmented, slider, dropdown, option-grid/preset-grid, standard row…) are just the **starting point as of now, not a closed enum** — they will be supplemented or changed. Adding/changing an archetype follows the "unknown → assemble on the spot → solidify once it recurs" path (§9.4), and **updates the Level 2 decision tables in §7 + any affected presets at the same time**. This is "grow on demand" in practice — no need to enumerate everything upfront.
+
+### 9.4 Mapping to the methodology
+
+- Aligned with: §3 (slots), §4 (variants: archetype enum selects a snippet), §5 (lists: slot lists, mode lists), §5.2 (registry: default composition by id), §9.3 (one framework skill per sub-page type), §9.4 (known snippet / unknown fallback / high-frequency promote), §9.7.4 (copy not create).
+- **Extension** (codebase goes one level deeper than the methodology): the methodology treats "control" as a single-layer atom; real functions are **composite**, so they are split into **function card + component atom two layers**, with recursion applied into the card interior.
+- **Override**: §3.1 "bake at generation time, no runtime show/hide" is **overridden at the control interaction layer by real interaction** (8.2); cross-model/connection state is still baked.
+
+### 9.5 Honest boundaries and risks
+
+- **Abstractions can leak**: if two visual modes are genuinely different (Noise Control's icon cards vs Multimedia's plain text grid), make them two archetypes — don't force a merge (§2.1 "wrong abstraction costs more than duplication"). The archetype count may therefore be one or two larger, but remains bounded.
+- **Deep nesting show/hide**: pure CSS sibling chains can become brittle; needs the generic declarative engine as a fallback (8.4).
+- **Real interaction violates §3.1**: deliberate knowing override, see 8.2.
+
+---
+
+## 10. Decision log
+
+| # | Decision | When introduced | Rationale | Status |
 |---|---|---|---|---|
-| D1 | 方法论参照、codebase 优先 | 起点 | 用户明示;方法论部分过时 | 生效 |
-| D2 | `headset-control-generic` → `headset-function`,control→function 全量迁移 | 第 2 节 | 名字太宽泛;保持一致防 drift | **已 git add 未 commit** |
-| D3 | function 形态 = 单行模块 | 第 2 节 | 当时理解 | **已撤销**(被 D9 取代) |
-| D4 | 两层架构:已知 copy / 未知现搭 | 第 3 节 | 用户背景 | 生效 |
-| D5 | 一个子页 = 一个功能(1:1),撤掉列表 | 5.2 | 误读"Skill 就是子页" | **已撤销**(被截图推翻) |
-| D6 | 已知功能用快照/数据,不为每功能开 skill | 第 4 节 | 见 4.3 优劣;逻辑只需一处 | 生效 |
-| D7 | Content Area = 功能列表(1~N) | 5.3 | Audio Settings 截图 | 生效 |
-| D8 | 固定素材下沉到组件;function = 数据驱动拼装;身份认 id | 5.4 | 删/改/增真实 case | 生效 |
-| D9 | function = 卡片块(标题 + 组件),非单行 | 5.3/5.4 | 截图 | 生效(替代 D3) |
-| D10 | 控件选型:三张表(①形状→家族 ②家族内呈现 segmented/dropdown、button/link ③领域约定)+ 编写期推一次冻成数据;不做 runtime 选择引擎 | 第 7 节 | 把推断收敛成查表 | 生效(已写进 headset/AGENTS.md) |
-| D11 | 真交互(而非静态稿) | 8.2 | 用户选 B | 生效 |
-| D12 | 用原生表单控件 + CSS,几乎零 JS;撤掉 `headset.js`;Dropdown 是登记例外(`<details>/<summary>` + 少量脚本,不用原生 `<select>`) | 8.3 | 行为浏览器自带,更贴"copy 不构造";Dropdown 为保 Figma 自定义列表外观例外处理 | 生效(替代早先的 headset.js 提案) |
-| D13 | 深层嵌套显隐用通用声明引擎 `data-show-when` 兜底 | 8.4 | CSS 兄弟链脆 | 生效(仅深嵌套) |
-| D14 | 纯前端、不入库、刷新回默认 | 8.2/8.5 | 用户确认两次 | 生效 |
-| D15 | 收敛为"递归槽位列表"单一原语 | 5.5 | 用户"槽位"心智 | **当前模型** |
-| D16 | **preset-first**:每个功能 ID 一份固定预设组成,默认占绝大多数,覆盖是例外;预设存成数据 | 6.6 | 用户背景:"对应到 ID 几乎都有预设、雷打不动" | 生效(坐实 D6/D8,非反转) |
-| D17 | **快照=派生产物 + "改原子→重建快照"纪律**;暂不建 build 机器(只 2 张卡,方法论接受复制)。快照由卡壳+原子装配而来,`headset-function` 的装配逻辑是未来 build 步骤的种子;卡多了再上"spec→装配→快照"自动化 | F 分析 | drift 真实(B 清 ⓘ SVG 时被迫改片段+3 份烤死副本演示了)但现在便宜 | 生效:纪律立、机器 defer |
-| D18 | **生成期极简**:manifest = 子页标题 + **功能 id 列表(+ 罕见覆盖)**;gen-subpage 对 function 只"复制快照 + 剥标记",per-function 填值近乎空操作(已知卡里几乎没有按机型变的值);不建复杂填值引擎 | G 分析 | 冻结快照里几乎一切都烤死;真正按机型变的是"有哪些功能"这个列表 | 生效:待真跑 gen-subpage 验证 |
-| D19 | **递归槽位/条件显隐 落地为 manifest `reveals` schema + 生成步骤 + 生成期校验**:§6.5/§8/§9.1 的"条件子槽"此前只到 CSS+片段层(`.segment-panels` 位置型 `:has`),manifest 无写法、gen-subpage 无步骤。现定义 `reveals`(selector option value → 有序槽列表,槽=组件或嵌套 `{function:<id>}`,可递归),取代乱编的 `condition:`;gen-subpage/headset-function 增加 reveals 生成步骤;新增生成期校验(未知 archetype/id、`condition:` 残留、reveals 键不匹配、>6 option、重复 option 值 → HALT);确立"产物必须可由 manifest 重生成,禁止手改产物"纪律(把 D17 上升到页面级) | WL327 首跑暴露(EQ 被当 slider、手改 HTML、manifest↔产物分叉) | 架构早有递归原语,缺的是 schema 与生成两层;WL327 是 gen-subpage 首次真跑,撞上 §11 未实现项 | 生效:WL327 重生成验证 |
-| D20 | **toggle `dependents`(置灰)schema + 普适标题槽 `.subfn-label` + 嵌套普适/快照冻结原则 + 机械校验器**:BUG-002 暴露 `reveals` 被误用在 control-row、且命名全宽组件标题被丢。新增 `dependents`(control-row 的置灰子槽,与 `reveals` 显隐对偶);`.subfn-label` 标题槽对 reveals 与 dependents 普适(补回被丢的 "ANC Strength"/"Canceling Strength");§9.1 钉死"嵌套能力普适、行为数据驱动、快照是冻结叶子(不重开 D18)"。**关键稳定性**:把 HALT 从 SKILL.md 散文升级为**零依赖机械校验器** `validate-manifest.py`(gen-subpage 生成前必跑,非 0 即停),根治"弱模型绕过散文规则"(BUG-002 自述的 skip 原因)。顺带修正"options+panels 合计≤6"的措辞 bug(实为 ≤6 option,panels 与 options 1:1) | BUG-002 + 用户"要稳定"指令 | 散文规则会被弱模型在助人压力下绕过;实例修复不防复发,要普适+机械闸门 | 生效:校验器实测真 manifest 通过、5 类坏 manifest HALT |
-| D21 | 把组件层显式分成**两级:shape(容器:row/stacked) × component(组件:toggle/dropdown/slider/segmented/preset-grid)**。`control-row` 是 **row 形状**(内含可换的紧凑组件 toggle/dropdown),**不是** segmented/slider/preset-grid 的同级;stacked 形状 = `.subfn-label` 标题 + 全宽组件,标题属于形状(不可丢)。"嵌套子功能"的决策流改为**先选形状(横/竖)再选组件**(见 `headset/AGENTS.md`)。**暂不重命名代码 archetype 枚举**(枚举照旧:`control-row | slider | segmented | preset-grid | dropdown`)——重命名/拆分会动 manifest schema、校验器、片段、所有机型,destabilize,defer。 | 用户设计视角讨论(先选形状再选组件;并指出 dropdown 既是 archetype 又在 control-row 内 = 层级混淆) | 散落逻辑导致丢标题、`reveals` 误用在 control-row 等 bug;两级模型让标题结构化(归形状)、贴合设计师心智;但代码重构面大,稳定优先,只在文档层落地 | 生效(文档层;代码 archetype 重命名 defer) |
-| D22 | archetype `control-row` 重命名为 `toggle`;枚举改为**纯组件** `toggle | slider | segmented | preset-grid | dropdown`;**容器形状由生成器推导**(紧凑组件 toggle/dropdown → row 行;全宽组件 slider/segmented/preset-grid → stacked + `.subfn-label`)。落实 D21 两级模型于代码层。**CSS 类名不变**(`.function-header`/`.switch`/`.subfn-toggle` 等照旧);**生成产物 HTML 不变**(只动 manifest 的 archetype 字符串 + 片段文件名 control-row.html→toggle.html)。`dropdown.html` 改成自带标签行的完整版 = grow-on-demand 待办(暂无 manifest 用 `archetype: dropdown`)。 | 用户追问"为何不改枚举";grep 证据:仅 1 个真实机型用到、dropdown 从未作顶层 archetype → 改名此刻最便宜。 | control-row 是 shape 名混入 component 枚举;1 机型 pilot 阶段重命名成本最低,拖延只会随 manifest 增多变贵;校验器与 schema 同步更新,不损生成稳定性。 | 生效(代码层;dropdown.html 全行版 defer) |
+| D1 | Methodology is reference; codebase is authoritative | Start | User stated explicitly; methodology is partly outdated | Active |
+| D2 | `headset-control-generic` → `headset-function`; full control→function vocabulary migration | §2 | Name too broad; keep consistent to prevent drift | **git add-ed, not committed** |
+| D3 | Function form = single-line module | §2 | Understanding at the time | **Revoked** (superseded by D9) |
+| D4 | Two-layer architecture: known → copy / unknown → assemble on the spot | §3 | User background | Active |
+| D5 | One sub-page = one function (1:1); remove the list | 5.2 | Misread "Skill is the sub-page" | **Revoked** (overturned by screenshot) |
+| D6 | Known functions use snapshot/data; no skill per function | §4 | See 4.3 pros/cons; logic only needs to live in one place | Active |
+| D7 | Content Area = function list (1~N) | 5.3 | Audio Settings screenshot | Active |
+| D8 | Fixed material pushed to component layer; function = data-driven assembly; identity by id | 5.4 | Real delete/change/add use cases | Active |
+| D9 | Function = card block (title + components), not single line | 5.3/5.4 | Screenshot | Active (replaces D3) |
+| D10 | Control selection: three tables (① shape→family ② presentation within family: segmented/dropdown, button/link ③ domain conventions) + infer once at authoring time and freeze into data; no runtime selection engine | §7 | Converge inference into table lookups | Active (written into headset/AGENTS.md) |
+| D11 | Real interaction (not static mockup) | 8.2 | User chose B | Active |
+| D12 | Use native form controls + CSS, near-zero JS; remove `headset.js`; Dropdown is a registered exception (`<details>/<summary>` + minimal script, no native `<select>`) | 8.3 | Browser provides behavior natively, more consistent with "copy not construct"; Dropdown exceptional to preserve Figma custom list appearance | Active (replaces the earlier headset.js proposal) |
+| D13 | Deep nested show/hide uses generic declarative engine `data-show-when` as fallback | 8.4 | CSS sibling chains are brittle | Active (deep nesting only) |
+| D14 | Pure front-end, no persistence, resets to default on refresh | 8.2/8.5 | User confirmed twice | Active |
+| D15 | Converge to "recursive slot list" as the single primitive | 5.5 | User's "slot" mental model | **Current model** |
+| D16 | **Preset-first**: each function ID has one fixed preset composition; defaults are the vast majority; overrides are the exception; presets stored as data | 6.6 | User background: "almost every ID has a preset, rock solid" | Active (solidifies D6/D8, not a reversal) |
+| D17 | **Snapshot = derived artifact + "change atom → rebuild snapshot" discipline**; no build machine for now (only 2 cards, methodology accepts copying). Snapshot is assembled from shell + atoms; `headset-function` assembly logic is the seed of a future build step; automate "spec → assemble → snapshot" when card count grows | F analysis | Drift is real (cleaning ⓘ SVG forced editing snippet + 3 baked-in copies at once) but cheap right now | Active: discipline established, machine deferred |
+| D18 | **Minimal generation**: manifest = sub-page title + **function id list (+ rare overrides)**; gen-subpage on a function only "copies snapshot + strips markers"; per-function value-fill is nearly a no-op (almost nothing in known cards varies by model); no complex fill engine | G analysis | Almost everything in a frozen snapshot is baked; what truly varies by model is "which functions are present" (the list) | Active: pending real gen-subpage run to validate |
+| D19 | **Recursive slot / conditional reveal lands as manifest `reveals` schema + generation steps + generation-time validation**: the "conditional sub-slot" in §6.5/§8/§9.1 had previously only reached the CSS+snippet layer (`.segment-panels` positional `:has`); no manifest syntax, no gen-subpage steps. Now defines `reveals` (selector option value → ordered slot list; slot = component or nested `{function:<id>}`, recursively); replaces the improvised `condition:`; gen-subpage/headset-function add reveals generation steps; new generation-time validation (unknown archetype/id, leftover `condition:`, reveals key mismatch, >6 options, duplicate option values → HALT); establishes "output must be regenerable from manifest; patching output directly is forbidden" discipline (elevates D17 to page level) | WL327 first run exposed (EQ treated as slider, HTML hand-patched, manifest↔output diverged) | Architecture always had the recursive primitive; what was missing was the schema and generation layers; WL327 is gen-subpage's first real run and hit the §11 unimplemented items | Active: WL327 regeneration verified |
+| D20 | **Toggle `dependents` (grey-out) schema + universal title slot `.subfn-label` + nested-universal / snapshot-frozen principle + mechanical validator**: BUG-002 exposed `reveals` being misused on control-row, and named full-width component titles being dropped. Added `dependents` (grey-out sub-slots for control-row, dual to `reveals` show/hide); `.subfn-label` title slot is universal for both reveals and dependents (restores dropped "ANC Strength"/"Canceling Strength"); §9.1 locks in "nesting capability is universal, behavior is data-driven, snapshots are frozen leaves (no re-opening D18)." **Key stability**: upgrades HALT from SKILL.md prose to a **zero-dependency mechanical validator** `validate-manifest.py` (mandatory pre-generation run before gen-subpage; non-zero = stop), curing "weak model bypasses prose rules" (BUG-002's stated skip reason). Also fixes the "options+panels total ≤6" wording bug (actually ≤6 options; panels and options are 1:1) | BUG-002 + user "stability" directive | Prose rules get bypassed by weak models under pressure to be helpful; per-instance fixes don't prevent recurrence — need universal + mechanical gate | Active: validator tested on real manifests passes; 5 categories of bad manifests HALT |
+| D21 | Explicitly split the component layer into **two levels: shape (container: row/stacked) × component (control: toggle/dropdown/slider/segmented/preset-grid)**. `control-row` is a **row shape** (holding interchangeable compact controls toggle/dropdown), **not** a peer of segmented/slider/preset-grid; stacked shape = `.subfn-label` title + full-width component; title belongs to the shape (cannot be dropped). Decision flow for "nested sub-functions" changed to **first pick shape (horizontal/vertical) then pick component** (see `headset/AGENTS.md`). **No renaming the code archetype enum for now** (enum stays: `control-row | slider | segmented | preset-grid | dropdown`) — renaming/splitting would touch manifest schema, validator, snippets, all models: destabilizing, deferred. | User's design-perspective discussion (pick shape first, then component; pointed out dropdown is both an archetype and inside control-row = hierarchy confusion) | Scattered logic caused dropped titles, `reveals` misuse on control-row, etc.; two-level model makes title structural (belonging to shape), matches designers' mental model; but code refactor scope is large — stability first, land in docs only | Active (docs layer; code archetype rename deferred) |
+| D22 | Rename archetype `control-row` to `toggle`; enum becomes **pure components** `toggle | slider | segmented | preset-grid | dropdown`; **container shape is inferred by the generator** (compact components toggle/dropdown → row; full-width components slider/segmented/preset-grid → stacked + `.subfn-label`). Lands D21's two-level model in code. **CSS class names unchanged** (`.function-header`/`.switch`/`.subfn-toggle` etc.); **generated HTML unchanged** (only manifest archetype string + snippet filename control-row.html→toggle.html). `dropdown.html` updated to a full labeled row = grow-on-demand to-do (no manifest currently uses `archetype: dropdown`). | User asked "why not rename the enum"; grep evidence: only 1 real model uses it, dropdown has never been a top-level archetype → rename is cheapest right now. | control-row is a shape name intruding into the component enum; 1-model pilot stage has the lowest rename cost; delaying only gets more expensive as manifests grow; validator and schema updated in sync, no impact on generation stability. | Active (code layer; dropdown.html full-row version deferred) |
 
 ---
 
-## 11. 待办 / 未决
+## 11. To-do / Open items
 
-**已完成(2026-06-25):**
-- [x] `headset-function` 改名迁移已 commit(130da31)。
-- [x] function 形态从单行升级成卡片:`function-frame.html` 重做成卡壳;`.function-*` 卡片样式落地(§6.7)。
-- [x] 新增 `headset-shared/components/`:`toggle` / `slider` / `info-tooltip`(§6.7);`segmented` / `dropdown` / `preset-grid` 等按需再加。
-- [x] Collaboration 卡建出并逐项验证;firmware ⓘ 与卡片 ⓘ 合并成一套 tooltip(§6.7)。
-- [x] **把控件选型的三张表写进 `headset/AGENTS.md`**(D10):①形状→家族;②家族内呈现(Segmented/Dropdown 数量阈值、Button/Hyperlink 语义);③领域约定。只在编写期用。
+**Completed (2026-06-25):**
+- [x] `headset-function` rename migration committed (130da31).
+- [x] Function form upgraded from single-line to card: `function-frame.html` remade as card shell; `.function-*` card styles landed (§6.7).
+- [x] Added `headset-shared/components/`: `toggle` / `slider` / `info-tooltip` (§6.7); `segmented` / `dropdown` / `preset-grid` etc. to be added on demand.
+- [x] Collaboration card built and verified item-by-item; firmware ⓘ and card ⓘ merged into one tooltip set (§6.7).
+- [x] **Three control-selection tables written into `headset/AGENTS.md`** (D10): ① shape→family; ② presentation within family (Segmented/Dropdown count threshold, Button/Hyperlink semantics); ③ domain conventions. Authoring-time use only.
 
-**已完成(2026-06-26,D19):**
-- [x] **跑 `gen-subpage` 出一个真子页**:WL327 `home.manifest` + `audio-settings.manifest` → `index.html` + `audio-settings.html`(首次真跑,暴露并修复了 schema/生成两层缺口)。
-- [x] **Noise Control(`segmented`)+ Multimedia(`preset-grid`)+ 条件子功能**:条件显隐落地为 `reveals` schema(选 ANC → slider 面板;选 Custom → `eq-audio` 卡),走 §8 的位置型 `:has` CSS。
-- [x] **manifest schema + 生成期校验**:`reveals`/`components[]` schema 写进 `headset-gen-subpage/SKILL.md`;未知/越界/重复 → HALT。
+**Completed (2026-06-26, D19):**
+- [x] **Ran `gen-subpage` to produce a real sub-page**: WL327 `home.manifest` + `audio-settings.manifest` → `index.html` + `audio-settings.html` (first real run; exposed and fixed schema/generation-layer gaps).
+- [x] **Noise Control (`segmented`) + Multimedia (`preset-grid`) + conditional sub-functions**: conditional show/hide landed as `reveals` schema (select ANC → slider panel; select Custom → `eq-audio` card); uses positional `:has` CSS per §8.
+- [x] **Manifest schema + generation-time validation**: `reveals`/`components[]` schema written into `headset-gen-subpage/SKILL.md`; unknown/out-of-range/duplicate → HALT.
 
-**未做:**
-- [ ] **偏离款验证**:出一个"删 Sidetone / Noise Control 只留 2 模式"的机型,证明改数据不碰素材。
-- [ ] **已知功能"默认组成"的存放形式** + `gen-subpage` 的覆盖合并逻辑(覆盖路径,目前只支持 per-slot data-property 覆盖)。
-- [ ] icons 仅 `audio.svg`;Noise Control 的 segment 图标仍是手绘占位(非取自 `icons/`),待真 acoustic 图标补齐。
-
----
-
-## 12. 术语表
-
-- **Feature(主页入口)**:主页 Feature Zone 的按钮,`features[]` 一项,点进去是一个子页。**不是 skill**,复制 `feature-button.html`。
-- **子页(sub-page)**:如 "Audio Settings",有标题 + Content Area;由一个框架 skill `gen-subpage` 生成,**不为每个子页开 skill**(§9.3)。
-- **Content Area**:子页的内容区,= 一列**功能槽**(1~N 个,可变)。
-- **Function / 功能卡片**:Content Area 里的一张有标题的卡片(Noise Control / Collaboration / Multimedia)。内部 = 一列**组件槽**。**用数据驱动拼装,不是冻结快照。**
-- **Component / 组件**:功能内部的小控件(开关/滑杆/分段/预设网格)。用**原生表单控件片段**,行为浏览器自带。
-- **Slot / 槽位**:模板里的填充位(代码里的 `data-slot`)。**递归**:Content Area、功能卡片、组件层层都是"槽列表"。
-- **Archetype / 形态**:组件的"外形类别"(`toggle` / segmented/slider/dropdown/preset-grid…)。**少而有界**;名字/选项是数据。
-- **Snippet / Snapshot / 片段 / 快照**:被复制的静态 HTML 素材(+ 值槽)。组件片段、连接块、feature-button 都属此类。
-- **Skill**:带 `SKILL.md` 的文件夹,能跑逻辑。这里只有框架 skill(`gen-homepage`/`gen-subpage`)和未知功能现搭器(`headset-function`);**不为每个已知功能开 skill**。
-- **Layer 1 / 已知**:有片段/默认组成 → copy + 填。
-- **Layer 2 / 未知**:`headset-function` 现搭 → 复现后固化(§9.4)。
-- **Manifest / 清单 / 组成数据**:机型/子页的内容数据。决定有哪些功能、每个功能哪些组件槽、每个组件的值与 archetype、条件 reveals。
-- **Reveal / 条件显隐**:某状态(如选 ANC)下才出现的条件槽,0/N、可嵌套;浅层 CSS、深层声明引擎。
-- **编写期(authoring) vs 生成期(generation)**:推理/判断只在编写期发生并冻结成数据;生成期确定性拼装、不推。
+**Not yet done:**
+- [ ] **Variant model validation**: produce a model that "removes Sidetone / Noise Control with only 2 modes" to prove data changes leave material untouched.
+- [ ] **Storage format for known functions' "default composition"** + `gen-subpage` override-merge logic (override path currently only supports per-slot data-property overrides).
+- [ ] Icons: only `audio.svg` exists; Noise Control's segment icons are still hand-drawn placeholders (not from `icons/`); pending real acoustic icons.
 
 ---
 
-*本记录随讨论推进持续更新。最新收敛模型见第 9 节;尚未落地项见第 11 节。*
+## 12. Glossary
+
+- **Feature (home-page entry)**: A button in the home page Feature Zone; one item in `features[]`; clicking navigates to a sub-page. **Not a skill** — copies `feature-button.html`.
+- **Sub-page**: e.g. "Audio Settings," with a title + Content Area; generated by the single framework skill `gen-subpage`; **no dedicated skill per sub-page** (§9.3).
+- **Content Area**: The content region of a sub-page = a column of **function slots** (1~N, variable).
+- **Function / Function card**: A titled card inside the Content Area (Noise Control / Collaboration / Multimedia). Internally = a column of **component slots**. **Data-driven assembly, not a frozen snapshot.**
+- **Component**: The small control inside a function (switch/slider/segmented/preset grid). Uses **native form control snippets**; behavior is provided by the browser.
+- **Slot**: A fill position in a template (the `data-slot` in code). **Recursive**: Content Area, function card, and component layer are all "slot lists."
+- **Archetype**: The "shape category" of a component (`toggle` / segmented/slider/dropdown/preset-grid…). **Few in number and bounded**; names/options are data.
+- **Snippet / Snapshot**: Static HTML material (+ value slots) to be copied. Component snippets, connection blocks, and feature-buttons all belong to this category.
+- **Skill**: A folder with `SKILL.md` that can run logic. Here there are only framework skills (`gen-homepage`/`gen-subpage`) and the unknown-function assembler (`headset-function`); **no skill per known function**.
+- **Layer 1 / Known**: Snippet/default composition exists → copy + fill.
+- **Layer 2 / Unknown**: `headset-function` assembles on the spot → solidified once it recurs (§9.4).
+- **Manifest / Composition data**: The content data for a model/sub-page. Specifies which functions exist, which component slots each function has, each component's values and archetype, and conditional reveals.
+- **Reveal / Conditional show-hide**: Conditional slots that only appear in a certain state (e.g. when ANC is selected); 0/N, nestable; shallow = CSS; deep = declarative engine.
+- **Authoring time vs generation time**: Reasoning/judgment happens only at authoring time and is frozen into data; generation time performs deterministic assembly without inference.
+
+---
+
+*This record is continuously updated as the discussion progresses. The latest converged model is in §9; items not yet landed are in §11.*

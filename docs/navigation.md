@@ -1,87 +1,87 @@
-# 项目导航 · 阅读地图（什么阶段读哪些文件）
+# Project Navigation · Reading Map (what to read at each stage)
 
-> **用途**:不用每次从头读全仓库。先看这一页 → 按"任务"找到该读/该改的**那几个文件**。
-> 这是**入口索引 + 任务路由**,不重复别处内容,只指路。最后更新:2026-06-26。
-
----
-
-## 1. 一句话:这是什么项目
-
-一个**产品 UI 生成系统**(headset 为 pilot)。强模型在**编写期**把设计意图冻结成"预写片段 + manifest 数据";
-**弱模型在生成期只复制片段 + 填值,不生成、不推断**("copy, don't create")。三层:
-
-```
-设计令牌 shared/tokens.css  →  品类样式 headset/headset.css  →  页面骨架(skills)  →  机型数据(manifest)
-```
+> **Purpose**: No need to read the whole repo from scratch every time. Start here → find the **specific files** to read/change for your task.
+> This is an **entry index + task router** — it does not duplicate content from elsewhere, it only points the way. Last updated: 2026-06-26.
 
 ---
 
-## 2. 文件结构总览(每行一句话 + 属于哪层)
+## 1. In one sentence: what is this project
+
+A **product UI generation system** (headset as pilot). A strong model **freezes design intent** at authoring time into "pre-written snippets + manifest data";
+**a weak model at generation time only copies snippets + fills values — no generation, no inference** ("copy, don't create"). Three layers:
 
 ```
-AGENTS.md                       根 agent map:三层架构、skill 命名/防 sprawl、copy-not-create、build 契约
+Design tokens shared/tokens.css  →  Category styles headset/headset.css  →  Page frames (skills)  →  Model data (manifest)
+```
+
+---
+
+## 2. File structure overview (one line per file + which layer it belongs to)
+
+```
+AGENTS.md                       Root agent map: three-layer architecture, skill naming/anti-sprawl, copy-not-create, build contract
 docs/
-  navigation.md                 ← 你在这(阅读地图)
-  component-catalog.md          【组件清单】所有可复用组件 + 何时用 + 通用性 + 调用方式(活清单)
-  function-card-architecture.md 【设计日志】为什么这么设计:D1–D18 决策、§7 控件选型、§8 交互模型(长,历史)
-  methodology.md                外部方法论(仅参考,与 codebase 冲突时以 codebase 为准;顶部有"已被代码取代"清单)
+  navigation.md                 ← You are here (reading map)
+  component-catalog.md          [Component catalog] all reusable components + when to use + universality + how to call (living catalog)
+  function-card-architecture.md [Design journal] why it was designed this way: D1–D22 decisions, §7 control selection, §8 interaction model (long, historical)
+  methodology.md                External methodology (reference only; codebase wins on conflicts; top has "superseded by code" list)
 headset/
-  AGENTS.md                     【headset 操作契约】路由、非协商规则、控件选型三表、目录树 —— 干活前先读这
-  headset.css                   品类布局 + 所有组件样式 + 交互(:has/:checked/subfn/面板/dropdown)
-  models/<MODEL>/               机型 manifest + 生成出的成品页(目前无真机型;HS-DEMO 已 gitignore)
-shared/tokens.css               设计令牌(颜色/字体/圆角…),全品类共享
-.agents/skills/                 Devin 在仓库根发现的 skill(folder + SKILL.md)
-  headset-gen-homepage/         生成 index.html(home-frame.html)
-  headset-gen-subpage/          生成任意子页(subpage-frame.html)
-    templates/functions/        【现成可套用卡 · id 路由】eq-audio / promotion-download / single-control + README
-    templates/examples/         【演示/教学范例 · 不路由】collaboration / auto-power-off / noise-control + README
-  headset-function/             无快照时的兜底卡构建器(function-frame.html = 卡壳)
-  headset-shared/               不是 skill,是共享片段:
-    components/                6 个原子片段(.html) + README(原子规则 + segmented/preset 细则)
-    connection/                 连接块片段(bluetooth/wired/unpair)
-    icons/  feature-button.html  图标库 + 功能按钮
+  AGENTS.md                     [headset operational contract] routing, non-negotiable rules, control-selection three tables, directory tree — read this before working
+  headset.css                   Category layout + all component styles + interaction (:has/:checked/subfn/panels/dropdown)
+  models/<MODEL>/               Model manifests + generated finished pages (no real models yet; HS-DEMO is gitignored)
+shared/tokens.css               Design tokens (color/font/radius…), shared across all categories
+.agents/skills/                 Skills discovered by Devin at the repo root (folder + SKILL.md)
+  headset-gen-homepage/         Generates index.html (home-frame.html)
+  headset-gen-subpage/          Generates any sub-page (subpage-frame.html)
+    templates/functions/        [Ready-to-use cards · id-routed] eq-audio / promotion-download / single-control + README
+    templates/examples/         [Demo/teaching examples · not routed] collaboration / auto-power-off / noise-control + README
+  headset-function/             Fallback card assembler when no snapshot exists (function-frame.html = card shell)
+  headset-shared/               Not a skill; shared snippets:
+    components/                 6 atomic snippets (.html) + README (atomic rules + segmented/preset details)
+    connection/                 Connection block snippets (bluetooth/wired/unpair)
+    icons/  feature-button.html Icon library + feature button
 ```
 
 ---
 
-## 3. 按任务的阅读/修改路线(核心)
+## 3. Task-based reading / change routes (core)
 
-| 我要做什么 | 读/改哪些文件(按顺序) | 注意 |
+| What I want to do | Files to read/change (in order) | Notes |
 |---|---|---|
-| **改一个原子片段**(toggle/slider/segmented/preset/dropdown/info) | `components/<name>.html`(片段本身) → `components/README.md`(原子规则) → `headset/headset.css`(它的样式) | 片段无内联 `<style>`;样式全在 headset.css |
-| **加/改一张功能卡** | 有快照→直接改 `functions/<id>.html`;无→`headset-function/templates/function-frame.html`(卡壳)+`components/*`(原子)拼;对照 `component-catalog.md` | 卡按 manifest 的 `id` 路由(D8) |
-| **改"可替换控件(swap)"规则** | **只改** `components/toggle.html`(唯一权威);`single-control.html` 引用它,别在它里重写 | 只允许 switch ↔ dropdown 进 header |
-| **改"用哪个控件"的选型规则** | `headset/AGENTS.md` §"Control Selection"(operational) | 为什么这么定 → `function-card-architecture.md` §7 |
-| **改路由**(哪个 id→哪张卡 / 关键词) | `functions/README.md` + `headset-gen-subpage/SKILL.md` + `headset/AGENTS.md` 路由段 | 生成期纯 id;关键词表仅编写期 |
-| **改样式 / 加 token** | 组件样式→`headset/headset.css`;颜色等 token→`shared/tokens.css` | 禁内联 `<style>`,token 优先 |
-| **加连接块 / feature 按钮 / 图标** | `headset-shared/connection|icons|feature-button.html` + 各自 README | 也是 copy 片段,未知 enum 就 HALT |
-| **理解整体为什么这么设计** | `function-card-architecture.md`(决策日志 D1–D18 + §节) | 长,只在需要"为什么"时读 |
-| **想知道有哪些组件、各自通用不通用** | `component-catalog.md` | 一站式清单 |
+| **Edit an atomic snippet** (toggle/slider/segmented/preset/dropdown/info) | `components/<name>.html` (the snippet itself) → `components/README.md` (atomic rules) → `headset/headset.css` (its styles) | Snippets have no inline `<style>`; all styles are in headset.css |
+| **Add/change a function card** | Snapshot exists → edit `functions/<id>.html` directly; none → assemble from `headset-function/templates/function-frame.html` (card shell) + `components/*` (atoms); consult `component-catalog.md` | Cards are routed by manifest `id` (D8) |
+| **Change the "swappable control (swap)" rule** | **Edit only** `components/toggle.html` (sole authority); `single-control.html` references it — do not rewrite the rule there | Only switch ↔ dropdown allowed in header |
+| **Change the "which control to use" selection rule** | `headset/AGENTS.md` §"Control Selection" (operational) | Why it was defined that way → `function-card-architecture.md` §7 |
+| **Change routing** (which id → which card / keywords) | `functions/README.md` + `headset-gen-subpage/SKILL.md` + `headset/AGENTS.md` routing section | Generation is id-only; keyword table is authoring-time only |
+| **Change styles / add a token** | Component styles → `headset/headset.css`; color etc. tokens → `shared/tokens.css` | Inline `<style>` forbidden; tokens first |
+| **Add a connection block / feature button / icon** | `headset-shared/connection|icons|feature-button.html` + their respective READMEs | Also copy-snippet; unknown enum → HALT |
+| **Understand why the overall design is this way** | `function-card-architecture.md` (decision log D1–D22 + sections) | Long; only read when you need the "why" |
+| **Find out what components exist and their universality** | `component-catalog.md` | One-stop catalog |
 
 ---
 
-## 4. 权威源对照(防 drift / 别重复读)
+## 4. Single-source truth reference (prevent drift / avoid re-reading)
 
-每件事只有**一个**真相源,改的时候认准它:
+Every topic has **one** source of truth — always go to it when making changes:
 
-| 主题 | 唯一真相源 | 其它文件的角色 |
+| Topic | Single source of truth | Role of other files |
 |---|---|---|
-| 三层架构 / skill 命名 / 防 sprawl | `AGENTS.md`(根) | — |
-| headset 路由 + 非协商规则 + 控件选型表 | `headset/AGENTS.md` | — |
-| 组件清单 / 通用性 | `docs/component-catalog.md` | — |
-| swap 规则(可替换 header 控件) | `components/toggle.html` | single-control 引用它 |
-| segmented vs preset-grid 细则 | `components/README.md` | AGENTS 只给家族级表 |
-| 设计决策的"为什么" | `function-card-architecture.md` | 历史/思考日志,不是当前规范 |
-| 样式 | `headset/headset.css` | token 在 tokens.css |
-| methodology.md | — | **仅参考**(顶部列了已被代码取代的点),冲突以 codebase 为准 |
+| Three-layer architecture / skill naming / anti-sprawl | `AGENTS.md` (root) | — |
+| headset routing + non-negotiable rules + control selection tables | `headset/AGENTS.md` | — |
+| Component catalog / universality | `docs/component-catalog.md` | — |
+| Swap rule (swappable header control) | `components/toggle.html` | single-control references it |
+| segmented vs preset-grid details | `components/README.md` | AGENTS only provides the family-level table |
+| Design decision rationale ("why") | `function-card-architecture.md` | Historical/thinking log, not current spec |
+| Styles | `headset/headset.css` | Tokens are in tokens.css |
+| methodology.md | — | **Reference only** (top section lists points superseded by code); codebase wins on conflicts |
 
 ---
 
-## 5. 新人/新会话最短上手顺序
+## 5. Shortest onboarding sequence for new sessions
 
-1. 本页(navigation.md)—— 知道东西在哪。
-2. `headset/AGENTS.md` —— 干活的硬规则 + 目录树。
-3. 要碰组件 → `docs/component-catalog.md` 找到对应项 → 跳到它的文件。
-4. 只有需要"为什么这么设计"时,才去翻 `function-card-architecture.md`。
+1. This page (navigation.md) — know where things are.
+2. `headset/AGENTS.md` — hard rules + directory tree for working.
+3. Need to touch a component → `docs/component-catalog.md` to find it → jump to its file.
+4. Only read `function-card-architecture.md` when you need the "why behind the design."
 
-> 维护:文件结构/权威源变化时更新本页第 2、4 节 + 顶部日期。
+> Maintenance: update §2 and §4 of this page + the top date whenever the file structure or single-source assignments change.

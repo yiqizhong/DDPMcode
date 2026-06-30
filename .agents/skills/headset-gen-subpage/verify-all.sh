@@ -141,7 +141,17 @@ for model_dir in "${MODELS[@]}"; do
   run_check "$model requirements coverage" python3 "$CHECK_REQUIREMENTS_COVERAGE" "$model_dir"
   run_check "$model coverage atoms" python3 "$CHECK_COVERAGE_ATOMS" "$model_dir"
 
-  run_check "$model generated HTML drift" python3 "$VERIFY_MODEL" "$model"
+  # Drift only makes sense for models whose generated HTML is committed. Dev/demo
+  # fixtures (e.g. FIXTURE, HS-DEMO) gitignore their *.html, so they are absent from
+  # a fresh checkout (CI) — skip drift for those; their manifests/coverage still run.
+  # Only gitignored HTML is skipped: a merely-uncommitted/new model still drift-checks.
+  if git -C "$ROOT" check-ignore -q "headset/models/$model/index.html" 2>/dev/null; then
+    echo "== $model generated HTML drift =="
+    echo "SKIP: $model generated HTML is gitignored — drift not applicable"
+    echo
+  else
+    run_check "$model generated HTML drift" python3 "$VERIFY_MODEL" "$model"
+  fi
 done
 
 if [ "$FAILURES" -gt 0 ]; then

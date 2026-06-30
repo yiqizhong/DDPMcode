@@ -1,0 +1,15 @@
+marketing-name: Dell Pro 9 Wireless ANC Headset
+model-number: WL927
+firmware: 12.432.486.11
+image: images/5027.png
+connectionType: wired
+features:
+  - label: Audio Settings
+    icon: audio
+    link: audio-settings.html
+  - label: Automated Actions
+    icon: settings
+    link: automated-actions.html
+  - label: Device Settings
+    icon: settings
+    link: device-settings.html

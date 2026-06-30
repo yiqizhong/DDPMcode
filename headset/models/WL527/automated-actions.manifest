@@ -2,11 +2,9 @@ title: Automated Actions
 functions:
   - id: wear-detection
     title: Wear Detection
-    tooltip: "Automatically detect when you're wearing the headset"
+    info: "Automatically detect when you're wearing the headset"
     components:
       - archetype: toggle
-        label: Wear Detection
-        tooltip: "Automatically detect when you're wearing the headset"
         value: true
         dependents:
           - archetype: segmented
@@ -14,14 +12,13 @@ functions:
             options:
               - {label: Low, value: low}
               - {label: Normal, value: normal, selected: true}
-          - archetype: section
-            label: When Headset Removed
+          - title: When Headset Removed
             components:
               - archetype: toggle
                 label: Pause Music
-                tooltip: "Pause audio when headset is removed"
+                info: "Pause audio when headset is removed"
                 value: true
               - archetype: toggle
                 label: Mute Microphone
-                tooltip: "Mute microphone when headset is removed"
+                info: "Mute microphone when headset is removed"
                 value: true

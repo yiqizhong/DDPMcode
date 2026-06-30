@@ -1,6 +1,7 @@
 marketing-name: Dell Pro 5 Wireless ANC Headset
 model-number: WL527
 firmware: 12.432.486.11
+image: images/5027.png
 connectionType: bluetooth
 battery: 50
 features:

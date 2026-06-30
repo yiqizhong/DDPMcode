@@ -1,6 +1,8 @@
 marketing-name: DDPM Headset
 model-number: HS-DEMO
 firmware: 1.0.0.0
+image: none
+opt-out-reason: Demo fixture has no supplied device image.
 connectionType: wired
 
 features:

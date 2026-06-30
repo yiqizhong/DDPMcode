@@ -16,7 +16,8 @@
 | `model-number` | str | **required** | model-number span | HALT |
 | `firmware` | str | optional | "Firmware Version …" line in the ⓘ tooltip | **drop that line** |
 | `ppid` | str | optional | "PPID: …" line in the ⓘ tooltip | **drop that line** |
-| `image` | path | optional | `.device-image-place` | leave the place empty (no `<img>`) |
+| `image` | path \| `none` | **required** | `.device-image-place` | HALT if absent; `image: none` is an explicit opt-out and requires `opt-out-reason` |
+| `opt-out-reason` | str | conditional | audit reason for `image: none` | HALT when `image: none` and absent/empty; otherwise omit |
 | `connectionType` | enum¹ | **required** | which `connection/<type>.html` is copied | HALT |
 | `battery` | int 0–100 | conditional² | battery value inside the connection block | if the chosen snippet HAS a battery slot and battery is absent → render `—%`; if the snippet has no battery slot (e.g. wired) → ignored |
 | `features` | list | **optional** | feature buttons (home) + obligates building each linked sub-page | **absent/empty → homepage only: no feature buttons, no sub-pages generated** |
@@ -88,10 +89,12 @@ do when PPID is missing — omit, leak the placeholder, or invent one.)
 ## How the gate handles it (extend `validate-manifest.py` to cover home)
 
 The home manifest gets the same kind of mechanical gate the sub-page manifest already has:
-- missing a **required** field (`marketing-name`, `model-number`, `connectionType`) → **HALT** with
+- missing a **required** field (`marketing-name`, `model-number`, `image`, `connectionType`) → **HALT** with
   the exact field named.
-- missing an **optional** field (`firmware`, `ppid`, `image`, often `battery`, **and `features`
+- missing an **optional** field (`firmware`, `ppid`, often `battery`, **and `features`
   itself**) → **passes** (the renderer omits the element; empty `features` → homepage only).
+- `image: none` without a non-empty `opt-out-reason` → **HALT**; `image: none` with a reason passes
+  and renders an empty `.device-image-place` with no `<img>`.
 - a feature that IS present but is missing `label`/`icon`/`link` → **HALT** (each present feature needs
   all three; `icon` is the LLM's job to have filled).
 - `connectionType` / `features[].icon` that name no snippet/asset → **HALT** (Lane 2).
@@ -101,13 +104,15 @@ the field named — never a surprise crash mid-render, and never on a legitimate
 
 ## Regularizing the two existing home manifests
 
-**`HS-DEMO/home.manifest`** — already conformant; it simply omits the optional `ppid`, `image`, and
-(being wired) `battery`. No change needed:
+**`HS-DEMO/home.manifest`** — conformant with an explicit image opt-out; it simply omits the optional
+`ppid` and (being wired) `battery`:
 
 ```yaml
 marketing-name: DDPM Headset
 model-number: HS-DEMO
 firmware: 1.0.0.0
+image: none
+opt-out-reason: Demo fixture has no supplied device image.
 connectionType: wired
 features:
   - label: Audio Settings

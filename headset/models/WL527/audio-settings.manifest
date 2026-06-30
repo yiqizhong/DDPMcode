@@ -2,7 +2,7 @@ title: Audio Settings
 functions:
   - id: noise-control
     title: Noise Control
-    tooltip: "Automatically adjusts Active Noise Cancellation levels based on your surroundings"
+    info: "Automatically adjusts Active Noise Cancellation levels based on your surroundings"
     components:
       - archetype: segmented
         icons: true
@@ -14,7 +14,7 @@ functions:
           anc:
             - archetype: toggle
               label: Adaptive ANC
-              tooltip: "Automatically adjusts Active Noise Cancellation levels based on your surroundings"
+              info: "Automatically adjusts Active Noise Cancellation levels based on your surroundings"
               value: false
           transparency:
             - archetype: slider
@@ -25,15 +25,15 @@ functions:
               stops: 3
   - id: collaboration
     title: Collaboration
-    tooltip: "Manage microphone and audio settings for calls"
+    info: "Manage microphone and audio settings for calls"
     components:
       - archetype: toggle
         label: Mic Noise Cancellation
-        tooltip: "Reduces background noise during calls"
+        info: "Reduces background noise during calls"
         value: true
       - archetype: toggle
         label: Sidetone
-        tooltip: "Hear your own voice through the headset"
+        info: "Hear your own voice through the headset"
         value: false
         dependents:
           - archetype: slider
@@ -44,7 +44,7 @@ functions:
   - id: multimedia
     title: Multimedia
     components:
-      - archetype: preset-grid
+      - archetype: segmented
         label: Presets
         options:
           - {label: Bass Boost, value: bass-boost, selected: true}

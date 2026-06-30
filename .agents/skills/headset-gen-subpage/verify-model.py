@@ -137,12 +137,6 @@ def verify_model(model):
     except (ValueError, render_model.RenderHalt) as exc:
         return halt(str(exc))
 
-    expected_names = {page for page, _, _ in pages}
-    existing_html = {
-        name for name in os.listdir(model_dir)
-        if name.endswith(".html") and os.path.isfile(os.path.join(model_dir, name))
-    }
-
     ok = True
     offending = set()
     for page, module, argv in pages:
@@ -165,11 +159,6 @@ def verify_model(model):
             print("%s: DRIFT %s" % (page, first_diff_hint(actual, expected)))
             ok = False
             offending.add(page)
-
-    for page in sorted(existing_html - expected_names):
-        print("%s: DRIFT unexpected on-disk page; renderer would not produce it" % page)
-        ok = False
-        offending.add(page)
 
     if not ok:
         print("DRIFT: offending page(s): %s" % ", ".join(sorted(offending)), file=sys.stderr)

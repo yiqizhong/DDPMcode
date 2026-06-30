@@ -14,11 +14,31 @@ import sys
 # The archetype contract is the single source of truth in archetypes.py (next to this
 # script); the validator derives every archetype rule from it and hardcodes none of its own.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from archetypes import ARCHETYPES, ALL_ARCHETYPES, SELECTOR_ARCHETYPES, MAX_OPTIONS
+from archetypes import (
+    ARCHETYPES,
+    ALL_ARCHETYPES,
+    SELECTOR_ARCHETYPES,
+    MAX_OPTIONS,
+    OPTION_KEYS,
+    FUNCTION_SLOT_KEYS,
+    component_allowed_keys,
+)
 
 REGISTRY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates", "functions")
 sys.path.insert(0, REGISTRY)
 from keywords import SNAPSHOT_KEYWORDS
+
+SUBPAGE_ALLOWED_KEYS = frozenset(("title", "functions"))
+FUNCTION_ALLOWED_KEYS = frozenset((
+    "id",
+    "title",
+    "info",
+    "components",
+    "snapshot-opt-out",
+    "opt-out-reason",
+))
+NESTED_CARD_SLOT_KEYS = frozenset(("title", "info", "components"))
+MAX_NESTED_CARD_DEPTH = 1
 
 
 # ---- minimal YAML-subset parser (block maps, block seqs, scalars, inline {flow}) ----
@@ -34,6 +54,8 @@ def _scalar(tok):
         return False
     if re.fullmatch(r"-?\d+", tok):
         return int(tok)
+    if re.fullmatch(r"-?(?:\d+\.\d*|\d*\.\d+)", tok):
+        return float(tok)
     return tok
 
 
@@ -141,6 +163,17 @@ class V:
     def advisory(self, msg):
         self.advisories.append(msg)
 
+    def unknown_keys(self, where, obj, allowed):
+        for key in obj:
+            if key not in allowed:
+                self.err(
+                    where,
+                    "unknown key `%s` (allowed: %s)" % (
+                        key,
+                        ", ".join("`%s`" % k for k in sorted(allowed)),
+                    ),
+                )
+
     def snapshot_keyword_check(self, fn, function_id):
         """Check whether an assembled function's id/title matches a registered snapshot keyword.
 
@@ -202,7 +235,7 @@ class V:
                 % (matched_snapshot, matched_keyword, matched_snapshot, matched_snapshot)
             )
 
-    def component(self, sc, where, top_sole=False):
+    def component(self, sc, where, top_sole=False, card_title=None, nested_card_depth=0):
         if not isinstance(sc, dict):
             self.err(where, "component is not a mapping")
             return
@@ -215,17 +248,37 @@ class V:
             return
         spec = ARCHETYPES.get(arch)
         if spec is None:
+            if arch == "section":
+                self.err(
+                    where,
+                    "unknown archetype 'section'; use a nested card slot instead: "
+                    "`title: <string>` + optional `info:` + `components: [<slot>...]` "
+                    "(no `archetype` key)",
+                )
+                return
             self.err(where, "unknown archetype %r (allowed: %s)" % (arch, ", ".join(sorted(ALL_ARCHETYPES))))
             return
+        self.unknown_keys(where, sc, component_allowed_keys(arch))
 
         # Required props — checked by KEY PRESENCE so a numeric/bool prop may be 0 / false.
         for prop in spec["required"]:
             if prop not in sc:
                 self.err(where, "`%s` is missing required prop `%s`" % (arch, prop))
+        if arch == "slider":
+            self.slider_value_sanity(sc, where)
 
-        # Label — positional: a compact row always needs one; a full-width control needs one
-        # unless it is the card's sole top-level control (then the card title covers it).
-        if (spec["width"] == "compact" or not top_sole) and not sc.get("label"):
+        # Label — positional: controls need their own label unless they are the card's
+        # sole top-level control (then the card title covers it).
+        label = sc.get("label")
+        if label is not None and card_title is not None:
+            label_norm = str(label).strip().lower()
+            title_norm = str(card_title).strip().lower()
+            if label_norm and title_norm and label_norm == title_norm:
+                self.err(
+                    where,
+                    "redundant `label` equals card title — omit it; the card title is the label",
+                )
+        if not top_sole and not sc.get("label"):
             if spec["width"] == "compact":
                 self.err(where, "`%s` renders as a labeled row and needs a non-empty `label`" % arch)
             else:
@@ -251,11 +304,20 @@ class V:
             if arch in SELECTOR_ARCHETYPES and len(opts) > MAX_OPTIONS:
                 self.err(where, "%d options exceeds the max of %d (CSS :has() maps nth-child up to 6)"
                          % (len(opts), MAX_OPTIONS))
+            if arch == "preset-grid" and len(opts) <= 3:
+                self.err(where, "`preset-grid` with %d options violates selector count rule: "
+                                "2-3 options use `segmented`; 4 depends on semantics; "
+                                "5-6 use `preset-grid`" % len(opts))
+            if arch == "segmented" and len(opts) >= 5:
+                self.err(where, "`segmented` with %d options violates selector count rule: "
+                                "2-3 options use `segmented`; 4 depends on semantics; "
+                                "5-6 use `preset-grid`" % len(opts))
             seen_v, seen_l, n_selected = set(), set(), 0
             for o in opts:
                 if not isinstance(o, dict):
                     self.err(where, "each option must be a mapping with `label` and `value`")
                     continue
+                self.unknown_keys(where, o, OPTION_KEYS)
                 v, l = o.get("value"), o.get("label")
                 if v is None:
                     self.err(where, "an option is missing `value`")
@@ -271,6 +333,8 @@ class V:
                 seen_l.add(l)
             if n_selected > 1:
                 self.err(where, "%d options marked `selected` — at most one may be pre-selected" % n_selected)
+            if arch in SELECTOR_ARCHETYPES and n_selected == 0:
+                self.err(where, "a selector needs exactly one option marked `selected`")
 
         # reveals — only on the archetypes whose conditional channel is "reveals".
         if "reveals" in sc:
@@ -287,16 +351,91 @@ class V:
                         if str(key) not in option_values:
                             self.err(where, "`reveals` key %r matches no option value (have: %s)"
                                      % (key, ", ".join(sorted(option_values)) or "none"))
-                        self.slots(slots, "%s>reveals[%s]" % (where, key))
+                        self.slots(
+                            slots,
+                            "%s>reveals[%s]" % (where, key),
+                            card_title=card_title,
+                            nested_card_depth=nested_card_depth,
+                        )
 
         # dependents — only on the archetype whose conditional channel is "dependents" (toggle).
         if "dependents" in sc:
             if spec["conditional"] != "dependents":
                 alt = "`reveals`" if spec["conditional"] == "reveals" else "no conditional channel"
                 self.err(where, "`dependents` is only valid on a `toggle`; `%s` carries %s" % (arch, alt))
-            self.slots(sc.get("dependents"), "%s>dependents" % where)
+            self.slots(
+                sc.get("dependents"),
+                "%s>dependents" % where,
+                card_title=card_title,
+                nested_card_depth=nested_card_depth,
+            )
 
-    def slots(self, slots, where):
+    def is_number(self, value):
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+    def slider_value_sanity(self, sc, where):
+        values = {}
+        for field in ("min", "max", "value"):
+            if field not in sc:
+                continue
+            value = sc.get(field)
+            values[field] = value
+            if not self.is_number(value):
+                self.err(where, "slider field `%s` must be a number (got %r)" % (field, value))
+        if all(field in values and self.is_number(values[field]) for field in ("min", "max")):
+            if values["min"] >= values["max"]:
+                self.err(
+                    where,
+                    "slider requires min < max (got min %s, max %s)" % (values["min"], values["max"]),
+                )
+        if all(field in values and self.is_number(values[field]) for field in ("min", "max", "value")):
+            if values["value"] < values["min"] or values["value"] > values["max"]:
+                self.err(
+                    where,
+                    "slider value %s is outside min %s and max %s"
+                    % (values["value"], values["min"], values["max"]),
+                )
+        if "stops" in sc:
+            stops = sc.get("stops")
+            if not isinstance(stops, int) or isinstance(stops, bool) or stops < 2:
+                self.err(where, "slider field `stops` must be an integer >= 2 (got %r)" % stops)
+
+    def nested_card(self, card, where, nested_card_depth):
+        if nested_card_depth > MAX_NESTED_CARD_DEPTH:
+            self.err(
+                where,
+                "nested assembled card depth %d exceeds the pure-CSS cap of %d; deeper nesting "
+                "requires the not-yet-built declarative show/hide engine (D13)"
+                % (nested_card_depth, MAX_NESTED_CARD_DEPTH),
+            )
+        self.unknown_keys(where, card, NESTED_CARD_SLOT_KEYS)
+        if not card.get("title"):
+            self.err(where, "nested card slot missing required `title`")
+        components = card.get("components")
+        if components is None:
+            self.err(where, "nested card slot missing required `components` list")
+            return
+        if not isinstance(components, list):
+            self.err(where, "`components` must be a list")
+            return
+        self.slots(
+            components,
+            "%s>components" % where,
+            top_level=True,
+            top_sole=(len(components) == 1),
+            card_title=card.get("title"),
+            nested_card_depth=nested_card_depth,
+        )
+
+    def is_nested_card_slot(self, slot):
+        return (
+            isinstance(slot, dict)
+            and "function" not in slot
+            and "archetype" not in slot
+            and ("title" in slot or "components" in slot or "info" in slot)
+        )
+
+    def slots(self, slots, where, top_level=False, top_sole=False, card_title=None, nested_card_depth=0):
         if slots is None:
             return
         if not isinstance(slots, list):
@@ -308,18 +447,28 @@ class V:
                 self.err(sw, "slot is not a mapping")
                 continue
             if "function" in slot:
+                self.unknown_keys(sw, slot, FUNCTION_SLOT_KEYS)
                 fid = slot["function"]
                 snap = os.path.join(REGISTRY, "%s.html" % fid)
                 if not os.path.exists(snap):
                     self.err(sw, "function slot %r has no snapshot functions/%s.html (a bare function "
                                  "slot must reference an existing snapshot)" % (fid, fid))
+            elif self.is_nested_card_slot(slot):
+                self.nested_card(slot, sw, nested_card_depth + 1)
             else:
-                self.component(slot, sw)
+                self.component(
+                    slot,
+                    sw,
+                    top_sole=(top_level and top_sole),
+                    card_title=card_title,
+                    nested_card_depth=nested_card_depth,
+                )
 
     def function(self, fn, where):
         if not isinstance(fn, dict):
             self.err(where, "function entry is not a mapping")
             return
+        self.unknown_keys(where, fn, FUNCTION_ALLOWED_KEYS)
         fid = fn.get("id")
         if not fid:
             self.err(where, "function missing `id`")
@@ -340,14 +489,20 @@ class V:
         if not isinstance(subs, list):
             self.err(where, "`components` must be a list")
             return
-        sole = len(subs) == 1  # a lone top-level full-width control renders headingless (no `label` needed)
-        for n, sc in enumerate(subs):
-            self.component(sc, "%s>components[%d]" % (where, n), top_sole=sole)
+        # A lone top-level full-width control renders headingless (no `label` needed).
+        self.slots(
+            subs,
+            "%s>components" % where,
+            top_level=True,
+            top_sole=(len(subs) == 1),
+            card_title=fn.get("title"),
+        )
 
     def manifest(self, m):
         if not isinstance(m, dict):
             self.err("manifest", "top level is not a mapping")
             return
+        self.unknown_keys("manifest", m, SUBPAGE_ALLOWED_KEYS)
         if not m.get("title"):
             self.err("manifest", "missing `title`")
         fns = m.get("functions")

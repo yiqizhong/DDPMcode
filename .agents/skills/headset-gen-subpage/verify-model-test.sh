@@ -48,6 +48,20 @@ echo "PASS HS-DEMO verify-model"
 
 rm -rf "$MODELS_DIR/$TMP_MODEL"
 cp -R "$MODELS_DIR/HS-DEMO" "$MODELS_DIR/$TMP_MODEL"
+printf '<!DOCTYPE html>\n<title>Auxiliary Preview</title>\n' >"$MODELS_DIR/$TMP_MODEL/connection-preview.html"
+
+python3 "$VERIFY" "$TMP_MODEL" >"$TMP_OUT" 2>"$TMP_ERR" || {
+  cat "$TMP_OUT" "$TMP_ERR" >&2
+  fail "temp model with auxiliary HTML should pass"
+}
+grep -Fq "connection-preview.html: DRIFT" "$TMP_OUT" && {
+  cat "$TMP_OUT" "$TMP_ERR" >&2
+  fail "auxiliary HTML should be ignored, not flagged as drift"
+}
+echo "PASS auxiliary HTML is ignored"
+
+rm -rf "$MODELS_DIR/$TMP_MODEL"
+cp -R "$MODELS_DIR/HS-DEMO" "$MODELS_DIR/$TMP_MODEL"
 printf '\n' >>"$MODELS_DIR/$TMP_MODEL/audio-settings.html"
 
 if python3 "$VERIFY" "$TMP_MODEL" >"$TMP_OUT" 2>"$TMP_ERR"; then

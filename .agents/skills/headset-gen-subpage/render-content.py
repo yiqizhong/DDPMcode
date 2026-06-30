@@ -228,10 +228,10 @@ def render_function(function_entry, path="fn"):
 
     sole = len(components) == 1
     rendered = []
-    for idx, component in enumerate(components, start=1):
+    for idx, slot in enumerate(components, start=1):
         control_id = function_id if sole else "%s-%d" % (function_id, idx)
-        rendered.append(render_component(component, sole=sole, top_level=True,
-                                          control_id=control_id, path="%s.%d" % (path, idx)))
+        rendered.append(render_slot(slot, "%s.%d" % (path, idx), sole=sole, top_level=True,
+                                    control_id=control_id))
     frame = replace_slot_contents(frame, "components", "\n".join(rendered))
     return strip_markers(frame)
 
@@ -252,14 +252,59 @@ def unwrap_function(markup):
     return inner + (("\n" + script) if script else "")
 
 
-def render_slot(slot, path):
+def is_nested_card_slot(slot):
+    return (
+        isinstance(slot, dict)
+        and "function" not in slot
+        and "archetype" not in slot
+        and ("title" in slot or "components" in slot or "info" in slot)
+    )
+
+
+def render_nested_card(card, path):
+    components = card.get("components") or []
+    if card.get("info"):
+        label = (
+            '<div class="function-header">\n'
+            '  <div class="function-title">\n'
+            '    <p class="subfn-label">%s</p>\n'
+            '  </div>\n'
+            '  <div class="function-icons">\n%s\n  </div>\n'
+            '</div>'
+        ) % (text(card.get("title", "")), render_info(card["info"]))
+    else:
+        label = '<p class="subfn-label">%s</p>' % text(card.get("title", ""))
+
+    sole = len(components) == 1
+    children = []
+    for idx, child in enumerate(components, start=1):
+        rendered = render_slot(
+            child,
+            "%s.card%d" % (path, idx),
+            sole=sole,
+            top_level=True,
+            control_id="%s-card%d" % (path.replace(".", "-"), idx),
+        )
+        children.append('<div class="subfn-child">\n%s\n</div>' % rendered)
+    return '<div class="subfn-group">\n%s\n%s\n</div>' % (label, "\n".join(children))
+
+
+def render_slot(slot, path, sole=False, top_level=False, control_id=None):
     if isinstance(slot, dict) and "function" in slot:
         function_id = slot["function"]
         snap = snapshot_path(function_id)
         if not os.path.exists(snap):
             return lane2("nested function %s has no snapshot" % function_id)
         return unwrap_function(strip_markers(read_text(snap)))
-    return render_component(slot, sole=False, top_level=False, control_id=path.replace(".", "-"), path=path)
+    if is_nested_card_slot(slot):
+        return render_nested_card(slot, path)
+    return render_component(
+        slot,
+        sole=sole,
+        top_level=top_level,
+        control_id=control_id or path.replace(".", "-"),
+        path=path,
+    )
 
 
 def render_component(component, sole, top_level, control_id, path):
@@ -304,6 +349,8 @@ def render_toggle(component, control_id, path):
         "id": control_id,
         "label": component.get("label", ""),
     })
+    if not component.get("label"):
+        snippet = remove_element_by_class(snippet, "function-title")
     if component.get("info"):
         snippet = fill_element_by_class(snippet, "function-icons", render_info(component["info"]))
     else:

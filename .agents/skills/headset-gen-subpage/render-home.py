@@ -202,7 +202,7 @@ def render_feature_zone(home):
 
 def render_device_image(home):
     image = home.get("image")
-    if not image:
+    if not image or image == "none":
         return ""
     return '<img src="%s" alt="%s">' % (attr(image), attr(home["marketing-name"]))
 

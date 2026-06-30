@@ -18,6 +18,7 @@ The Procedure in SKILL.md is the human-readable SPEC this script implements; kee
 """
 
 import html
+import importlib.util
 import os
 import re
 import sys
@@ -32,9 +33,13 @@ ARROW_LEFT_SVG = os.path.join(ROOT, "dds2", "dds2_arrow-left.svg")   # Back butt
 
 # shared/walkthrough.css maps step radios -> panels positionally (:nth-of-type up to N); keep in
 # sync with that file's positional rule set.
-MAX_STEPS = 6
-
-TOP_KEYS = {"title", "cta", "done-link"}
+_VALIDATOR_SPEC = importlib.util.spec_from_file_location(
+    "validate_walkthrough",
+    os.path.join(HERE, "validate-walkthrough.py"),
+)
+validate_walkthrough = importlib.util.module_from_spec(_VALIDATOR_SPEC)
+_VALIDATOR_SPEC.loader.exec_module(validate_walkthrough)
+MAX_STEPS = validate_walkthrough.MAX_STEPS
 
 
 class RenderHalt(Exception):
@@ -58,55 +63,15 @@ def attr(value):
     return html.escape(str(value), quote=True)
 
 
-def _unquote(value):
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
-        return value[1:-1]
-    return value
-
-
 def parse_manifest(raw):
-    """Minimal, dependency-free parse of the walkthrough schema: top-level scalars
-    (title / cta / done-link) + a `steps:` list of `{title, body, image?}` maps."""
-    data = {"steps": []}
-    current = None
-    for line in raw.splitlines():
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        indent = len(line) - len(line.lstrip(" "))
-        stripped = line.strip()
-        is_item = stripped.startswith("- ")
-        if is_item:
-            stripped = stripped[2:].strip()
-            current = {}
-            data["steps"].append(current)
-        if ":" not in stripped:
-            halt("cannot parse line (no key): %r" % line.strip())
-        key, _, value = stripped.partition(":")
-        key, value = key.strip(), _unquote(value.strip())
-        if key == "steps":
-            current = None
-            continue
-        if is_item or (indent > 0 and current is not None):
-            current[key] = value
-        elif indent == 0 and key in TOP_KEYS:
-            data[key] = value
-            current = None
-        else:
-            halt("unexpected key %r outside a step" % key)
-    return data
+    return validate_walkthrough.parse_manifest(raw)
 
 
 def validate(manifest):
-    steps = manifest.get("steps") or []
-    if not steps:
-        halt("walkthrough has no steps[]")
-    if len(steps) > MAX_STEPS:
-        halt("too many steps (%d > MAX_STEPS=%d); shared/walkthrough.css only maps %d positionally"
-             % (len(steps), MAX_STEPS, MAX_STEPS))
-    for i, step in enumerate(steps, start=1):
-        for required in ("title", "body"):
-            if not step.get(required):
-                halt("step %d is missing required %r" % (i, required))
+    v = validate_walkthrough.V()
+    v.manifest(manifest)
+    if v.errors:
+        halt("walkthrough manifest is out of contract: %s" % "; ".join(v.errors))
 
 
 def rewrite_css_paths(markup, category):

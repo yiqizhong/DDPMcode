@@ -12,15 +12,16 @@ lives in `headset/headset.css`; the snippet is just the markup + value slots.
 ## The atoms (grow on demand — §9.4)
 
 These atoms span two levels: `toggle` and `dropdown` are **compact components** that render as a row
-(shape derived); `slider` / `segmented` / `preset-grid` are **full-width components** that render
-stacked (`.subfn-label` title above). For the full authoring decision procedure (component → derived
-shape → condition), see `headset/AGENTS.md` →
+(shape derived; a sole top-level compact control may omit its label because the card title covers it);
+`slider` / `segmented` / `preset-grid` are **full-width components** that render stacked
+(`.subfn-label` title above). For the full authoring decision procedure (component → derived shape →
+condition), see `headset/AGENTS.md` →
 "Control Selection (Authoring Only)".
 
 | Snippet | Archetype | Description / fills | headset.css classes |
 |---|---|---|---|
-| `toggle.html` | `toggle` | the standard labeled toggle row: name left + native switch right | `.function-header`, `.switch*` |
-| `dropdown.html` | `dropdown` | compact labeled row: label left + `<details>`/`<summary>` dropdown widget right; fills `{id}`, per-option label/value/selected | `.dropdown`, `.dropdown-trigger`, `.dropdown-value`, `.dropdown-chevron`, `.dropdown-list`, `.dropdown-item`, `.dropdown-item--selected` |
+| `toggle.html` | `toggle` | the standard toggle row: optional name left + native switch right | `.function-header`, `.switch*` |
+| `dropdown.html` | `dropdown` | compact row: optional label left + `<details>`/`<summary>` dropdown widget right; fills `{id}`, per-option label/value/selected | `.dropdown`, `.dropdown-trigger`, `.dropdown-value`, `.dropdown-chevron`, `.dropdown-list`, `.dropdown-item`, `.dropdown-item--selected` |
 | `slider.html` | `slider` | min/max labels + native range + value bubble; fills `{min}/{max}/{val}`, `{label}` | `.slider-row`, `.slider-input`, `.slider-value` |
 | `segmented.html` | `segmented` | row of 2–4 mutually-exclusive option buttons; fills `{id}`, `{label}`, `{labelN}`, `{valueN}` | `.segmented-control`, `.segment`, `.segment-input`, `.segment-icon`, `.segment-label` |
 | `preset-grid.html` | `preset-grid` | 2-column grid of 4–6 option buttons; fills same as segmented + `{id}-preset` | `.preset-grid`, `.segment--span` + all `.segment*` |
@@ -102,8 +103,9 @@ no file in `segment-icons/` → HALT and ask; never pull from `dds2/` directly o
 Selector atoms (`segmented`, `preset-grid`) carry an optional `.segment-panels` block: the **Nth
 panel shows when the Nth option is selected** (positional `:has(...:checked)`, zero JS). In the
 manifest this is the selector's **`reveals`** map — key = an option `value`, value = the ordered
-slot list that fills that option's panel (a component `{ archetype, … }`, or a nested card
-`{ function: <id> }`, recursively). It is the ONLY way to express "select X → show Y".
+slot list that fills that option's panel (a component `{ archetype, … }`, a snapshot function ref
+`{ function: <id> }`, or a nested assembled card `{ title, info?, components }`, recursively). It is
+the ONLY way to express "select X → show Y".
 
 ```
 - archetype: preset-grid
@@ -121,6 +123,25 @@ CSS maps `:has()` only up to `nth-child(6)`). A nested `{ function: <id> }` slot
 the parent card (the full shell would nest a card in a card). A component must NEVER carry a flat `condition:` field — that pre-schema form does
 not exist; conditional content lives under the selector's `reveals`.
 
+## Nested assembled card slot — labeled sub-group with recursive slots
+
+Any slot list (`components`, selector `reveals`, or toggle `dependents`) may contain a nested
+assembled card:
+
+```yaml
+- title: When Headset Removed
+  info: Optional helper text
+  components:
+    - archetype: toggle
+      label: Pause Music
+      value: true
+```
+
+Generation reuses the existing sub-function vocabulary: the nested card is a `.subfn-group`, its
+`title` renders as `.subfn-label`, optional `info` uses `info-tooltip.html`, and every inner slot is
+wrapped in `.subfn-child` before recursive rendering. Do not use `archetype: section`; headings and
+grouped controls are expressed by the nested card slot shape above.
+
 **Reveal vs grey-out are different:** `reveals` shows/hides a panel on option select; the
 `.subfn-group` below greys a still-visible dependent when a toggle is OFF. Do not conflate them.
 
@@ -128,7 +149,8 @@ not exist; conditional content lives under the selector's `reveals`.
 
 A `toggle` can own dependent components that STAY VISIBLE but grey out when it is OFF.
 In the manifest this is the toggle's **`dependents`** field (ordered slot list, same slot shape as
-`reveals` — a `{ archetype, … }` component or a `{ function: <id> }`). It is the toggle counterpart
+`reveals` — a `{ archetype, … }` component, a `{ function: <id> }` snapshot ref, or a
+`{ title, info?, components }` nested assembled card). It is the toggle counterpart
 of a selector's `reveals`: `dependents` greys (stays visible), `reveals` shows/hides. `dependents`
 goes ONLY on a `toggle`; `reveals` ONLY on a selector — never swap them.
 

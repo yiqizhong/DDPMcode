@@ -88,8 +88,9 @@ runtime: it renders the explicit archetype/id already frozen into the manifest (
 
 Decide this at authoring and freeze it as data — never leave it for generation to infer, and never
 hand-patch it into the output. A selector option that should reveal more controls is written as the
-selector's **`reveals`** map (key = option `value` → ordered slot list; a slot is a component or a
-nested `{ function: <id> }`, recursively). There is no `condition:` field. Full schema:
+selector's **`reveals`** map (key = option `value` → ordered slot list; a slot is a component, a
+snapshot function ref `{ function: <id> }`, or a nested assembled card `{ title, info?, components }`,
+recursively). There is no `condition:` field. Full schema:
 `.agents/skills/headset-gen-subpage/SKILL.md` → Manifest schema; mechanism:
 `.agents/skills/headset-shared/components/README.md` → Conditional reveals.
 
@@ -121,8 +122,9 @@ A child under a function card is authored by choosing, in this order:
 4. **Condition (when it appears) — orthogonal to shape/component:** always present → a plain slot in
    `components[]`; appears on a selector choice → `reveals` on the selector (show/hide); stays
    visible but greys when a toggle is OFF → `dependents` on the `toggle` (grey-out).
-5. **Or a whole nested card:** a child can be an entire function (`{ function: <id> }`) dropped
-   (unwrapped) into a reveal panel or a dependent — recurses.
+5. **Or a whole nested card:** a child can be a titled assembled card (`{ title, info?, components }`)
+   with its own recursive slot list. A child can also be an entire snapshot function
+   (`{ function: <id> }`) dropped (unwrapped) into a reveal panel or a dependent.
 
 The **row** shape is what compact components (`toggle`, `dropdown`) render as; the **stacked** shape
 is `.subfn-label` + a full-width component.
@@ -133,6 +135,49 @@ Schema + the mechanical HALT gate: `.agents/skills/headset-gen-subpage/SKILL.md`
 Segmented vs preset-grid details live in `.agents/skills/headset-shared/components/README.md`;
 do not duplicate that full rule here.
 
+## Requirements Fidelity Review (Authoring Only)
+
+If a model folder has `requirements.md`, the mechanical coverage gate verifies identity,
+function-list routing, walkthrough title/count sync, and `coverage.md` atom entries for every
+numbered function-description clause. The atom checker then mechanically verifies each supported
+stable locator/value assertion against the manifests. It does not judge whether each atom is the
+right interpretation of the prose.
+
+`coverage.md` is an atom table:
+
+| Atom ID | Requirement | Locator | Expected | Verdict |
+|---|---|---|---|---|
+| `Audio setting #1.a` | One explicit fact/control requirement. | `audio-settings::noise-control::option(anc).selected` | `true` | `pass` |
+
+Locator rules: use stable names only — manifest stem, function `id`, component label/archetype
+selector, option `value`, and named channels such as `reveals.<option-value>` and `dependents`.
+Never use positional paths like `/functions/0/components/0`. Supported mechanical assertions are
+bounded to function existence, component archetype/label, option set, selected option, reveal or
+dependent slot archetype/label, scalar values, and info/tooltip text. Use `Locator: n/a` for facts
+that remain reviewer-only.
+
+After authoring manifests and rendering pages, an **independent** model/agent that did not author the
+manifests must audit `requirements.md` against `home.manifest`, every sub-page manifest,
+`walkthrough.manifest` if present, and the rendered pages. This is the D10 human/strong-model
+checkpoint: reasoning happens at authoring time and is frozen into the atom table. `Verdict` is the
+reviewer's output: `pass`, `fail`, or `ambiguous`. The atom checker proves only that the manifest
+matches the authored atoms and has not drifted; it does **not** prove the atoms faithfully reflect
+the prose. It is deliberately **not** an LLM review and must not be implemented as an LLM-calling
+script.
+
+Mark `Verdict: ambiguous` and escalate to the human for missing defaults, unclear parent/child
+ownership, show/hide vs grey-out ambiguity, option count/range mismatch, unclear tooltip target, or a
+snapshot-keyword conflict.
+
+Reviewer checklist:
+- Every numbered function-description clause appears in the right rendered page/card/control.
+- Defaults match: selected options, toggle states, slider values, and dropdown selections.
+- Option sets and ranges match exactly; no extra or missing modes.
+- Required tooltips are present on the correct function/control.
+- Reveal/dependent behavior matches the source: show/hide vs grey-out, parent/child ownership, and
+  nested groups.
+- The rendered pages are reproducible from manifests; no hand-patched HTML or dangling feature route.
+
 ## Non-negotiables (apply to every generated page)
 
 - **Manifest is the contract; validate before emitting (mechanical gate).** Generation is
@@ -142,8 +187,8 @@ do not duplicate that full rule here.
   is the enforcement (zero-dependency, always runs), not prose; every archetype rule is derived from one
   contract file, `archetypes.py` (add a new archetype there + its snippet — nothing about archetypes is
   hardcoded in the validator). It catches: unknown `archetype`, stray `condition:`, a missing required
-  prop (`slider` min/max/value, `dropdown` options), a missing `label` where one renders (compact rows,
-  and non-sole full-width controls — the BUG-002 class), `reveals` on a `toggle` (use `dependents` for
+  prop (`slider` min/max/value, `dropdown` options), a missing `label` where one renders (non-sole
+  compact rows and non-sole full-width controls — the BUG-002 class), `reveals` on a `toggle` (use `dependents` for
   toggle grey-out), `dependents` on a non-toggle, a `reveals` key matching no option, >6 selector
   options, a missing/duplicate option value or label, >1 option `selected`, and a `function` slot with
   no snapshot.

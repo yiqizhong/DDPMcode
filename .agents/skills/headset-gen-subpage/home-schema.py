@@ -49,10 +49,16 @@ HOME_SCHEMA = {
             "absent": "omit PPID row",
         },
         "image": {
-            "required": False,
-            "type": "path",
+            "required": True,
+            "type": "path|none",
             "drives": "device image",
-            "absent": "leave image area empty",
+            "absent": "HALT; use `image: none` plus `opt-out-reason` for an explicit no-image page",
+        },
+        "opt-out-reason": {
+            "required": False,
+            "type": "str",
+            "drives": "required explanation when `image: none` explicitly opts out of a device image",
+            "absent": "HALT only when `image: none`; otherwise omit",
         },
         "battery": {
             "required": False,
@@ -95,7 +101,9 @@ REQUIRED_FIELDS = tuple(
 OPTIONAL_FIELDS = tuple(
     name for name, spec in HOME_SCHEMA["fields"].items() if not spec["required"]
 )
+ALLOWED_FIELDS = frozenset(HOME_SCHEMA["fields"])
 FEATURE_REQUIRED_FIELDS = HOME_SCHEMA["fields"]["features"]["item_required"]
+FEATURE_ALLOWED_FIELDS = frozenset(FEATURE_REQUIRED_FIELDS)
 
 
 def registry_path(registry, key):

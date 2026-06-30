@@ -1,6 +1,8 @@
 marketing-name: Fixture Headset
 model-number: FIXTURE
 firmware: 1.0.0
+image: none
+opt-out-reason: Test fixture has no supplied device image.
 connectionType: bluetooth
 battery: 50
 features:

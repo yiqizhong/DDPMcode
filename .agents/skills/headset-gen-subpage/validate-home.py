@@ -28,11 +28,23 @@ home_schema = _load_module("home_schema", "home-schema.py")
 
 
 class V:
-    def __init__(self):
+    def __init__(self, model_dir=None):
         self.errors = []
+        self.model_dir = model_dir
 
     def err(self, where, msg):
         self.errors.append("%s: %s" % (where, msg))
+
+    def unknown_keys(self, where, obj, allowed):
+        for key in obj:
+            if key not in allowed:
+                self.err(
+                    where,
+                    "unknown key `%s` (allowed: %s)" % (
+                        key,
+                        ", ".join("`%s`" % k for k in sorted(allowed)),
+                    ),
+                )
 
     def _missing(self, m, field):
         return field not in m or m.get(field) is None or m.get(field) == ""
@@ -67,6 +79,40 @@ class V:
         if not isinstance(value, int) or value < 0 or value > 100:
             self.err("manifest.battery", "`battery` must be an integer from 0 to 100 when present")
 
+    def _image(self, m):
+        image = m.get("image")
+        reason = m.get("opt-out-reason", "")
+        if image == "none":
+            if not isinstance(reason, str) or reason.strip() == "":
+                self.err("manifest.image", "`image: none` requires a non-empty `opt-out-reason`")
+            return
+        if "opt-out-reason" in m:
+            self.err(
+                "manifest.opt-out-reason",
+                "`opt-out-reason` is only allowed with `image: none`",
+            )
+        # A real image must be a relative path inside the model folder that exists on disk
+        # (mirrors the feature-icon existence check). Prevents the absolute-path / broken-image
+        # class — e.g. an embedded `C:\Users\...\5027.png` (the original Bug 1).
+        if isinstance(image, str) and image and image != "none":
+            if image.startswith("/") or "\\" in image or (
+                len(image) >= 2 and image[1] == ":" and image[0].isalpha()
+            ):
+                self.err(
+                    "manifest.image",
+                    "`image` must be a relative path inside the model folder, not an "
+                    "absolute/OS-specific path: %r" % image,
+                )
+            elif ".." in image.replace("\\", "/").split("/"):
+                self.err(
+                    "manifest.image",
+                    "`image` must live inside the model folder (no `..`): %r" % image,
+                )
+            elif self.model_dir is not None and not os.path.exists(
+                os.path.join(self.model_dir, image)
+            ):
+                self.err("manifest.image", "image file not found: %s" % image)
+
     def _features(self, m):
         if "features" not in m or m.get("features") in (None, []):
             return
@@ -79,6 +125,7 @@ class V:
             if not isinstance(feature, dict):
                 self.err(where, "feature is not a mapping")
                 continue
+            self.unknown_keys(where, feature, home_schema.FEATURE_ALLOWED_FIELDS)
             for field in home_schema.FEATURE_REQUIRED_FIELDS:
                 if field not in feature or feature.get(field) is None or feature.get(field) == "":
                     self.err(where, "feature missing `%s`" % field)
@@ -102,11 +149,13 @@ class V:
         if not isinstance(m, dict):
             self.err("manifest", "top level is not a mapping")
             return
+        self.unknown_keys("manifest", m, home_schema.ALLOWED_FIELDS)
         for field in home_schema.REQUIRED_FIELDS:
             if self._missing(m, field):
                 self.err("manifest", "missing required field `%s`" % field)
-        for field in ("marketing-name", "model-number", "firmware", "ppid", "image"):
+        for field in ("marketing-name", "model-number", "firmware", "ppid", "image", "opt-out-reason"):
             self._string_if_present(m, field)
+        self._image(m)
         self._connection(m)
         self._battery(m)
         self._features(m)
@@ -128,7 +177,7 @@ def main(argv):
     except Exception as e:
         print("HALT: cannot parse %s: %s" % (path, e), file=sys.stderr)
         return 1
-    v = V()
+    v = V(os.path.dirname(os.path.abspath(path)))
     v.manifest(manifest)
     if v.errors:
         print("HALT — %s is out of contract (%d issue(s)):" % (path, len(v.errors)), file=sys.stderr)

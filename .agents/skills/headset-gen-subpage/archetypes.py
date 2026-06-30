@@ -7,8 +7,9 @@ from this dict — it hardcodes no archetype names, option caps, or width sets o
 
 Per-archetype keys
 ──────────────────
-  width        "compact" -> renders as a row (label left + widget right); `label` is ALWAYS
-                            required (a labeled row with no name is broken).
+  width        "compact" -> renders as a row (label left + widget right); `label` is required
+                            unless the control is the card's SOLE top-level control and the
+                            card title covers it.
                "full"    -> renders stacked (a `.subfn-label` heading above the widget);
                             `label` is required UNLESS the control is its card's SOLE
                             top-level control (then the card title covers it and it renders
@@ -43,7 +44,7 @@ ARCHETYPES = {
         "conditional": "dependents",
         "options": "forbidden",
         "required": [],
-        "optional": ["label", "value"],
+        "optional": ["label", "info", "value"],
         "when": "Boolean on/off (2-state)",
     },
     "dropdown": {
@@ -59,7 +60,7 @@ ARCHETYPES = {
         "conditional": None,
         "options": "forbidden",
         "required": ["min", "max", "value"],
-        "optional": ["label"],
+        "optional": ["label", "stops"],
         "when": "A value on an ordered range / stepped scale",
     },
     "segmented": {
@@ -84,6 +85,21 @@ ARCHETYPES = {
 ALL_ARCHETYPES = set(ARCHETYPES)
 SELECTOR_ARCHETYPES = {k for k, v in ARCHETYPES.items() if v["conditional"] == "reveals"}
 
+OPTION_KEYS = frozenset(("label", "value", "selected"))
+FUNCTION_SLOT_KEYS = frozenset(("function",))
+
+
+def component_allowed_keys(name):
+    spec = ARCHETYPES[name]
+    keys = {"archetype"}
+    keys.update(spec["required"])
+    keys.update(spec["optional"])
+    if spec["options"] != "forbidden":
+        keys.add("options")
+    if spec["conditional"]:
+        keys.add(spec["conditional"])
+    return frozenset(keys)
+
 
 # ---- catalog.prompt() analog: render the contract as a markdown table ----------------
 # The single authoritative selection/contract table, DERIVED from ARCHETYPES above so it can
@@ -102,7 +118,7 @@ _ORDER = ["toggle", "slider", "segmented", "preset-grid", "dropdown"]
 
 def _required_props(name, spec):
     # `label` is positional, not in spec["required"]; render it with its rule, then the rest.
-    label = "label" if spec["width"] == "compact" else "label\\*"
+    label = "label\\*" if spec["width"] == "compact" else "label\\*"
     return ", ".join([label] + list(spec["required"]))
 
 
@@ -126,9 +142,9 @@ def render_table():
         ))
     lines += [
         "",
-        "\\* A full-width control may omit `label` ONLY when it is the card's sole top-level control",
-        "  (then the card title covers it and it renders headingless); anywhere else a missing label is",
-        "  dropped data (the BUG-002 class). A selector caps `options` at %d." % MAX_OPTIONS,
+        "\\* A compact or full-width control may omit `label` ONLY when it is the card's sole top-level",
+        "  control (then the card title covers it and it renders headingless); anywhere else a missing",
+        "  label is dropped data (the BUG-002 class). A selector caps `options` at %d." % MAX_OPTIONS,
     ]
     return "\n".join(lines)
 

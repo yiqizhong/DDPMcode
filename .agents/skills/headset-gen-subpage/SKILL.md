@@ -51,23 +51,28 @@ functions:                            # ordered; the page renders EXACTLY these,
   - id: <function-id>                 # routing key. functions/<id>.html copied whole if it exists.
     title: <string>                   # card title — assembled path only (snapshots carry their own)
     info: <string?>                   # optional ⓘ tooltip text
-    components:                      # assembled path only (no snapshot). Ordered list of component slots.
-      - archetype: <enum>             # toggle | slider | segmented | preset-grid | dropdown
+    components:                      # assembled path only (no snapshot). Ordered list of slots.
+      - archetype: <enum>             # component slot: toggle | slider | segmented | preset-grid | dropdown
         ...<archetype value slots>... # per components/README.md (label / min,max,value / options / …)
         reveals:                      # OPTIONAL — ONLY on a selector archetype (segmented | preset-grid)
           <option-value>:             # key MUST equal one of THIS selector's option `value`s
-            - <slot>                  # ordered list of revealed slots; each slot is either:
-            ...                       #   a component:  { archetype: <enum>, ...value slots }
-                                      #   a nested card:  { function: <function-id> }
+            - <slot>                  # ordered list of revealed slots; same recursive slot shape
         dependents:                   # OPTIONAL — ONLY on a toggle
           - <slot>                    # ordered slot list (same shape as a reveals slot) that GREYS
             ...                       #   OUT (stays visible, non-interactive) when the toggle is OFF
 ```
 
+`<slot>` is recursive and may be any of:
+
+- a component: `{ archetype: <enum>, ...value slots }`
+- a snapshot function ref: `{ function: <function-id> }` (copied by id, unwrapped inside the parent)
+- a nested assembled card: `{ title: <string>, info?: <string>, components: [ <slot>... ] }`
+
 **Two distinct conditional mechanisms — do not conflate:**
 - **`reveals`** — the conditional-reveal / recursive-slot primitive (architecture §6.5 / §8 / §9.1).
   ONLY on a selector (segmented | preset-grid). A selected option SHOWS/HIDES a `.segment-panel`. A
-  revealed slot may itself be a selector with its own `reveals` (recursion). The ONLY legal way to
+  revealed slot may itself be a selector with its own `reveals`, a `{function:<id>}` snapshot ref, or
+  a nested assembled card `{title, info?, components}` with its own recursive slots. The ONLY legal way to
   express "select X → show Y". It replaces any flat `condition:` field (a component must NEVER carry
   `condition:`). Do not hand-embed conditional panels.
 - **`dependents`** — the toggle grey-out (`.subfn-group`) relationship. ONLY on a `toggle`.
@@ -93,9 +98,10 @@ archetype there + its snippet, never by hardcoding. The script HALTs when:
 - `archetype` is not in the catalog {toggle, slider, segmented, preset-grid, dropdown}.
 - A component carries a legacy `condition:` field → migrate it to a selector's `reveals` or a toggle's `dependents`.
 - A required prop is missing — `slider` without `min`/`max`/`value`; a `dropdown` without `options`.
-- A `label` is missing where one renders — any compact row (`toggle`/`dropdown`), and any full-width
+- A `label` is missing where one renders — any compact row (`toggle`/`dropdown`) or full-width
   control (`slider`/`segmented`/`preset-grid`) that is NOT its card's sole top-level control (a lone
-  top-level full-width control renders headingless and legitimately omits it). A dropped heading is the BUG-002 class.
+  top-level control renders headingless and legitimately omits it because the card title covers it).
+  A dropped heading is the BUG-002 class.
 - `reveals` appears on a non-selector archetype (incl. a `toggle`); for a toggle's grey-out
   dependents use `dependents` (reveals is selector-only). Or a `reveals` key matches no option `value`.
 - `dependents` appears on any archetype other than `toggle`.
@@ -106,6 +112,56 @@ archetype there + its snippet, never by hardcoding. The script HALTs when:
 - A function id resolves to a snapshot `functions/<id>.html` but also declares `components:` — snapshots carry their own structure.
 - A bare `function` slot's id has no `functions/<id>.html` snapshot.
 - An assembled function's `id` or `title` matches a registered snapshot keyword (e.g. "promotion" → `promotion-download`) and no valid opt-out is present. Fix: set `id: <snapshot-id>` and remove `components:`, OR add `snapshot-opt-out: <snapshot-id>` (must equal the matched snapshot) and a non-empty `opt-out-reason`. A `snapshot-opt-out` with no keyword match, or naming the wrong snapshot, or with an empty reason, is itself an error.
+
+**Requirements coverage gate (system-level, when `requirements.md` exists):**
+```
+python3 .agents/skills/headset-gen-subpage/check-requirements-coverage.py headset/models/$1
+python3 .agents/skills/headset-gen-subpage/check-coverage-atoms.py headset/models/$1
+```
+These are per-model mechanical gates. If `headset/models/$1/requirements.md` is absent, they print
+`SKIP` and exit 0; absence is not a failure. The first gate HALTs on device identity drift,
+function-list / feature-route drift, walkthrough title/count drift, or a missing `coverage.md` atom
+for any numbered function-description clause. The second gate reads the atom table and mechanically
+verifies each supported locator/value assertion against the manifests. The atom-table format is shown
+in `templates/coverage-template.md`.
+
+**Atom table format (`coverage.md`):**
+
+| Atom ID | Requirement | Locator | Expected | Verdict |
+|---|---|---|---|---|
+| `Audio setting #1.a` | One fact/control requirement. | `audio-settings::noise-control::option(anc).selected` | `true` | `pass` |
+
+- `Atom ID` starts with the numbered clause id plus a suffix, e.g. `Audio setting #1.a`.
+- `Locator` uses stable names only: manifest stem, function `id`, component label/archetype selector,
+  option `value`, and named channels such as `reveals.<option-value>` and `dependents`. Do not use
+  positional paths like `/functions/0/components/0`.
+- Supported mechanical assertions are deliberately bounded: function exists; component archetype/label;
+  exact option set; selected option; reveal/dependent slot archetype/label; scalar values; and
+  info/tooltip text. Use `n/a` for reviewer-only facts that do not fit this bounded grammar.
+- `Verdict` is the independent reviewer's output: `pass`, `fail`, or `ambiguous`. The checker validates
+  the row shape and supported manifest assertions; it does not decide the verdict.
+
+**Independent requirements review (authoring-time only, NOT a code gate):** after authoring manifests
+and rendering pages, hand `requirements.md`, `home.manifest`, all sub-page manifests,
+`walkthrough.manifest` if present, and the rendered pages to an independent model/agent that did not
+author the manifests. This is the D10 human/strong-model checkpoint: reasoning happens at authoring
+time and is frozen into data. The reviewer writes/fills `coverage.md`: one atom per explicit fact,
+stable locator, expected value, and `Verdict`. The mechanical atom checker proves only "the manifest
+matches the authored atoms and did not drift." It does **not** prove the atoms faithfully reflect the
+prose. Do not build an LLM-calling script and do not claim the review is mechanical.
+
+Mark an atom `ambiguous` and escalate to the human when the source leaves any of these unclear:
+missing default, unclear parent/child ownership, show/hide vs grey-out behavior, option count/range
+mismatch, unclear tooltip target, or a snapshot-keyword conflict.
+
+Reviewer checklist:
+- Every numbered function-description clause is present in the intended page/card/control.
+- Defaults match requirements: selected options, toggle states, slider values, dropdown selections.
+- Option sets match exactly, including missing/extra modes and ordered ranges.
+- Tooltips required by the source are present on the right function/control.
+- Reveal/dependent behavior matches the requirement: show/hide vs grey-out, parent/child structure,
+  and nested groups.
+- Rendered HTML matches the manifest intent; no hand-patched output or dangling feature routes.
 
 ## Procedure
 
@@ -159,8 +215,10 @@ archetype there + its snippet, never by hardcoding. The script HALTs when:
    already inside the parent card's body, so drop the nested card's outer shell
    (`.function-container` > `.function-top-section` > its anonymous `<div>`) and place only its inner
    content — `.function-header` + `.function-content` (plus any trailing `<script>`) — directly in the
-   panel. Keeping the full shell would draw a card-inside-a-card. A revealed
-   component may itself be a selector with its own `reveals` (recurse). The reveal is wired purely
+   panel. Keeping the full shell would draw a card-inside-a-card. A **nested assembled card** slot →
+   render a labeled `.subfn-group`: `title` becomes `.subfn-label`, optional `info` uses the existing
+   info-tooltip snippet, and each inner slot is wrapped in `.subfn-child` before recursive rendering.
+   A revealed component may itself be a selector with its own `reveals` (recurse). The reveal is wired purely
    by the existing positional CSS (`headset.css` `.segment-panels` `:has(...:checked)`) — add no JS,
    embed no panel by hand. Empty `functions[]` → keep the placeholder note.
 

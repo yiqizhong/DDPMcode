@@ -2,11 +2,9 @@ title: Device Settings
 functions:
   - id: auto-off
     title: Auto Off
-    tooltip: "Automatically power off the headset after inactivity"
+    info: "Automatically power off the headset after inactivity"
     components:
       - archetype: toggle
-        label: Auto Off
-        tooltip: "Automatically power off the headset after inactivity"
         value: true
         dependents:
           - archetype: dropdown
@@ -21,11 +19,9 @@ functions:
               - {label: 5 hours, value: 5h}
   - id: audio-guidance
     title: Audio Guidance
-    tooltip: "Get audio feedback for headset status and changes"
+    info: "Get audio feedback for headset status and changes"
     components:
       - archetype: toggle
-        label: Audio Guidance
-        tooltip: "Get audio feedback for headset status and changes"
         value: true
         dependents:
           - archetype: segmented
@@ -35,15 +31,9 @@ functions:
               - {label: Voice, value: voice}
   - id: busy-light
     title: Busy Light
-    tooltip: "Show a light indicator when you're on a call"
+    info: "Show a light indicator when you're on a call"
     components:
       - archetype: toggle
-        label: Busy Light
-        tooltip: "Show a light indicator when you're on a call"
         value: true
-  - id: download-dell-audio
+  - id: promotion-download
     title: Download Dell Audio
-    components:
-      - archetype: button
-        label: Download Dell Audio
-        link: https://www.dell.com/support

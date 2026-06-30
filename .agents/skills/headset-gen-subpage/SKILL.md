@@ -163,6 +163,38 @@ Reviewer checklist:
   and nested groups.
 - Rendered HTML matches the manifest intent; no hand-patched output or dangling feature routes.
 
+## Autonomous generation + self-correction loop
+
+Run this loop for headset model generation:
+
+1. Read `requirements.md`. Author all manifests (home + each subpage + walkthrough) — the one
+   non-mechanical step (D10).
+2. Run `.agents/skills/headset-gen-subpage/regen.sh` (validate + render + verify, all models).
+3. If green → done. If a check fails → CLASSIFY it with the table below and act; loop back to step 2.
+4. Stop and ESCALATE to the human ONLY for the semantic cases.
+
+| Gate failure | Class | Action |
+|---|---|---|
+| drift (HTML != renderer output) | AUTOFIX (deterministic) | re-run the renderer (`regen.sh`); never hand-edit HTML |
+| validate HALT: unknown key | AUTOFIX | correct the key per schema (obvious typo like `tooltip`->`info` → rename; otherwise fix/remove) |
+| validate HALT: wrong archetype for option count | AUTOFIX | change archetype per rule (2-3 → segmented, 5-6 → preset-grid) |
+| validate HALT: `label` == card `title` | AUTOFIX | remove the redundant label |
+| validate HALT: slider min/max/value/stops | AUTOFIX | correct to the requirement's range |
+| validate HALT: image absolute / `..` / missing | AUTOFIX | normalize to a relative existing path, or `image: none` + reason if there is genuinely no image |
+| validate HALT: nested-card depth cap exceeded | ESCALATE | deeper nesting needs the unbuilt D13 engine — flag it |
+| CSS-class not defined | AUTOFIX | use a class that exists in the linked CSS (or define it in CSS) |
+| requirements-coverage HALT: missing function / device-identity mismatch | AUTOFIX if the manifest clearly dropped/garbled what requirements state; ESCALATE if which is right is unclear | fix manifest, or escalate |
+| coverage-atom mismatch (manifest != atom) | AUTOFIX if the atom faithfully reflects the requirement and the manifest deviates; ESCALATE if it's unclear whether the atom or the manifest is wrong | fix manifest, or escalate |
+| independent-review fail/ambiguous, or genuine prose ambiguity (e.g. the "4h" case) | ESCALATE | stop; present the requirement quote, the conflict, and options to the human |
+
+Governing PRINCIPLE: **auto-fix when the correct fix is determinable from rules + requirements
+without guessing intent; escalate the moment resolving it would require guessing what the human
+meant.** When escalating, present: the requirement quote, what the manifest/atom currently says, why
+it's ambiguous, and a recommendation.
+
+AUTOFIX edits the MANIFEST (or CSS/snippet), never the rendered HTML (D19). After any fix, re-run
+`.agents/skills/headset-gen-subpage/regen.sh`.
+
 ## Procedure
 
 1. **Copy the frame** to the model folder, rewriting the two stylesheet links from

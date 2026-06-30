@@ -995,7 +995,8 @@ body {
   width: 100%;
 }
 
-.subfn-group:has(> .function-header .subfn-toggle:not(:checked)) > .subfn-child {
+.subfn-group:has(> .function-header .subfn-toggle:not(:checked)) > .subfn-child,
+.function-top-section:has(> div > .function-header .subfn-toggle:not(:checked)) > div > .function-content > .subfn-child {
   opacity: 0.4;
   pointer-events: none;
 }

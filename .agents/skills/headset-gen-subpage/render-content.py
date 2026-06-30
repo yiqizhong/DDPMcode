@@ -221,19 +221,51 @@ def render_function(function_entry, path="fn"):
 
     frame = read_text(FUNCTION_FRAME)
     frame = set_data_property_text(frame, "function-title", function_entry.get("title", ""))
-    if function_entry.get("info"):
-        frame = replace_slot_contents(frame, "function-info", render_info(function_entry["info"]))
+    sole = len(components) == 1
+    card_level_toggle = sole and is_card_level_toggle(components[0])
+    info_text = function_entry.get("info")
+    if card_level_toggle and not info_text:
+        info_text = components[0].get("info")
+    if info_text:
+        frame = replace_slot_contents(frame, "function-info", render_info(info_text))
     else:
         frame = remove_slot_element(frame, "function-info")
 
-    sole = len(components) == 1
-    rendered = []
-    for idx, slot in enumerate(components, start=1):
-        control_id = function_id if sole else "%s-%d" % (function_id, idx)
-        rendered.append(render_slot(slot, "%s.%d" % (path, idx), sole=sole, top_level=True,
-                                    control_id=control_id))
+    if card_level_toggle:
+        component = components[0]
+        control_id = function_id
+        frame = append_to_function_header(
+            frame,
+            render_switch_widget(
+                component,
+                control_id,
+                controller=bool(component.get("dependents")),
+            ),
+        )
+        rendered = render_dependents(component.get("dependents") or [], "%s.1" % path)
+    else:
+        rendered = []
+        for idx, slot in enumerate(components, start=1):
+            control_id = function_id if sole else "%s-%d" % (function_id, idx)
+            rendered.append(render_slot(slot, "%s.%d" % (path, idx), sole=sole, top_level=True,
+                                        control_id=control_id))
     frame = replace_slot_contents(frame, "components", "\n".join(rendered))
     return strip_markers(frame)
+
+
+def is_card_level_toggle(component):
+    return (
+        isinstance(component, dict)
+        and component.get("archetype") == "toggle"
+        and not component.get("label")
+    )
+
+
+def append_to_function_header(markup, content):
+    marker = '\n      </div>\n      <div class="function-content"'
+    if marker not in markup:
+        return markup
+    return markup.replace(marker, "\n%s%s" % (content, marker), 1)
 
 
 def unwrap_function(markup):
@@ -363,13 +395,36 @@ def render_toggle(component, control_id, path):
         return snippet
 
     snippet = add_class_to_first(snippet, "switch-input", "subfn-toggle")
+    children = render_dependents(dependents, path)
+    return '<div class="subfn-group">\n%s\n%s\n</div>' % (snippet, "\n".join(children))
+
+
+def render_switch_widget(component, control_id, controller=False):
+    snippet = read_component("toggle")
+    if snippet is None:
+        return lane2("toggle snippet is missing")
+    snippet = replace_placeholders(snippet, {
+        "id": control_id,
+        "label": component.get("label", ""),
+    })
+    if component.get("value") is True:
+        snippet = add_checked_to_first_input(snippet)
+    if controller:
+        snippet = add_class_to_first(snippet, "switch-input", "subfn-toggle")
+    match = re.search(r'<label class="switch">.*?</label>', snippet, flags=re.S)
+    if not match:
+        return lane2("toggle snippet has no switch widget")
+    return match.group(0)
+
+
+def render_dependents(dependents, path):
     children = []
     for idx, dependent in enumerate(dependents, start=1):
         children.append(
             '<div class="subfn-child">\n%s\n</div>' %
             render_slot(dependent, "%s.dep%d" % (path, idx))
         )
-    return '<div class="subfn-group">\n%s\n%s\n</div>' % (snippet, "\n".join(children))
+    return children
 
 
 def extract_dropdown_li_unit(snippet):

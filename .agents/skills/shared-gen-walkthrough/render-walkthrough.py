@@ -76,13 +76,15 @@ def validate(manifest):
 
 def rewrite_css_paths(markup, category):
     # preview depth (4 up) -> output depth (3 up): <category>/models/<MODEL>/walkthrough.html
-    # Three links to rewrite:
+    # Four links to rewrite:
     #   shared/tokens.css       — depth 4 -> depth 3
+    #   shared/shell.css        — depth 4 -> depth 3 (shared window-frame shell)
     #   headset/headset.css     — depth 4, category-specific -> depth 2 with actual category
     #   shared/walkthrough.css  — depth 4 -> depth 3
     return (
         markup
         .replace('href="../../../../shared/tokens.css"', 'href="../../../shared/tokens.css"')
+        .replace('href="../../../../shared/shell.css"', 'href="../../../shared/shell.css"')
         .replace('href="../../../../headset/headset.css"',
                  'href="../../%s.css"' % category)
         .replace('href="../../../../shared/walkthrough.css"', 'href="../../../shared/walkthrough.css"')

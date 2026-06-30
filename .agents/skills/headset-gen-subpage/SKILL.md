@@ -201,6 +201,7 @@ AUTOFIX edits the MANIFEST (or CSS/snippet), never the rendered HTML (D19). Afte
    preview-relative to output-relative. Run from the repo root:
    ```
    sed -e 's|href="../../../../shared/tokens.css"|href="../../../shared/tokens.css"|' \
+       -e 's|href="../../../../shared/shell.css"|href="../../../shared/shell.css"|' \
        -e 's|href="../../../../headset/headset.css"|href="../../headset.css"|' \
        .agents/skills/headset-gen-subpage/templates/subpage-frame.html \
        > headset/models/$1/$2.html
@@ -276,7 +277,7 @@ AUTOFIX edits the MANIFEST (or CSS/snippet), never the rendered HTML (D19). Afte
   never written from a keyword. Unknown connection mode or icon id → halt and ask.
 - Invent nothing: every value comes from a manifest.
 - Every sub-page MUST keep the back link to `index.html`. NO Unpair on sub-pages.
-- No inline `<style>`; link `shared/tokens.css` + `headset.css` only.
+- No inline `<style>`; link `shared/tokens.css` + `shared/shell.css` + `headset.css` only.
 - One framework for all sub-pages — never create a sub-page-specific skill.
 - **Reproducible from the manifest (no off-pipeline hand-patching).** The output must be exactly what
   re-running this skill on the manifest produces. If the rendered page needs something the manifest

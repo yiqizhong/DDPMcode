@@ -11,7 +11,7 @@ A **product UI generation system** (headset as pilot). A strong model **freezes 
 **a weak model at generation time only copies snippets + fills values — no generation, no inference** ("copy, don't create"). Three layers:
 
 ```
-Design tokens shared/tokens.css  →  Category styles headset/headset.css  →  Page frames (skills)  →  Model data (manifest)
+Design tokens + reset shared/tokens.css  →  Shared window shell shared/shell.css  →  Category styles headset/headset.css  →  Page frames (skills)  →  Model data (manifest)
 ```
 
 ---
@@ -72,7 +72,7 @@ Every topic has **one** source of truth — always go to it when making changes:
 | Swap rule (swappable header control) | `components/toggle.html` | single-control references it |
 | segmented vs preset-grid details | `components/README.md` | AGENTS only provides the family-level table |
 | Design decision rationale ("why") | `function-card-architecture.md` | Historical/thinking log, not current spec |
-| Styles | `headset/headset.css` | Tokens are in tokens.css |
+| Styles | `headset/headset.css` (category) | Reset + tokens in `shared/tokens.css`; window-frame shell (`.frame`/`.masthead`/`.content-zone`/backdrop) in `shared/shell.css` |
 | methodology.md | — | **Reference only** (top section lists points superseded by code); codebase wins on conflicts |
 
 ---

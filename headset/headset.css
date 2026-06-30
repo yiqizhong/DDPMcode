@@ -1,46 +1,16 @@
 /* ============================================================
    Category-template layer — headset layout + single-part styles.
-   References the design-token layer (../shared/tokens.css) via
-   var().
+   References the design-token layer (../shared/tokens.css) via var().
 
-   Frame/header/masthead/zone layout is generic. The connection tag
-   (.connection-tag + .bluetooth-icon/.wired-icon/.battery-*),
-   Unpair (.unpair-button) and feature button (.feature-button +
-   .button-content) styles are the white-theme design imported from
+   The generic window shell (reset, body backdrop, .frame, .content-zone,
+   .masthead + controls) lives in the SHARED layer: shared/shell.css —
+   linked by every category's page templates. This file holds only the
+   headset-specific styling: device image, the connection tag
+   (.connection-tag + .bluetooth-icon/.wired-icon/.battery-*), Unpair
+   (.unpair-button), feature buttons (.feature-button + .button-content),
+   and the in-card DDPM components — the white-theme design imported from
    the Figma ui-work (inline-SVG icons; values via shared/tokens.css).
    ============================================================ */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: var(--color-bg-page);
-}
-
-.frame {
-  width: var(--canvas-width);
-  height: var(--canvas-height);
-  background: var(--color-canvas-bg);
-  border: 1px solid var(--color-border-muted);
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 16px;
-}
-
-.content-zone {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-  padding: 0 16px 16px 64px;
-}
 
 .devices-image-zone {
   flex: 1;
@@ -482,41 +452,7 @@ body {
 
 /* The firmware ⓘ tooltip now uses the SHARED .info-tooltip* component (defined below). */
 
-/* --- Masthead --- */
-.masthead {
-  height: 64px;
-  display: flex;
-  padding: 16px 24px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  flex-shrink: 0;
-  align-self: stretch;
-}
-
-.masthead-controls {
-  display: flex;
-  gap: 24px;
-}
-
-.control-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.control-button svg {
-  display: block;
-  width: 16px;
-  height: 16px;
-}
+/* Masthead (.masthead + .masthead-controls + .control-button) moved to shared/shell.css. */
 
 /* Back link — 16px left-arrow icon, sits left of the title (used on BOTH pages: a real <a>
    on sub-pages, a static <span> on the home page). The box is the title's

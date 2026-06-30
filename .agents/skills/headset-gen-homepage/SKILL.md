@@ -39,6 +39,7 @@ for the HTML — running the render is part of THIS task, not an optional follow
    from the repo root:
    ```
    sed -e 's|href="../../../../shared/tokens.css"|href="../../../shared/tokens.css"|' \
+       -e 's|href="../../../../shared/shell.css"|href="../../../shared/shell.css"|' \
        -e 's|href="../../../../headset/headset.css"|href="../../headset.css"|' \
        .agents/skills/headset-gen-homepage/templates/home-frame.html \
        > headset/models/$1/index.html
@@ -91,9 +92,10 @@ for the HTML — running the render is part of THIS task, not an optional follow
   `.agents/skills/headset-shared/icons/<id>.svg` (id = `feature.icon`); unknown id →
   halt, no icon → text-only. Never draw an icon.
 - No `display`-hidden or pre-embedded-and-hidden variants in the output.
-- No inline `<style>`; the frame links `shared/tokens.css` + `headset.css` only.
-- After the copy, the output's CSS links must be `../../../shared/tokens.css` and
-  `../../headset.css` (the `sed` in step 1 handles this). Never leave the 4-up preview paths.
+- No inline `<style>`; the frame links `shared/tokens.css` + `shared/shell.css` + `headset.css` only.
+- After the copy, the output's CSS links must be `../../../shared/tokens.css`,
+  `../../../shared/shell.css` and `../../headset.css` (the `sed` in step 1 handles this).
+  Never leave the 4-up preview paths.
 - Invent nothing — every value comes from the manifest.
 - **Definition of Done = rendered HTML on disk, not the manifest.** The task is complete ONLY when
   `render-model.py <MODEL>` (or `render-home.py`) has been RUN, `headset/models/<MODEL>/index.html`

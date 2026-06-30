@@ -71,6 +71,7 @@ def rewrite_css_paths(markup):
     return (
         markup
         .replace('href="../../../../shared/tokens.css"', 'href="../../../shared/tokens.css"')
+        .replace('href="../../../../shared/shell.css"', 'href="../../../shared/shell.css"')
         .replace('href="../../../../headset/headset.css"', 'href="../../headset.css"')
     )
 

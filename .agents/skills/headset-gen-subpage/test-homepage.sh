@@ -70,8 +70,9 @@ require('<a class="back-link"' not in doc, "home page has an anchor back link")
 require('href="index.html"' not in doc, "home page has a navigable back link")
 
 require('<link rel="stylesheet" href="../../../shared/tokens.css">' in doc, "missing output-depth tokens.css href")
+require('<link rel="stylesheet" href="../../../shared/shell.css">' in doc, "missing output-depth shell.css href")
 require('<link rel="stylesheet" href="../../headset.css">' in doc, "missing output-depth headset.css href")
-require("../../../../shared/tokens.css" not in doc and "../../../../headset/headset.css" not in doc, "preview-depth CSS href remains")
+require("../../../../shared/tokens.css" not in doc and "../../../../shared/shell.css" not in doc and "../../../../headset/headset.css" not in doc, "preview-depth CSS href remains")
 require("<style" not in doc.lower(), "inline style block present")
 
 ctype = home["connectionType"]

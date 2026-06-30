@@ -15,7 +15,7 @@
   --color-text-strong: #0e0e0e;
 
   /* Surfaces */
-  --color-bg-page: #f0f0f0;
+  --color-bg-page: #383838;             /* soft-dark charcoal canvas behind the app window */
   --color-surface: #ffffff;
   --color-surface-muted: #f5f5f5;
   --color-canvas-bg: #e5f1fc;           /* app canvas background (light blue) — home + sub-pages */
@@ -42,6 +42,7 @@
   --radius-sm: 2px;
   --radius-md: 4px;
   --radius-card: 8px;                    /* function card surface */
+  --radius-frame: 8px;                   /* app window / page frame */
   --radius-lg: 16px;
 
   /* Elevation */
@@ -52,4 +53,12 @@
   /* Canvas */
   --canvas-width: 1378px;
   --canvas-height: 735px;
+}
+
+/* Base reset — lives here (the layer EVERY page links, frame or standalone preview)
+   rather than in the frame shell, so non-frame pages keep box-sizing/zeroed margins. */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }

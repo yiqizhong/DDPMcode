@@ -1,0 +1,77 @@
+/* ============================================================
+   Shared page-frame shell — the app-window chrome that EVERY category
+   page template links (home / sub-page / walkthrough), above the
+   category layer (<category>.css). References shared/tokens.css via var().
+
+   Scope: the generic window shell only — the body backdrop, .frame (the
+   rounded app window), .content-zone (main layout band), and the .masthead
+   title bar + window controls. The base reset lives in shared/tokens.css
+   (every page links it, including non-frame previews). Category-specific
+   styling (device image, connection tag, feature buttons, in-card
+   components) stays in the category stylesheet.
+   ============================================================ */
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--color-bg-page);
+}
+
+.frame {
+  width: var(--canvas-width);
+  height: var(--canvas-height);
+  background: var(--color-canvas-bg);
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-frame);
+  display: flex;
+  flex-direction: column;
+}
+
+.content-zone {
+  flex: 1;
+  min-height: 0;   /* shrink to the frame's flex allocation instead of growing to content size,
+                      so .content-area's overflow-y:auto can scroll instead of the zone (and its
+                      16px bottom padding) overflowing past the frame */
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding: 0 16px 16px 64px;
+}
+
+/* --- Masthead — window title bar + min / maximize / close controls --- */
+.masthead {
+  height: 64px;
+  display: flex;
+  padding: 16px 24px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.masthead-controls {
+  display: flex;
+  gap: 24px;
+}
+
+.control-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.control-button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}

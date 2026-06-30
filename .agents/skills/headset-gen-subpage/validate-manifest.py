@@ -18,7 +18,9 @@ from archetypes import (
     ARCHETYPES,
     ALL_ARCHETYPES,
     SELECTOR_ARCHETYPES,
-    MAX_OPTIONS,
+    DROPDOWN_SMALL_MAX,
+    DROPDOWN_REASONS,
+    COUNT_RULE_HINT,
     OPTION_KEYS,
     FUNCTION_SLOT_KEYS,
     component_allowed_keys,
@@ -286,7 +288,7 @@ class V:
                                 "`label` (rendered as its .subfn-label heading; a missing one is "
                                 "dropped data — the BUG-002 class)" % arch)
 
-        # Options — governed by the catalog's per-archetype rule; selectors are capped, dropdown is not.
+        # Options — governed by the catalog's per-archetype count window + the dropdown-reason gate.
         opts = sc.get("options")
         opt_rule = spec["options"]
         if opt_rule == "forbidden":
@@ -301,17 +303,29 @@ class V:
             self.err(where, "`options` on `%s` must be a non-empty list" % arch)
             opts = []
         else:
-            if arch in SELECTOR_ARCHETYPES and len(opts) > MAX_OPTIONS:
-                self.err(where, "%d options exceeds the max of %d (CSS :has() maps nth-child up to 6)"
-                         % (len(opts), MAX_OPTIONS))
-            if arch == "preset-grid" and len(opts) <= 3:
-                self.err(where, "`preset-grid` with %d options violates selector count rule: "
-                                "2-3 options use `segmented`; 4 depends on semantics; "
-                                "5-6 use `preset-grid`" % len(opts))
-            if arch == "segmented" and len(opts) >= 5:
-                self.err(where, "`segmented` with %d options violates selector count rule: "
-                                "2-3 options use `segmented`; 4 depends on semantics; "
-                                "5-6 use `preset-grid`" % len(opts))
+            n = len(opts)
+            # Count window from the contract (archetypes.py): segmented 2-3, preset-grid 4-6,
+            # dropdown 2+. A violation means a different archetype is the deterministic answer.
+            lo = spec.get("min_options")
+            hi = spec.get("max_options")
+            if lo is not None and n < lo:
+                self.err(where, "`%s` needs at least %d options (got %d) — %s"
+                         % (arch, lo, n, COUNT_RULE_HINT))
+            if hi is not None and n > hi:
+                self.err(where, "`%s` allows at most %d options (got %d) — %s"
+                         % (arch, hi, n, COUNT_RULE_HINT))
+            # A small dropdown (<= threshold) must justify itself; otherwise it should be a visible
+            # selector. This is what pins segmented-vs-dropdown so the same input can't flap.
+            if arch == "dropdown" and n <= DROPDOWN_SMALL_MAX:
+                reason = sc.get("dropdown-reason")
+                if reason is None:
+                    self.err(where, "a `dropdown` with %d options must be a visible selector "
+                                    "(2-3 -> segmented, 4-6 -> preset-grid) UNLESS it declares a "
+                                    "`dropdown-reason` (%s)"
+                             % (n, ", ".join(sorted(DROPDOWN_REASONS))))
+                elif reason not in DROPDOWN_REASONS:
+                    self.err(where, "`dropdown-reason: %r` is not recognized (allowed: %s)"
+                             % (reason, ", ".join(sorted(DROPDOWN_REASONS))))
             seen_v, seen_l, n_selected = set(), set(), 0
             for o in opts:
                 if not isinstance(o, dict):

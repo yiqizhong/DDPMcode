@@ -54,10 +54,11 @@ If a relevant skill exists but was not used, that is a violation — redo it thr
 These rules are for writing manifests and design snippets. Generation does not choose controls at
 runtime: it renders the explicit archetype/id already frozen into the manifest (§7 / D10).
 
-> **Authoritative per-archetype contract** (shape, conditional channel, options rule, required props)
-> is generated from the catalog — run `python3 .agents/skills/headset-gen-subpage/archetypes.py`. It is
-> always in sync with the validator; never hand-maintain a parallel copy of it. The family map and the
-> fuzzy heuristics below (which the catalog can't encode) stay here as prose.
+> **Authoritative per-archetype contract** (shape, conditional channel, options rule, required props,
+> count windows) is generated from the catalog — run `python3 .agents/skills/headset-gen-subpage/archetypes.py`.
+> It is always in sync with the validator; never hand-maintain a parallel copy of it. Select-family
+> choice (segmented vs preset-grid vs dropdown) is now **mechanical** — the deterministic rule is
+> `docs/component-selection-rule.md`; only the acoustic-environment **icon** rule stays as prose below.
 
 **Data shape → archetype family**
 
@@ -73,7 +74,7 @@ runtime: it renders the explicit archetype/id already frozen into the manifest (
 
 | Family | Rule |
 |---|---|
-| Select: segmented vs dropdown | Use Segmented when there are <=5-6 options and they should stay visible, or when icon cards are needed. Use Dropdown when there are more options or space is tight. |
+| Select: segmented / preset-grid / dropdown | By option count (deterministic): **2–3 → segmented** (hard cap 3), **4–6 → preset-grid**, **>6 → dropdown**. A ≤6-option `dropdown` is allowed ONLY with a declared `dropdown-reason` (`ordered-value` / `long-labels` / `inline-slot`); otherwise use the visible selector for that count. Full rationale: `docs/component-selection-rule.md`. |
 | Button: button vs link | Use a real hyperlink (`<a href>`, like `feature-button`) for navigation to another page/view. Use a button for in-place actions. |
 
 **Domain conventions**
@@ -109,8 +110,8 @@ renders as one `.subfn-group` containing the toggle row and `.subfn-child` depen
 A child under a function card is authored by choosing, in this order:
 
 1. **Component (the real function)** — from the data shape (tables above): on/off → toggle;
-   pick-1-of-N visible/few or icon modes → segmented; presets/profiles 4–6 → preset-grid; ordered
-   range → slider; pick-1-of-N many/tight → dropdown.
+   ordered continuous range → slider; then pick-1-of-N **by count** — 2–3 → segmented, 4–6 →
+   preset-grid, >6 → dropdown (a ≤6 dropdown needs a declared `dropdown-reason`).
 2. **Shape (container) is derived, not authored.** Two shapes: **row** (name left, a compact widget
    right — one line) and **stacked** (a `.subfn-label` title on top, a full-width widget below).
 3. **Shape follows the component's width:**

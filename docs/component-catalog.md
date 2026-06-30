@@ -40,14 +40,14 @@
 | Piece | What it is / when to use | Universality | How the Agent calls it |
 |---|---|---|---|
 | **Switch** (toggle · **no separate file**, embedded in `toggle.html`) | Binary on/off (boolean) | ✅ Universal | Default right control of `toggle`; fill `{id}-state`, add `checked`=ON |
-| **Dropdown** (`dropdown.html`) | Single-select, but **many options / tight space** (e.g. auto-off timeout 15min…8h). Custom `<details>` floating layer, `position:fixed` to escape scroll-container clipping | ✅ Universal | Swap into the `CONTROL` slot of `toggle`/single-control; empirical example: auto-power-off in the appendix |
+| **Dropdown** (`dropdown.html`) | Single-select for **>6 options**, or a declared exception for ≤6 (ordered value-list / long labels / inline slot — e.g. auto-off timeout 15min…8h). Custom `<details>` floating layer, `position:fixed` to escape scroll-container clipping | ✅ Universal | Swap into the `CONTROL` slot of `toggle`/single-control; a ≤6-option dropdown MUST carry a `dropdown-reason` (see `docs/component-selection-rule.md`) |
 
 ### C. Full-width controls (span the full row, placed in card body — **cannot go in header**)
 
 | Piece | What it is / when to use | Universality | How the Agent calls it |
 |---|---|---|---|
 | **Slider** (`slider.html`) | A value along an **ordered** range/step (volume, intensity, Sidetone level) | ✅ Universal | Copy into body; fill `{min}/{max}/{val}`; one `oninput` line drives the value bubble |
-| **Segmented selector** (`segmented.html`) | Pick 1 from **2–4 items**, all visible at once / with icons (mode switch: ANC/Transparency) | ✅ Universal | Copy into body; add/remove `.segment` for count; optional conditional panels. **Cap: 6 options** |
+| **Segmented selector** (`segmented.html`) | Pick 1 from **2–3 items** in a row, all visible at once / with icons (mode switch: ANC/Transparency) | ✅ Universal | Copy into body; add/remove `.segment` for count; optional conditional panels. **Hard cap: 3** (4+ → preset grid) |
 | **Preset grid** (`preset-grid.html`) | **4–6 presets** tiled (EQ presets, audio profiles) | ✅ Universal | Copy into body; 2-column grid; last item can span full row. **Cap: 6** |
 
 ### D. Auxiliary
@@ -56,8 +56,8 @@
 |---|---|---|---|
 | **Info tooltip** (`info-tooltip.html`) | ⓘ icon next to a control + hover explanation | ✅ Universal (optional) | Copy into that row's `.function-icons` only when a description exists; delete the div otherwise |
 
-**Which control to use** (details in `components/README.md` + `headset/AGENTS.md` selection table):
-on/off → **switch**; ordered value → **slider**; 2–3 options → **segmented**; 4 options: check semantics (mode switch → segmented / presets → grid); 5–6 options → **preset grid**; many options or tight space → **dropdown**.
+**Which control to use** (full rule in `docs/component-selection-rule.md`; mechanical contract in `archetypes.py`):
+on/off → **switch**; ordered continuous value → **slider**; **2–3 → segmented** (hard cap 3); **4–6 → preset grid**; **>6 → dropdown**. A dropdown with ≤6 options is allowed **only** with a declared `dropdown-reason` (`ordered-value` / `long-labels` / `inline-slot`) — otherwise it must be the visible selector for that count.
 
 ---
 

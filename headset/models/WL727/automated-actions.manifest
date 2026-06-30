@@ -1,0 +1,22 @@
+title: Automated Actions
+functions:
+  - id: wear-detection
+    title: Wear Detection
+    info: Automatically pause audio or mute microphone when you remove the headset
+    components:
+      - archetype: toggle
+        dependents:
+          - archetype: segmented
+            label: Sensor Sensitivity
+            options:
+              - value: low
+                label: Low
+              - value: normal
+                label: Normal
+                selected: true
+          - archetype: toggle
+            label: Pause Music
+            info: Pause playback when headset is removed
+          - archetype: toggle
+            label: Mute Microphone
+            info: Mute microphone when headset is removed

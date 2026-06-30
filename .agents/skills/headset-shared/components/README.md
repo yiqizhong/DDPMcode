@@ -23,7 +23,7 @@ condition), see `headset/AGENTS.md` →
 | `toggle.html` | `toggle` | the standard toggle row: optional name left + native switch right | `.function-header`, `.switch*` |
 | `dropdown.html` | `dropdown` | compact row: optional label left + `<details>`/`<summary>` dropdown widget right; fills `{id}`, per-option label/value/selected | `.dropdown`, `.dropdown-trigger`, `.dropdown-value`, `.dropdown-chevron`, `.dropdown-list`, `.dropdown-item`, `.dropdown-item--selected` |
 | `slider.html` | `slider` | min/max labels + native range + value bubble; fills `{min}/{max}/{val}`, `{label}` | `.slider-row`, `.slider-input`, `.slider-value` |
-| `segmented.html` | `segmented` | row of 2–4 mutually-exclusive option buttons; fills `{id}`, `{label}`, `{labelN}`, `{valueN}` | `.segmented-control`, `.segment`, `.segment-input`, `.segment-icon`, `.segment-label` |
+| `segmented.html` | `segmented` | row of 2–3 mutually-exclusive option buttons (hard cap 3); fills `{id}`, `{label}`, `{labelN}`, `{valueN}` | `.segmented-control`, `.segment`, `.segment-input`, `.segment-icon`, `.segment-label` |
 | `preset-grid.html` | `preset-grid` | 2-column grid of 4–6 option buttons; fills same as segmented + `{id}-preset` | `.preset-grid`, `.segment--span` + all `.segment*` |
 | `info-tooltip.html` | — | OPTIONAL ⓘ + hover tooltip; fills `{info-text}` | `.info-tooltip*` |
 
@@ -45,22 +45,25 @@ and optional conditional-panel system. The only difference is **layout** and **u
 | | `segmented.html` | `preset-grid.html` |
 |---|---|---|
 | Layout | Single horizontal row (`flex row`) | 2-column grid (`CSS grid`) |
-| Item count | 2–4 | 4–6 (5+ always grid; 4 depends on semantics) |
+| Item count | 2–3 (**hard cap 3**) | 4–6 |
 | Item width | Equal, stretch to fill | Equal, 50% each; last may span full row |
 | Icons | Required for acoustic-environment modes (see rule below); optional otherwise | Not used — label-only |
 | Height | **56px** default; **80px** when icon present (auto via `:has`) | **56px** always (no icons) |
 | Primary use | Mode switching (ANC/Transparency, channel, EQ mode) | Preset/profile selection (EQ presets, sound profiles, multimedia presets) |
 
-**Decision rule — option count alone is not enough; semantics matter:**
+**Decision rule — count is the spine (the full select-family rule, incl. dropdown, lives in
+`docs/component-selection-rule.md`):**
 
-| Count | Semantics | Use |
-|---|---|---|
-| 2–3 | any | segmented row (always) |
-| 5–6 | any | preset-grid (always — doesn't fit in a row) |
-| 4 | **mode switching** (e.g. ANC / Low / Off / Transparency) | segmented row |
-| 4 | **preset / profile** (e.g. Default / Bass Boost / Speech / Treble) | preset-grid |
+| Count | Use |
+|---|---|
+| 2–3 | **segmented** row (hard cap 3) |
+| 4–6 | **preset-grid** (a row can't hold 4+; 5–6 never fits) |
+| >6 | **dropdown** (forced) |
 
-The key semantic question: *"Are these named configurations the user picks from, or modes the device switches between?"* Presets → grid. Modes → row.
+There is no longer a count where segmented and preset-grid overlap, so no per-count semantic
+judgment is needed to pick between them. The mode-vs-preset distinction below still governs the
+**icon** rule, and an ordered/value-list choice may collapse to a `dropdown` via a declared
+`dropdown-reason` (see the selection-rule doc) — but neither changes the count boundaries above.
 
 ## Segmented control — icon usage rule
 

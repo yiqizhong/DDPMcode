@@ -1,0 +1,49 @@
+title: Device Settings
+functions:
+  - id: auto-off
+    title: Auto OFF
+    info: Automatically power off the headset after a period of inactivity
+    components:
+      - archetype: toggle
+        dependents:
+          - archetype: dropdown
+            label: Power off after
+            dropdown-reason: ordered-value
+            options:
+              - value: 15min
+                label: 15 minutes
+              - value: 30min
+                label: 30 minutes
+              - value: 1hr
+                label: 1 hour
+              - value: 2hr
+                label: 2 hours
+              - value: 3hr
+                label: 3 hours
+              - value: 5hr
+                label: 5 hours
+                selected: true
+
+  - id: audio-guidance
+    title: Audio Guidance
+    info: Choose how the headset communicates status updates
+    components:
+      - archetype: toggle
+        dependents:
+          - archetype: segmented
+            label: Mode
+            options:
+              - value: tones
+                label: Tones
+                selected: true
+              - value: voice
+                label: Voice
+
+  - id: busy-light
+    title: Busy Light
+    info: Show a light indicator when you are on a call
+    components:
+      - archetype: toggle
+
+  - id: promotion-download
+    title: Download Dell Audio

@@ -183,4 +183,91 @@ python3 "$VALIDATOR" "$GOOD_SLIDER"
 expect_halt "$VALIDATOR" "$ZERO_SELECTED" "zero-selected" 'a selector needs exactly one option marked `selected`'
 python3 "$VALIDATOR" "$EXACTLY_ONE_SELECTED"
 
+# ---- select-family count + dropdown-reason gate (docs/component-selection-rule.md) ----
+
+SEGMENTED_4="$TMPDIR/segmented-4-options.manifest"
+cat >"$SEGMENTED_4" <<'MANIFEST'
+title: Selector Fixture
+functions:
+  - id: selector-fixture
+    title: Selector Fixture
+    components:
+      - archetype: segmented
+        label: Mode
+        options:
+          - {label: A, value: a, selected: true}
+          - {label: B, value: b}
+          - {label: C, value: c}
+          - {label: D, value: d}
+MANIFEST
+
+DROPDOWN_SMALL_NO_REASON="$TMPDIR/dropdown-small-no-reason.manifest"
+cat >"$DROPDOWN_SMALL_NO_REASON" <<'MANIFEST'
+title: Selector Fixture
+functions:
+  - id: selector-fixture
+    title: Selector Fixture
+    components:
+      - archetype: dropdown
+        label: Mode
+        options:
+          - {label: Tones, value: tones, selected: true}
+          - {label: Voice, value: voice}
+MANIFEST
+
+DROPDOWN_SMALL_BAD_REASON="$TMPDIR/dropdown-small-bad-reason.manifest"
+cat >"$DROPDOWN_SMALL_BAD_REASON" <<'MANIFEST'
+title: Selector Fixture
+functions:
+  - id: selector-fixture
+    title: Selector Fixture
+    components:
+      - archetype: dropdown
+        label: Mode
+        dropdown-reason: space-is-tight
+        options:
+          - {label: Tones, value: tones, selected: true}
+          - {label: Voice, value: voice}
+MANIFEST
+
+DROPDOWN_SMALL_OK="$TMPDIR/dropdown-small-ok.manifest"
+cat >"$DROPDOWN_SMALL_OK" <<'MANIFEST'
+title: Selector Fixture
+functions:
+  - id: selector-fixture
+    title: Selector Fixture
+    components:
+      - archetype: dropdown
+        label: Power off after
+        dropdown-reason: ordered-value
+        options:
+          - {label: 15 minutes, value: 15m}
+          - {label: 1 hour, value: 1h, selected: true}
+MANIFEST
+
+DROPDOWN_LARGE_OK="$TMPDIR/dropdown-large-ok.manifest"
+cat >"$DROPDOWN_LARGE_OK" <<'MANIFEST'
+title: Selector Fixture
+functions:
+  - id: selector-fixture
+    title: Selector Fixture
+    components:
+      - archetype: dropdown
+        label: Timeout
+        options:
+          - {label: A, value: a}
+          - {label: B, value: b}
+          - {label: C, value: c}
+          - {label: D, value: d}
+          - {label: E, value: e}
+          - {label: F, value: f}
+          - {label: G, value: g, selected: true}
+MANIFEST
+
+expect_halt "$VALIDATOR" "$SEGMENTED_4" "segmented-4-options" "allows at most 3 options"
+expect_halt "$VALIDATOR" "$DROPDOWN_SMALL_NO_REASON" "dropdown-small-no-reason" "must be a visible selector"
+expect_halt "$VALIDATOR" "$DROPDOWN_SMALL_BAD_REASON" "dropdown-small-bad-reason" "is not recognized"
+python3 "$VALIDATOR" "$DROPDOWN_SMALL_OK"
+python3 "$VALIDATOR" "$DROPDOWN_LARGE_OK"
+
 echo "PASS manifest hardening regressions"

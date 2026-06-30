@@ -5,6 +5,7 @@ functions:
     components:
       - archetype: dropdown
         label: Auto Off Time
+        dropdown-reason: ordered-value
         options:
           - {label: 30 mins, value: 30m}
           - {label: 1 hour, value: 1h, selected: true}

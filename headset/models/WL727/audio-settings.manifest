@@ -1,0 +1,62 @@
+title: Audio Settings
+functions:
+  - id: noise-control
+    title: Noise Control
+    info: Manage how much outside noise you hear
+    components:
+      - archetype: segmented
+        label: Mode
+        options:
+          - value: anc
+            label: ANC
+            selected: true
+          - value: transparency
+            label: Transparency
+          - value: off
+            label: Off
+        reveals:
+          anc:
+            - archetype: toggle
+              label: Adaptive ANC
+              info: Automatically adjusts Active Noise Cancellation levels based on your surroundings
+          transparency:
+            - archetype: slider
+              label: Transparency Strength
+              min: 1
+              max: 3
+              value: 2
+
+  - id: collaboration
+    title: Collaboration
+    info: Configure microphone and audio settings for calls
+    components:
+      - archetype: toggle
+        label: Mic Noise Cancellation
+        info: Reduces background noise during calls
+      - archetype: toggle
+        label: Sidetone
+        info: Hear your own voice through the headset
+        dependents:
+          - archetype: slider
+            label: Sidetone Level
+            min: 1
+            max: 3
+            value: 2
+
+  - id: multimedia
+    title: Multimedia
+    info: Customize audio presets for music, movies, and podcasts
+    components:
+      - archetype: segmented
+        label: Preset
+        options:
+          - value: bass-boost
+            label: Bass Boost
+            selected: true
+          - value: speech-boost
+            label: Speech Boost
+          - value: custom
+            label: Custom
+        reveals:
+          custom:
+            - function: eq-audio

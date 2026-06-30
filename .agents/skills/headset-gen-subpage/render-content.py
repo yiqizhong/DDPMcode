@@ -250,7 +250,7 @@ def render_function(function_entry, path="fn"):
             rendered.append(render_slot(slot, "%s.%d" % (path, idx), sole=sole, top_level=True,
                                         control_id=control_id))
     frame = replace_slot_contents(frame, "components", "\n".join(rendered))
-    return strip_markers(frame)
+    return collapse_empty_content(strip_markers(frame))
 
 
 def is_card_level_toggle(component):
@@ -266,6 +266,14 @@ def append_to_function_header(markup, content):
     if marker not in markup:
         return markup
     return markup.replace(marker, "\n%s%s" % (content, marker), 1)
+
+
+def collapse_empty_content(markup):
+    """Drop a body-less `.function-content` (a header-only card, e.g. a card-level
+    toggle with no dependents) so the parent's 8px inter-item gap doesn't render an
+    empty separator below the title row. Only matches whitespace-only content, so
+    cards with real body content are untouched."""
+    return re.sub(r'\s*<div class="function-content">\s*</div>', "", markup)
 
 
 def unwrap_function(markup):

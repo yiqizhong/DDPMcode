@@ -45,30 +45,32 @@ def card(markup, title):
 
 def before_body(card_html):
     body_at = card_html.find('<div class="function-content"')
-    if body_at == -1:
-        fail("missing function-content")
-    return card_html[:body_at]
+    return card_html if body_at == -1 else card_html[:body_at]
 
 
 def body(card_html):
     body_at = card_html.find('<div class="function-content"')
-    if body_at == -1:
-        fail("missing function-content")
-    return card_html[body_at:]
+    return "" if body_at == -1 else card_html[body_at:]
 
 
 def assert_hoisted(markup, title, dependent_text=None, needs_greyout=True):
     html = card(markup, title)
     head = before_body(html)
     content = body(html)
+    has_content = '<div class="function-content"' in html
     if '<label class="switch">' not in head:
         fail(f"{title}: switch was not hoisted into the card title row")
-    if needs_greyout and 'class="switch-input subfn-toggle"' not in head:
-        fail(f"{title}: hoisted dependent toggle is not the grey-out controller")
-    if 'class="switch-input subfn-toggle"' in content:
-        fail(f"{title}: card-level toggle still rendered in the body")
-    if dependent_text and dependent_text not in content:
-        fail(f"{title}: dependent {dependent_text!r} missing from body")
+    if dependent_text or needs_greyout:
+        if not has_content:
+            fail(f"{title}: expected function-content holding dependents")
+        if needs_greyout and 'class="switch-input subfn-toggle"' not in head:
+            fail(f"{title}: hoisted dependent toggle is not the grey-out controller")
+        if 'class="switch-input subfn-toggle"' in content:
+            fail(f"{title}: card-level toggle still rendered in the body")
+        if dependent_text and dependent_text not in content:
+            fail(f"{title}: dependent {dependent_text!r} missing from body")
+    elif has_content:
+        fail(f"{title}: header-only card should not emit an empty function-content")
 
 
 device = (tmp / "device-settings.html").read_text()

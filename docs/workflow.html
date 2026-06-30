@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Headset UI 生成流程 — 从产品需求到 HTML</title>
+<style>
+  :root{
+    --smart:#6d5ef0; --mech:#0f9b8e; --skill:#c2742a;
+    --ink:#1b1d21; --ink2:#52565e; --ink3:#878c95;
+    --line:#e4e6ea; --surface:#ffffff; --surface2:#f4f6f8; --page:#f7f8fa;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:860px;margin:0 auto;padding:32px 20px 48px;}
+  h1{font-size:24px;margin:0 0 4px;font-weight:680;}
+  .lede{font-size:14px;color:var(--ink2);margin:0 0 4px;}
+  .lede b{color:var(--ink);}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);margin:14px 0 22px;padding-top:14px;border-top:1px solid var(--line);}
+  .legend span{display:inline-flex;align-items:center;gap:7px;}
+  .dot{width:11px;height:11px;border-radius:50%;flex:none;}
+  .dot.s{background:var(--smart);} .dot.m{background:var(--mech);} .dot.k{background:var(--skill);}
+
+  .node{border:1.5px solid var(--line);border-radius:999px;background:var(--surface);padding:11px 20px;text-align:center;font-weight:650;font-size:15px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .node small{display:block;font-weight:400;font-size:12.5px;color:var(--ink2);margin-top:3px;}
+  .node small code{font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:4px;}
+  .node.start{border-color:var(--smart);}
+  .node.end{border-color:var(--mech);background:linear-gradient(0deg,rgba(15,155,142,.07),rgba(15,155,142,.07)),#fff;}
+
+  .arrow{display:flex;justify-content:center;align-items:center;height:24px;color:var(--ink3);font-size:16px;}
+  .arrow .lab{font-size:12px;color:var(--ink2);margin-left:8px;}
+
+  .stage{display:flex;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .bar{width:6px;flex:none;background:var(--c);}
+  .body{padding:14px 17px;flex:1;min-width:0;}
+  .head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .num{width:24px;height:24px;border-radius:50%;flex:none;background:var(--c);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .name{font-weight:680;font-size:15.5px;}
+  .tag{margin-left:auto;font-size:11px;font-weight:650;color:var(--c);border:1px solid var(--c);background:#fff;padding:2px 9px;border-radius:999px;white-space:nowrap;}
+  .what{font-size:13.5px;color:var(--ink2);margin:0 0 11px;}
+  .what b{color:var(--ink);}
+  .row{display:grid;grid-template-columns:62px 1fr;gap:9px;align-items:start;margin-top:7px;}
+  .k{font-size:11.5px;font-weight:700;padding-top:3px;letter-spacing:.02em;}
+  .k.in{color:var(--ink3);} .k.out{color:var(--c);} .k.sk{color:var(--skill);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-family:var(--mono);font-size:11.5px;padding:2px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);white-space:nowrap;}
+  .chip.out{border-color:color-mix(in srgb,var(--c) 42%,var(--line));background:color-mix(in srgb,var(--c) 8%,#fff);}
+  .chip.sk{border-color:color-mix(in srgb,var(--skill) 45%,var(--line));background:color-mix(in srgb,var(--skill) 9%,#fff);color:#7a4a17;font-family:var(--sans);font-weight:600;white-space:normal;line-height:1.45;max-width:100%;}
+  .chip.sk b{font-family:var(--mono);font-weight:600;}
+
+  /* self-correction loop */
+  .loopzone{position:relative;padding-left:60px;margin:2px 0;}
+  .retrail{position:absolute;left:12px;top:16px;bottom:74px;width:40px;border:2.5px solid var(--mech);border-right:0;border-radius:14px 0 0 14px;pointer-events:none;}
+  .retrail::after{content:"";position:absolute;right:-9px;top:-2px;width:0;height:0;border:7px solid transparent;border-left-color:var(--mech);}
+  .retlab{position:absolute;left:2px;top:42%;transform:translateY(-50%);writing-mode:vertical-rl;font-size:11px;font-weight:700;color:var(--mech);letter-spacing:.04em;background:var(--page);padding:6px 0;}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:6px;}
+  .branch{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:12.5px;background:var(--surface);}
+  .branch b{font-size:13px;}
+  .branch.auto{border-left:5px solid var(--mech);}
+  .branch.human{border-left:5px solid var(--smart);}
+  .branch p{margin:6px 0 0;color:var(--ink2);}
+  .branch .mini{font-family:var(--mono);font-size:11px;color:var(--mech);margin-top:7px;display:inline-block;background:color-mix(in srgb,var(--mech) 8%,#fff);border:1px solid color-mix(in srgb,var(--mech) 35%,var(--line));padding:2px 7px;border-radius:5px;}
+
+  /* skills overview */
+  .skills{margin-top:30px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);padding:16px 18px;}
+  .skills h2{font-size:15px;margin:0 0 4px;display:flex;align-items:center;gap:8px;}
+  .skills .sub{font-size:12.5px;color:var(--ink2);margin:0 0 12px;}
+  .sk-item{display:grid;grid-template-columns:200px 1fr;gap:10px;padding:8px 0;border-top:1px dashed var(--line);font-size:13px;}
+  .sk-item:first-of-type{border-top:0;}
+  .sk-name{font-family:var(--mono);font-size:12.5px;font-weight:700;color:#7a4a17;}
+  .sk-role{color:var(--ink2);}
+  .foot{margin-top:18px;font-size:12px;color:var(--ink3);text-align:center;}
+  @media(max-width:560px){.split{grid-template-columns:1fr;}.sk-item{grid-template-columns:1fr;gap:2px;}.row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>从「产品需求」到「HTML 页面」的生成流程</h1>
+  <p class="lede">一份耳机配套 App 的 UI，是怎样由一句产品需求自动生成的。</p>
+  <p class="lede"><b>核心思路：</b>manifest 是唯一事实源；除第 ① 步外全是确定性脚本 + 机械闸门；任何机械错误能自动纠正、重跑。</p>
+  <div class="legend">
+    <span><i class="dot s"></i>需要智能判断（LLM / 人）</span>
+    <span><i class="dot m"></i>确定性 · 机械（脚本 / 闸门）</span>
+    <span><i class="dot k"></i><b style="color:#7a4a17">🛠 Skill</b>　＝ 该步用到的系统 skill</span>
+  </div>
+
+  <div class="node start">📄 用户输入：Product Requirement
+    <small>产出 → <code>requirements.md</code>　（模板：设备身份 · 功能清单 · 功能描述 · 引导步骤）</small>
+  </div>
+  <div class="arrow">↓</div>
+
+  <!-- Stage 1 -->
+  <div class="stage" style="--c:var(--smart)">
+    <div class="bar"></div>
+    <div class="body">
+      <div class="head"><span class="num">1</span><span class="name">作者化 Manifest</span><span class="tag">LLM · 智能判断</span></div>
+      <p class="what">读懂散文需求，做 <b>authoring 决策</b>：给每个功能选控件类型（toggle / segmented / slider / dropdown / preset-grid）、选项、默认值、条件显隐（reveals 显隐 · dependents 置灰），把判断<b>冻结成结构化数据</b>。这是全流程<b>唯一需要理解的一步</b>。</p>
+      <div class="row"><span class="k sk">🛠 Skill</span><span class="chips">
+        <span class="chip sk"><b>headset-gen-homepage</b>（首页 manifest）</span>
+        <span class="chip sk"><b>headset-gen-subpage</b>（子页 manifest + 控件选择表）</span>
+        <span class="chip sk"><b>shared-gen-walkthrough</b>（引导 manifest）</span>
+      </span></div>
+      <div class="row"><span class="k in">读入</span><span class="chips">
+        <span class="chip">requirements.md</span><span class="chip">headset/AGENTS.md（控件选择决策表）</span><span class="chip">各 SKILL.md schema</span><span class="chip">archetypes.py（合法控件目录）</span>
+      </span></div>
+      <div class="row"><span class="k out">产出</span><span class="chips">
+        <span class="chip out">home.manifest</span><span class="chip out">&lt;功能&gt;.manifest ×N</span><span class="chip out">walkthrough.manifest</span><span class="chip out">coverage.md（需求↔manifest 原子对照表）</span>
+      </span></div>
+    </div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <!-- Stage 2 -->
+  <div class="stage" style="--c:var(--mech)">
+    <div class="bar"></div>
+    <div class="body">
+      <div class="head"><span class="num">2</span><span class="name">校验 Validate</span><span class="tag">机械闸门</span></div>
+      <p class="what">对照 schema 机械检查每份 manifest：未知字段、控件↔选项数规则、label 与卡标题重复、slider 数值范围、图片路径、恰好一个默认选中、嵌套深度…… 任一违规即 <b>HALT</b> 并指出位置。</p>
+      <div class="row"><span class="k sk">🛠 Skill</span><span class="chips">
+        <span class="chip sk"><b>headset-gen-subpage</b>　<span style="font-family:var(--mono)">validate-manifest.py（子页） · validate-home.py（首页） · archetypes.py</span></span>
+        <span class="chip sk"><b>shared-gen-walkthrough</b>　<span style="font-family:var(--mono)">validate-walkthrough.py</span></span>
+      </span></div>
+      <div class="row"><span class="k in">读入</span><span class="chips"><span class="chip">home.manifest（首页）</span><span class="chip">子页 *.manifest</span><span class="chip">walkthrough.manifest</span></span></div>
+      <div class="row"><span class="k out">产出</span><span class="chips"><span class="chip out">通过 ✓ ／ HALT（附违规项）</span></span></div>
+    </div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <!-- Loop zone wraps Stage 3, 4, and the decision -->
+  <div class="loopzone">
+    <div class="retrail"></div>
+    <div class="retlab">⚙ 机械错 → 自动改 manifest → 重渲</div>
+
+    <!-- Stage 3 -->
+    <div class="stage" style="--c:var(--mech)">
+      <div class="bar"></div>
+      <div class="body">
+        <div class="head"><span class="num">3</span><span class="name">渲染 Render</span><span class="tag">确定性</span></div>
+        <p class="what">把组件 snippet / 整卡 snapshot 按 manifest <b>复制进页面骨架、填入数值、拼出整页</b> —— 零推断、零手写，<b>同样输入永远产出同样 HTML</b>。</p>
+        <div class="row"><span class="k sk">🛠 Skill</span><span class="chips">
+          <span class="chip sk"><b>headset-gen-subpage</b>（<span style="font-family:var(--mono)">render-model.py</span> 编排 → render-home / render-subpage / render-content）</span>
+          <span class="chip sk"><b>headset-gen-homepage</b>（首页骨架）</span>
+          <span class="chip sk"><b>headset-function</b>（function-frame 卡壳）</span>
+          <span class="chip sk"><b>headset-shared</b>（toggle/slider/segmented… 组件 · 图标 · 连接块）</span>
+          <span class="chip sk"><b>shared-gen-walkthrough</b>（render-walkthrough.py）</span>
+        </span></div>
+        <div class="row"><span class="k in">读入</span><span class="chips">
+          <span class="chip">*.manifest</span><span class="chip">headset-shared/components</span><span class="chip">headset-function/templates</span><span class="chip">整卡 snapshot（eq-audio · promotion-download…）</span><span class="chip">headset.css · tokens.css</span>
+        </span></div>
+        <div class="row"><span class="k out">产出</span><span class="chips">
+          <span class="chip out">index.html</span><span class="chip out">&lt;功能&gt;.html ×N</span><span class="chip out">walkthrough.html</span>
+        </span></div>
+      </div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <!-- Stage 4 -->
+    <div class="stage" style="--c:var(--mech)">
+      <div class="bar"></div>
+      <div class="body">
+        <div class="head"><span class="num">4</span><span class="name">验证 Verify（全模型闸门）</span><span class="tag">机械 · pre-commit + CI</span></div>
+        <p class="what">对每个 model 跑全套机械检查：<b>drift</b>（磁盘 HTML 必须 == 渲染器输出，抓"有人手改产物"）· CSS 类必须真实存在 · 需求覆盖（功能 / 设备身份）· coverage 原子逐条比对。挂在 git pre-commit + CI 上，<b>不绿不放行</b>。</p>
+        <div class="row"><span class="k sk">🛠 Skill</span><span class="chips">
+          <span class="chip sk"><b>headset-gen-subpage</b>（<span style="font-family:var(--mono)">verify-all.sh</span> 编排 → verify-model · check-css-classes · check-requirements-coverage · check-coverage-atoms）</span>
+        </span></div>
+        <div class="row"><span class="k in">读入</span><span class="chips">
+          <span class="chip">渲染出的 *.html</span><span class="chip">*.manifest</span><span class="chip">requirements.md</span><span class="chip">coverage.md</span><span class="chip">CSS</span>
+        </span></div>
+        <div class="row"><span class="k out">产出</span><span class="chips"><span class="chip out">通过 ✓ ／ 失败（指出哪个 model · 哪一项）</span></span></div>
+      </div>
+    </div>
+    <div class="arrow">↓ <span class="lab">若失败 → 分流</span></div>
+
+    <!-- Self-correction decision -->
+    <div class="split">
+      <div class="branch auto">
+        <b>⚙ 机械错 → 自动修</b>
+        <p>未知 key · 错控件 · drift · 缺 CSS 类… 自动改 <b>manifest 源头</b>，重渲后回到 ③/④，循环到绿。</p>
+        <span class="mini">headset-gen-subpage · regen.sh（AUTOFIX）↺</span>
+      </div>
+      <div class="branch human">
+        <b>⚠ 语义错 → 升级给人</b>
+        <p>原子 ↔ 散文不符 · 真歧义（如档位漏写）· 独立复审存疑 —— 机器<b>不猜意图</b>，停下交人裁决。</p>
+        <span class="mini" style="color:var(--smart);background:color-mix(in srgb,var(--smart) 8%,#fff);border-color:color-mix(in srgb,var(--smart) 35%,var(--line))">ESCALATE → 👤 人工</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓ <span class="lab">全绿后</span></div>
+  <div class="node end">✅ 最终产出：一套可上线的 HTML
+    <small>index.html　·　各功能子页　·　walkthrough.html</small>
+  </div>
+
+  <!-- Skills overview -->
+  <div class="skills">
+    <h2>🛠 本系统的 5 个 Skill</h2>
+    <p class="sub">流程里的每一步都由这些 skill 承担 —— 它们是系统的"工具箱"。</p>
+    <div class="sk-item"><span class="sk-name">headset-gen-subpage</span><span class="sk-role"><b>系统核心</b>：子页框架 + 全部校验 / 渲染 / 验证 / 自纠脚本（validate · render · verify · coverage · regen）都在这里。</span></div>
+    <div class="sk-item"><span class="sk-name">headset-gen-homepage</span><span class="sk-role">首页（设备身份 · 电量 · 连接 · 功能入口）的 <b>schema 契约 + 骨架模板</b>；它只含 SKILL.md + templates，<b>首页的校验（validate-home.py）与渲染（render-home.py）实现都在 headset-gen-subpage 引擎里</b>。</span></div>
+    <div class="sk-item"><span class="sk-name">headset-function</span><span class="sk-role">功能卡的卡壳（function-frame）；遇到未知功能时就地拼装、复用后沉淀成 snapshot。</span></div>
+    <div class="sk-item"><span class="sk-name">headset-shared</span><span class="sk-role">可复用的组件 snippet（toggle / slider / segmented / dropdown / preset-grid…）、图标、连接块、CSS。</span></div>
+    <div class="sk-item"><span class="sk-name">shared-gen-walkthrough</span><span class="sk-role">引导页（onboarding 多步走查）的 schema 校验与渲染。</span></div>
+  </div>
+
+  <p class="foot">manifest = 唯一事实源　·　产物可从 manifest 完全重生成，禁止手改　·　只有"要猜意图"才需要人</p>
+</div>
+</body>
+</html>

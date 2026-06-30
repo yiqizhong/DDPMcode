@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Headset UI Generation Pipeline — From Product Requirement to HTML</title>
+<style>
+  :root{
+    --smart:#6d5ef0; --mech:#0f9b8e; --skill:#c2742a;
+    --ink:#1b1d21; --ink2:#52565e; --ink3:#878c95;
+    --line:#e4e6ea; --surface:#ffffff; --surface2:#f4f6f8; --page:#f7f8fa;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px;margin:0 auto;padding:32px 20px 48px;}
+  h1{font-size:24px;margin:0 0 4px;font-weight:680;}
+  .lede{font-size:14px;color:var(--ink2);margin:0 0 4px;}
+  .lede b{color:var(--ink);}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);margin:14px 0 22px;padding-top:14px;border-top:1px solid var(--line);}
+  .legend span{display:inline-flex;align-items:center;gap:7px;}
+  .dot{width:11px;height:11px;border-radius:50%;flex:none;}
+  .dot.s{background:var(--smart);} .dot.m{background:var(--mech);} .dot.k{background:var(--skill);}
+
+  .node{border:1.5px solid var(--line);border-radius:999px;background:var(--surface);padding:11px 20px;text-align:center;font-weight:650;font-size:15px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .node small{display:block;font-weight:400;font-size:12.5px;color:var(--ink2);margin-top:3px;}
+  .node small code{font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:4px;}
+  .node.start{border-color:var(--smart);}
+  .node.end{border-color:var(--mech);background:linear-gradient(0deg,rgba(15,155,142,.07),rgba(15,155,142,.07)),#fff;}
+
+  .arrow{display:flex;justify-content:center;align-items:center;height:24px;color:var(--ink3);font-size:16px;}
+  .arrow .lab{font-size:12px;color:var(--ink2);margin-left:8px;}
+
+  .stage{display:flex;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .bar{width:6px;flex:none;background:var(--c);}
+  .body{padding:14px 17px;flex:1;min-width:0;}
+  .head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .num{width:24px;height:24px;border-radius:50%;flex:none;background:var(--c);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .name{font-weight:680;font-size:15.5px;}
+  .tag{margin-left:auto;font-size:11px;font-weight:650;color:var(--c);border:1px solid var(--c);background:#fff;padding:2px 9px;border-radius:999px;white-space:nowrap;}
+  .what{font-size:13.5px;color:var(--ink2);margin:0 0 11px;}
+  .what b{color:var(--ink);}
+  .row{display:grid;grid-template-columns:74px 1fr;gap:9px;align-items:start;margin-top:7px;}
+  .k{font-size:11.5px;font-weight:700;padding-top:3px;letter-spacing:.02em;}
+  .k.in{color:var(--ink3);} .k.out{color:var(--c);} .k.sk{color:var(--skill);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-family:var(--mono);font-size:11.5px;padding:2px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface2);color:var(--ink);white-space:nowrap;}
+  .chip.out{border-color:color-mix(in srgb,var(--c) 42%,var(--line));background:color-mix(in srgb,var(--c) 8%,#fff);}
+  .chip.sk{border-color:color-mix(in srgb,var(--skill) 45%,var(--line));background:color-mix(in srgb,var(--skill) 9%,#fff);color:#7a4a17;font-family:var(--sans);font-weight:600;white-space:normal;line-height:1.45;max-width:100%;}
+  .chip.sk b{font-family:var(--mono);font-weight:600;}
+
+  /* self-correction loop */
+  .loopzone{position:relative;padding-left:60px;margin:2px 0;}
+  .retrail{position:absolute;left:12px;top:16px;bottom:74px;width:40px;border:2.5px solid var(--mech);border-right:0;border-radius:14px 0 0 14px;pointer-events:none;}
+  .retrail::after{content:"";position:absolute;right:-9px;top:-2px;width:0;height:0;border:7px solid transparent;border-left-color:var(--mech);}
+  .retlab{position:absolute;left:2px;top:42%;transform:translateY(-50%);writing-mode:vertical-rl;font-size:11px;font-weight:700;color:var(--mech);letter-spacing:.04em;background:var(--page);padding:6px 0;}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:6px;}
+  .branch{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:12.5px;background:var(--surface);}
+  .branch b{font-size:13px;}
+  .branch.auto{border-left:5px solid var(--mech);}
+  .branch.human{border-left:5px solid var(--smart);}
+  .branch p{margin:6px 0 0;color:var(--ink2);}
+  .branch .mini{font-family:var(--mono);font-size:11px;color:var(--mech);margin-top:7px;display:inline-block;background:color-mix(in srgb,var(--mech) 8%,#fff);border:1px solid color-mix(in srgb,var(--mech) 35%,var(--line));padding:2px 7px;border-radius:5px;}
+
+  /* skills overview */
+  .skills{margin-top:30px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);padding:16px 18px;}
+  .skills h2{font-size:15px;margin:0 0 4px;display:flex;align-items:center;gap:8px;}
+  .skills .sub{font-size:12.5px;color:var(--ink2);margin:0 0 12px;}
+  .sk-item{display:grid;grid-template-columns:210px 1fr;gap:10px;padding:8px 0;border-top:1px dashed var(--line);font-size:13px;}
+  .sk-item:first-of-type{border-top:0;}
+  .sk-name{font-family:var(--mono);font-size:12.5px;font-weight:700;color:#7a4a17;}
+  .sk-role{color:var(--ink2);}
+  .foot{margin-top:18px;font-size:12px;color:var(--ink3);text-align:center;}
+  @media(max-width:560px){.split{grid-template-columns:1fr;}.sk-item{grid-template-columns:1fr;gap:2px;}.row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>From “Product Requirement” to “HTML pages” — the generation pipeline</h1>
+  <p class="lede">How a headset companion-app UI is generated automatically from a single product requirement.</p>
+  <p class="lede"><b>Core idea:</b> the manifest is the single source of truth; every step except ① is a deterministic script + mechanical gate; any machine-detectable error self-corrects and re-runs.</p>
+  <div class="legend">
+    <span><i class="dot s"></i>Needs judgment (LLM / human)</span>
+    <span><i class="dot m"></i>Deterministic · mechanical (scripts / gates)</span>
+    <span><i class="dot k"></i><b style="color:#7a4a17">🛠 Skill</b>　＝ the system skill used at this step</span>
+  </div>
+
+  <div class="node start">📄 User input: Product Requirement
+    <small>Produces → <code>requirements.md</code>　(template: device identity · feature list · feature descriptions · onboarding steps)</small>
+  </div>
+  <div class="arrow">↓</div>
+
+  <!-- Stage 1 -->
+  <div class="stage" style="--c:var(--smart)">
+    <div class="bar"></div>
+    <div class="body">
+      <div class="head"><span class="num">1</span><span class="name">Author the Manifest</span><span class="tag">LLM · judgment</span></div>
+      <p class="what">Read the prose requirement and make the <b>authoring decisions</b>: for each feature pick the control type (toggle / segmented / slider / dropdown / preset-grid), options, defaults, conditional show/hide (reveals = show/hide · dependents = grey-out), and <b>freeze the judgment into structured data</b>. The <b>only step that requires understanding</b>.</p>
+      <div class="row"><span class="k sk">🛠 Skill</span><span class="chips">
+        <span class="chip sk"><b>headset-gen-homepage</b> (home manifest)</span>
+        <span class="chip sk"><b>headset-gen-subpage</b> (subpage manifest + control-selection tables)</span>
+        <span class="chip sk"><b>shared-gen-walkthrough</b> (walkthrough manifest)</span>
+      </span></div>
+      <div class="row"><span class="k in">Reads</span><span class="chips">
+        <span class="chip">requirements.md</span><span class="chip">headset/AGENTS.md (control-selection tables)</span><span class="chip">each SKILL.md schema</span><span class="chip">archetypes.py (valid control catalog)</span>
+      </span></div>
+      <div class="row"><span class="k out">Outputs</span><span class="chips">
+        <span class="chip out">home.manifest</span><span class="chip out">&lt;feature&gt;.manifest ×N</span><span class="chip out">walkthrough.manifest</span><span class="chip out">coverage.md (requirement↔manifest atom table)</span>
+      </span></div>
+    </div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <!-- Stage 2 -->
+  <div class="stage" style="--c:var(--mech)">
+    <div class="bar"></div>
+    <div class="body">
+      <div class="head"><span class="num">2</span><span class="name">Validate</span><span class="tag">mechanical gate</span></div>
+      <p class="what">Mechanically check every manifest against the schema: unknown fields, control↔option-count rules, label == card title, slider value range, image path, exactly-one default selected, nesting depth… any violation → <b>HALT</b>, pointing to the spot.</p>
+      <div class="row"><span class="k sk">🛠 Skill</span><span class="chips">
+        <span class="chip sk"><b>headset-gen-subpage</b>　<span style="font-family:var(--mono)">validate-manifest.py (subpage) · validate-home.py (home) · archetypes.py</span></span>
+        <span class="chip sk"><b>shared-gen-walkthrough</b>　<span style="font-family:var(--mono)">validate-walkthrough.py</span></span>
+      </span></div>
+      <div class="row"><span class="k in">Reads</span><span class="chips"><span class="chip">home.manifest (home)</span><span class="chip">subpage *.manifest</span><span class="chip">walkthrough.manifest</span></span></div>
+      <div class="row"><span class="k out">Outputs</span><span class="chips"><span class="chip out">pass ✓ / HALT (with offending item)</span></span></div>
+    </div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <!-- Loop zone wraps Stage 3, 4, and the decision -->
+  <div class="loopzone">
+    <div class="retrail"></div>
+    <div class="retlab">⚙ mechanical error → auto-fix manifest → re-render</div>
+
+    <!-- Stage 3 -->
+    <div class="stage" style="--c:var(--mech)">
+      <div class="bar"></div>
+      <div class="body">
+        <div class="head"><span class="num">3</span><span class="name">Render</span><span class="tag">deterministic</span></div>
+        <p class="what">Copy component snippets / whole-card snapshots into the page frame per the manifest, <b>fill in values, assemble the page</b> — zero inference, zero hand-writing; <b>same input always produces the same HTML</b>.</p>
+        <div class="row"><span class="k sk">🛠 Skill</span><span class="chips">
+          <span class="chip sk"><b>headset-gen-subpage</b> (<span style="font-family:var(--mono)">render-model.py</span> orchestrates → render-home / render-subpage / render-content)</span>
+          <span class="chip sk"><b>headset-gen-homepage</b> (home frame)</span>
+          <span class="chip sk"><b>headset-function</b> (function-frame shell)</span>
+          <span class="chip sk"><b>headset-shared</b> (toggle/slider/segmented… components · icons · connection blocks)</span>
+          <span class="chip sk"><b>shared-gen-walkthrough</b> (render-walkthrough.py)</span>
+        </span></div>
+        <div class="row"><span class="k in">Reads</span><span class="chips">
+          <span class="chip">*.manifest</span><span class="chip">headset-shared/components</span><span class="chip">headset-function/templates</span><span class="chip">whole-card snapshots (eq-audio · promotion-download…)</span><span class="chip">headset.css · tokens.css</span>
+        </span></div>
+        <div class="row"><span class="k out">Outputs</span><span class="chips">
+          <span class="chip out">index.html</span><span class="chip out">&lt;feature&gt;.html ×N</span><span class="chip out">walkthrough.html</span>
+        </span></div>
+      </div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <!-- Stage 4 -->
+    <div class="stage" style="--c:var(--mech)">
+      <div class="bar"></div>
+      <div class="body">
+        <div class="head"><span class="num">4</span><span class="name">Verify (all-model gate)</span><span class="tag">mechanical · pre-commit + CI</span></div>
+        <p class="what">Run the full mechanical check on every model: <b>drift</b> (disk HTML must == renderer output — catches hand-edited output) · CSS classes must really exist · requirements coverage (features / device identity) · coverage atoms compared row by row. Wired into git pre-commit + CI; <b>nothing ships unless green</b>.</p>
+        <div class="row"><span class="k sk">🛠 Skill</span><span class="chips">
+          <span class="chip sk"><b>headset-gen-subpage</b> (<span style="font-family:var(--mono)">verify-all.sh</span> orchestrates → verify-model · check-css-classes · check-requirements-coverage · check-coverage-atoms)</span>
+        </span></div>
+        <div class="row"><span class="k in">Reads</span><span class="chips">
+          <span class="chip">rendered *.html</span><span class="chip">*.manifest</span><span class="chip">requirements.md</span><span class="chip">coverage.md</span><span class="chip">CSS</span>
+        </span></div>
+        <div class="row"><span class="k out">Outputs</span><span class="chips"><span class="chip out">pass ✓ / fail (names which model · which check)</span></span></div>
+      </div>
+    </div>
+    <div class="arrow">↓ <span class="lab">on failure → branch</span></div>
+
+    <!-- Self-correction decision -->
+    <div class="split">
+      <div class="branch auto">
+        <b>⚙ Mechanical error → auto-fix</b>
+        <p>Unknown key · wrong control · drift · missing CSS class… auto-fix the <b>manifest source</b>, re-render, loop back to ③/④ until green.</p>
+        <span class="mini">headset-gen-subpage · regen.sh (AUTOFIX) ↺</span>
+      </div>
+      <div class="branch human">
+        <b>⚠ Semantic error → escalate</b>
+        <p>Atom ↔ prose mismatch · genuine ambiguity (e.g. a dropped option) · independent-review doubt — the machine <b>won't guess intent</b>; it stops for a human to decide.</p>
+        <span class="mini" style="color:var(--smart);background:color-mix(in srgb,var(--smart) 8%,#fff);border-color:color-mix(in srgb,var(--smart) 35%,var(--line))">ESCALATE → 👤 human</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓ <span class="lab">once green</span></div>
+  <div class="node end">✅ Final output: a shippable set of HTML
+    <small>index.html　·　each feature subpage　·　walkthrough.html</small>
+  </div>
+
+  <!-- Skills overview -->
+  <div class="skills">
+    <h2>🛠 The system’s 5 skills</h2>
+    <p class="sub">Every step in the pipeline is carried by these skills — the system’s toolbox.</p>
+    <div class="sk-item"><span class="sk-name">headset-gen-subpage</span><span class="sk-role"><b>The engine.</b> The subpage framework plus all validate / render / verify / coverage / regen scripts live here.</span></div>
+    <div class="sk-item"><span class="sk-name">headset-gen-homepage</span><span class="sk-role">The home page’s (device identity · battery · connection · feature entries) <b>schema contract + frame templates</b>; it contains only SKILL.md + templates — the home page’s <b>validation (validate-home.py) and rendering (render-home.py) actually live in the headset-gen-subpage engine</b>.</span></div>
+    <div class="sk-item"><span class="sk-name">headset-function</span><span class="sk-role">The function-card shell (function-frame); assembles unknown functions on the spot and, once reused, settles them into a snapshot.</span></div>
+    <div class="sk-item"><span class="sk-name">headset-shared</span><span class="sk-role">Reusable component snippets (toggle / slider / segmented / dropdown / preset-grid…), icons, connection blocks, CSS.</span></div>
+    <div class="sk-item"><span class="sk-name">shared-gen-walkthrough</span><span class="sk-role">Schema validation and rendering for the onboarding walkthrough.</span></div>
+  </div>
+
+  <p class="foot">manifest = single source of truth　·　output is fully regenerable from the manifest, hand-edits forbidden　·　a human is needed only when intent must be guessed</p>
+</div>
+</body>
+</html>

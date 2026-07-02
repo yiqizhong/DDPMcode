@@ -133,6 +133,42 @@ Mechanism detail (markup, CSS classes): `.agents/skills/headset-shared/component
 Schema + the mechanical HALT gate: `.agents/skills/headset-gen-subpage/SKILL.md`
 (`validate-manifest.py`).
 
+**A card whose sole top-level control is one on/off — the master/member fork (D30).** When a
+function card has exactly one top-level component and it is a `toggle`, decide which of two
+*equally legal* shapes the card is, because the choice is carried entirely by whether the toggle
+has a `label`:
+
+- **Single-feature card → master switch.** The card title *is* the control's name (the on/off
+  belongs to the function itself). Author the toggle with **NO `label`** — the switch is hoisted
+  onto the title row, and any modes go in its `dependents` below. (e.g. `Audio Guidance`,
+  `Auto Off`, `Volume Adjustment Tone`.)
+- **Group card → named member.** The card title is a *category* and the toggle is one distinctly
+  named feature inside it. Give the toggle a **`label` that does NOT restate the title**.
+  (e.g. `Collaboration` → `Mic Noise Canceling`.)
+
+A master switch should not carry a `label` that merely re-words its own title (`Volume Tone` under
+`Volume Adjustment Tone`) — it renders as an orphan body row instead of the title-row switch. But
+master-vs-member is a **semantic** call the requirement decides, not something string math settles,
+so it is **not hard-blocked** (D31). Two tiers:
+
+- **Exact `label == title`** is an unambiguous duplicate → `validate-manifest.py` HALTs (D24a).
+- **Restatement** (label word-set ⊆ title word-set, e.g. `Volume Tone` ⊆ `Volume Adjustment Tone`,
+  but not an exact dup) is only a *suspicion* → a **non-blocking ADVISORY**. The build completes and
+  the flag is surfaced in the end-of-run REVIEW FLAGS summary (`verify-all.sh`) for review. (The
+  reverse — a label that *expands* the title, e.g. `Enable Dell Audio Promotion` under `Dell Audio
+  Promotion` — is the normal "Enable <feature>" idiom and is not flagged.)
+
+**Authoring recheck (tier 2, do this at authoring time, before finalizing the manifest).** When you
+are about to write a sole-toggle field and its `label` would restate the card title, STOP and
+re-read that function's requirement clause: if the on/off IS the whole function, drop the label
+(master switch); if it names a genuinely distinct feature, keep it (member). Do this reconsideration
+**at most once per field** (read B — decide once, do not loop). If you still cannot decide, leave it
+as written; it will be flagged, not blocked. Resolve at the source (the manifest), never by editing
+generated HTML (D19). This loop is also automated: `.agents/skills/headset-gen-subpage/author-recheck.py
+<manifest> <requirements>` runs the validate → consult-LLM-once-per-field → apply (MASTER drops the
+label) → re-validate cycle for you at authoring time; it edits the manifest before render, so the
+renderer stays LLM-free.
+
 Segmented vs preset-grid details live in `.agents/skills/headset-shared/components/README.md`;
 do not duplicate that full rule here.
 

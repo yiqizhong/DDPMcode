@@ -17,6 +17,12 @@ CHECK_REQUIREMENTS_COVERAGE="$HERE/check-requirements-coverage.py"
 CHECK_COVERAGE_ATOMS="$HERE/check-coverage-atoms.py"
 
 FAILURES=0
+# Advisories are non-blocking review flags (e.g. a sole-toggle label that looks like it
+# restates its card title — the master/member call the requirement-reader must make; D31).
+# They never fail verification; we collect them here and print one consolidated reminder at
+# the end so the build completes and nothing is silently swallowed.
+ADVISORY_LOG="$(mktemp)"
+trap 'rm -f "$ADVISORY_LOG"' EXIT
 
 record_failure() {
   FAILURES=$((FAILURES + 1))
@@ -27,8 +33,13 @@ run_check() {
   shift
   echo "== $label =="
   echo "+ $*"
-  "$@"
+  # Capture combined output so we can both pass it through AND harvest ADVISORY lines for the
+  # end-of-run summary. No `set -e`, so command substitution preserves the real exit code.
+  local out
+  out="$("$@" 2>&1)"
   local status=$?
+  [ -n "$out" ] && printf '%s\n' "$out"
+  printf '%s\n' "$out" | grep -a '^ADVISORY:' >>"$ADVISORY_LOG" 2>/dev/null || true
   if [ "$status" -eq 0 ]; then
     echo "OK: $label"
   else
@@ -170,6 +181,17 @@ for model_dir in "${MODELS[@]}"; do
     run_check "$model generated HTML drift" python3 "$VERIFY_MODEL" "$model"
   fi
 done
+
+if [ -s "$ADVISORY_LOG" ]; then
+  advisory_count=$(wc -l <"$ADVISORY_LOG" | tr -d ' ')
+  echo "================ REVIEW FLAGS: $advisory_count advisory(ies), non-blocking ================"
+  echo "Build/verify completed. These spots were flagged for the requirement-reader (the"
+  echo "authoring LLM, or you) to eyeball — they do NOT fail verification:"
+  echo
+  awk '{ printf "  %d. %s\n", NR, $0 }' "$ADVISORY_LOG"
+  echo "======================================================================================"
+  echo
+fi
 
 if [ "$FAILURES" -gt 0 ]; then
   echo "VERIFY-ALL FAILED: $FAILURES failing check(s)" >&2

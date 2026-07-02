@@ -71,6 +71,23 @@ def keyword_matches(text, keyword):
     return re.search(pattern, str(text).lower()) is not None
 
 
+def restates_title(label, title):
+    """True when the label merely RESTATES the card title — the label's word set is a
+    subset of the title's (exact match or an abbreviation like "Volume Tone" ⊆ "Volume
+    Adjustment Tone"). This is the signature of a card master switch mis-authored as a
+    labeled member row: the title already names the control, so the label just re-words
+    it. Direction matters: only label ⊆ title counts. The reverse (title ⊆ label, e.g.
+    "Enable Dell Audio Promotion" under "Dell Audio Promotion") is the established
+    "Enable <feature>" toggle idiom, not a restatement, so it stays legal. Genuinely
+    distinct grouped members (e.g. "Mic Noise Canceling" under "Collaboration") share no
+    words and return False."""
+    lt = set(re.findall(r"[a-z0-9]+", str(label).lower()))
+    tt = set(re.findall(r"[a-z0-9]+", str(title).lower()))
+    if not lt or not tt:
+        return False
+    return lt <= tt
+
+
 # ---- validation ----
 
 class V:
@@ -199,10 +216,31 @@ class V:
         if label is not None and card_title is not None:
             label_norm = str(label).strip().lower()
             title_norm = str(card_title).strip().lower()
+            # A sole top-level toggle is the master/member fork (D30): the card may be a
+            # single-feature card whose title IS the switch's name (no label → master switch
+            # on the title row) OR a group card with one named member (a label distinct from
+            # the title). Which one is a SEMANTIC call the requirement decides, not something
+            # string math can settle — so we do NOT hard-block it (D31). Two tiers:
+            #   • exact `label == title` — an unambiguous structural duplicate (D24a); no
+            #     legitimate reading, so it stays a hard error.
+            #   • label RESTATES the title (word-subset, e.g. "Volume Tone" ⊆ "Volume
+            #     Adjustment Tone") but is not an exact dup — a heuristic *suspicion* that the
+            #     author meant a master switch but wrote it in member form. It is only a proxy
+            #     for a semantic judgment (and would false-flag a legit member whose name
+            #     happens to sub-set the title), so it is a non-blocking ADVISORY: the build
+            #     completes, the flag is surfaced at the end for the requirement-reader (LLM at
+            #     authoring time, or a human) to decide. Scoped to the sole toggle.
             if label_norm and title_norm and label_norm == title_norm:
                 self.err(
                     where,
                     "redundant `label` equals card title — omit it; the card title is the label",
+                )
+            elif arch == "toggle" and top_sole and restates_title(label_norm, title_norm):
+                self.advisory(
+                    "ADVISORY: %s: sole toggle `label` %r looks like it restates the card "
+                    "title %r — if the on/off IS the whole function, drop the label so it "
+                    "renders as the card's master switch; keep it only if this is a distinct "
+                    "grouped feature. Flagged for review; not blocking." % (where, label, card_title)
                 )
         if not top_sole and not sc.get("label"):
             if spec["width"] == "compact":

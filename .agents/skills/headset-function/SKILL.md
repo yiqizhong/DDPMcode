@@ -6,6 +6,13 @@ argument-hint: <function-id>
 
 # headset-function
 
+> **This is a SPEC, not a manual procedure.** This card is assembled deterministically by
+> `render_function()` in `../headset-gen-subpage/render-content.py`, which runs automatically as
+> part of `python3 ../headset-gen-subpage/render-model.py <MODEL>`. The steps below document what
+> that code does — they are NOT instructions to hand-assemble HTML. Do not copy shells or snippets
+> by hand and do not invoke this as a separate skill at runtime: write a valid `functions[]` entry
+> in the sub-page manifest, then run the renderer. Editing the generated `.html` by hand is a bug.
+
 Builds one **function card** — a titled card that lives in a sub-page's Content Area, holding a
 vertical list of components (toggles, sliders, …). It is not tied to any specific function; it
 **assembles** a card from pre-written pieces (the card shell + component snippets), so an

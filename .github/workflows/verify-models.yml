@@ -13,3 +13,6 @@ jobs:
 
       - name: Verify generated headset models
         run: bash .agents/skills/headset-gen-subpage/verify-all.sh
+
+      - name: Run toolchain regression tests
+        run: bash .agents/skills/headset-gen-subpage/run-tests.sh

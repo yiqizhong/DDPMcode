@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Deterministic Phase-3 home-page renderer for headset model pages."""
 
-import html
 import importlib.util
 import os
 import re
@@ -18,10 +17,6 @@ FEATURE_BUTTON = os.path.join(SHARED_DIR, "feature-button.html")
 FEATURE_ICON_DIR = os.path.join(SHARED_DIR, "icons")
 
 
-class RenderHalt(Exception):
-    pass
-
-
 def load_module(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
@@ -29,25 +24,18 @@ def load_module(name, path):
     return module
 
 
+_lib = load_module("render_lib", os.path.join(HERE, "render-lib.py"))
+RenderHalt = _lib.RenderHalt
+read_text = _lib.read_text
+text = _lib.text
+attr = _lib.attr
+halt = _lib.halt
+rewrite_css_paths = _lib.rewrite_css_paths
+find_tag_end = _lib.find_tag_end
+replace_slot_contents = _lib.replace_slot_contents
+
 validate_home = load_module("validate_home", os.path.join(HERE, "validate-home.py"))
 render_content = load_module("render_content", os.path.join(HERE, "render-content.py"))
-
-
-def read_text(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
-
-
-def text(value):
-    return html.escape(str(value), quote=False)
-
-
-def attr(value):
-    return html.escape(str(value), quote=True)
-
-
-def halt(message):
-    raise RenderHalt(message)
 
 
 def parse_and_validate_home(path):
@@ -65,43 +53,6 @@ def parse_and_validate_home(path):
         lines.extend("  - %s" % error for error in gate.errors)
         halt("\n".join(lines))
     return manifest
-
-
-def rewrite_css_paths(markup):
-    return (
-        markup
-        .replace('href="../../../../shared/tokens.css"', 'href="../../../shared/tokens.css"')
-        .replace('href="../../../../shared/shell.css"', 'href="../../../shared/shell.css"')
-        .replace('href="../../../../headset/headset.css"', 'href="../../headset.css"')
-    )
-
-
-def find_tag_end(markup, start):
-    quote = None
-    i = start
-    while i < len(markup):
-        ch = markup[i]
-        if quote:
-            if ch == quote:
-                quote = None
-        elif ch in ("'", '"'):
-            quote = ch
-        elif ch == ">":
-            return i
-        i += 1
-    halt("unterminated HTML tag")
-
-
-def replace_slot_contents(markup, slot_name, content):
-    pos = markup.find('data-slot="%s"' % slot_name)
-    if pos == -1:
-        halt("frame missing data-slot=%s" % slot_name)
-    tag_start = markup.rfind("<", 0, pos)
-    tag_end = find_tag_end(markup, tag_start)
-    close_start = markup.find("</div>", tag_end)
-    if close_start == -1:
-        halt("frame slot %s has no closing div" % slot_name)
-    return markup[:tag_end + 1] + "\n" + content + "\n" + markup[close_start:]
 
 
 def set_data_property_text(markup, property_name, value):

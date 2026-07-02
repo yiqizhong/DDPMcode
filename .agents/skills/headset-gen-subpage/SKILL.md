@@ -305,3 +305,4 @@ AUTOFIX edits the MANIFEST (or CSS/snippet), never the rendered HTML (D19). Afte
 - **Did you actually RUN the renderer?** `headset/models/$1/$2.html` must exist on disk now — not just the manifest. If you only wrote the manifest, the task is NOT done: run `render-model.py $1`.
 - After generation, run `python3 .agents/skills/headset-gen-subpage/verify-model.py $1`; non-zero means output drifted from the manifest (hand-edited or stale) — regenerate via `render-model.py`, never hand-edit.
 - Back link to `index.html` present? Nothing fabricated? `data-slot`/`data-instruction`/`data-property` stripped?
+- Debugging which repo files a render actually touched? `python3 .agents/skills/headset-gen-subpage/trace-render.py <MODEL>` re-renders the model and writes `headset/models/<MODEL>/READ-LOG.md` with every file read.

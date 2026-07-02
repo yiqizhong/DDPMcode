@@ -53,13 +53,19 @@ Three properties fall out of this table:
    presentation class names; two of them don't even own their outer wrapper.
 3. **Leaky** — for `dropdown` and the selectors, the outer markup is generated in Python, so a reskin
    that changes the wrapper structure forces a `render-content.py` edit, not just a snippet edit.
-4. **Silent on breakage** — a snippet that violates the contract (e.g. a `dropdown` with no repeatable
-   `<li class="dropdown-item">`) does NOT HALT. `render_dropdown` / `render_selector` call `lane2()`
-   (render-content.py:94), which only appends to a `FALLBACKS` list and emits a `<!-- LLM-FALLBACK -->`
-   comment. That list is printed only by the CLI `main()` (render-content.py:509–513); the real pipeline
-   calls `render_content.render()` directly (render-subpage.py:233) and catches only `RenderHalt`. So a
-   broken import renders a fallback comment, passes `validate-manifest.py` (which checks the manifest,
-   not the snippet), and is **byte-stable forever**. This is the most important gap for imports.
+4. **~~Silent on breakage~~ — CLOSED.** A snippet that violates the contract (e.g. a `dropdown` with no
+   repeatable `<li class="dropdown-item">`) used to NOT halt: `lane2()` only appended to a `FALLBACKS`
+   list and emitted a `<!-- LLM-FALLBACK -->` comment, and the composed pipeline (`render-subpage.py`
+   calling `render_content.render_page_content()`) never checked it, so a broken import rendered a
+   fallback comment, passed `validate-manifest.py` (which checks the manifest, not the snippet), and was
+   byte-stable forever. This is now fixed: `render_page_content()` HALTs the composed render paths on any
+   non-empty `FALLBACKS`, the standalone `render-content.py` CLI exits 1 on the same condition, and
+   `validate-manifest.py` additionally checks that every archetype used in a manifest has a
+   `headset-shared/components/<archetype>.html` snippet on disk (catches a deleted snippet at the
+   validation gate, before render time). A *structurally corrupted-but-present* snippet (the scenario
+   this plan calls out — e.g. a `dropdown` missing its repeatable `<li>`) is still only caught at render
+   time, not by the validator (the validator only checks file existence, not snippet internals) — that
+   residual gap is unchanged by this fix and is still relevant to the import-scalability problem below.
 
 ### 1.2 Other artifacts an import may touch
 

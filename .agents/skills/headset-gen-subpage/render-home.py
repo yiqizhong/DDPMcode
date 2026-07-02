@@ -3,7 +3,6 @@
 
 import importlib.util
 import os
-import re
 import sys
 
 
@@ -27,12 +26,16 @@ def load_module(name, path):
 _lib = load_module("render_lib", os.path.join(HERE, "render-lib.py"))
 RenderHalt = _lib.RenderHalt
 read_text = _lib.read_text
-text = _lib.text
-attr = _lib.attr
 halt = _lib.halt
 rewrite_css_paths = _lib.rewrite_css_paths
 find_tag_end = _lib.find_tag_end
 replace_slot_contents = _lib.replace_slot_contents
+set_data_property_text = _lib.set_data_property_text
+set_data_property_html = _lib.set_data_property_html
+remove_data_property_element = _lib.remove_data_property_element
+fill_property_if_present = _lib.fill_property_if_present
+mode_is_paired = _lib.mode_is_paired
+render_device_image = _lib.render_device_image
 
 validate_home = load_module("validate_home", os.path.join(HERE, "validate-home.py"))
 render_content = load_module("render_content", os.path.join(HERE, "render-content.py"))
@@ -55,108 +58,23 @@ def parse_and_validate_home(path):
     return manifest
 
 
-def set_data_property_text(markup, property_name, value):
-    pattern = (
-        r'(<(?P<tag>[a-zA-Z][\w:-]*)\b(?=[^>]*data-property="%s")[^>]*>)'
-        r".*?"
-        r"(</(?P=tag)>)"
-    ) % re.escape(property_name)
-    replacement = lambda match: match.group(1) + text(value) + match.group(3)
-    updated, count = re.subn(pattern, replacement, markup, flags=re.S)
-    if count == 0:
-        halt("frame missing data-property=%s" % property_name)
-    return updated
-
-
-def set_data_property_html(markup, property_name, value):
-    pattern = (
-        r'(<(?P<tag>[a-zA-Z][\w:-]*)\b(?=[^>]*data-property="%s")[^>]*>)'
-        r".*?"
-        r"(</(?P=tag)>)"
-    ) % re.escape(property_name)
-    updated, count = re.subn(
-        pattern,
-        lambda match: match.group(1) + value + match.group(3),
-        markup,
-        count=1,
-        flags=re.S,
-    )
-    if count == 0:
-        halt("frame missing data-property=%s" % property_name)
-    return updated
-
-
-def remove_data_property_element(markup, property_name):
-    pattern = (
-        r'\n?[ \t]*<(?P<tag>[a-zA-Z][\w:-]*)\b'
-        r'(?=[^>]*data-property="%s")[^>]*>.*?</(?P=tag)>'
-    ) % re.escape(property_name)
-    return re.sub(pattern, "", markup, count=1, flags=re.S)
-
-
-def fill_property_if_present(markup, property_name, value):
-    if 'data-property="%s"' % property_name not in markup:
-        return markup
-    return set_data_property_text(markup, property_name, value)
-
-
-def mode_is_paired(raw_connection_snippet):
-    lower = raw_connection_snippet.lower()
-    return "paired mode" in lower and "does not pair" not in lower
-
-
 def render_connection(home):
-    connection_type = home.get("connectionType")
-    path = os.path.join(CONNECTION_DIR, "%s.html" % connection_type)
-    if not os.path.exists(path):
-        halt("connection snippet does not exist: %s" % path)
-
-    raw = read_text(path)
-    markup = render_content.strip_html_comments(raw)
-    if 'data-property="battery-level"' in markup:
-        battery = "%s%%" % home["battery"] if "battery" in home else "—%"
-        markup = fill_property_if_present(markup, "battery-level", battery)
-
-    parts = [markup.strip()]
-    if mode_is_paired(raw):
-        if not os.path.exists(UNPAIR):
-            halt("unpair snippet does not exist: %s" % UNPAIR)
-        parts.append(render_content.strip_html_comments(read_text(UNPAIR)).strip())
-    return "\n".join(parts)
+    return _lib.render_connection(
+        home, CONNECTION_DIR, render_content.strip_html_comments,
+        include_unpair=True, unpair_path=UNPAIR,
+    )
 
 
 def render_feature_button(feature):
-    icon_id = feature.get("icon")
-    icon_path = os.path.join(FEATURE_ICON_DIR, "%s.svg" % icon_id)
-    if not icon_id or not os.path.exists(icon_path):
-        halt("missing/unknown feature icon: %s" % icon_id)
-
-    markup = render_content.strip_html_comments(read_text(FEATURE_BUTTON))
-    markup = markup.replace("{label}", text(feature["label"]))
-    markup = markup.replace("{link}", attr(feature["link"]))
-    icon = read_text(icon_path).strip()
-    markup, count = re.subn(
-        r'(<div class="feature-icon">).*?(</div>)',
-        lambda match: match.group(1) + icon + match.group(2),
-        markup,
-        count=1,
-        flags=re.S,
+    return _lib.render_feature_button(
+        feature, FEATURE_BUTTON, FEATURE_ICON_DIR, render_content.strip_html_comments,
+        collapsed=False,
     )
-    if count == 0:
-        halt("feature-button snippet missing .feature-icon")
-    return markup.strip()
 
 
 def render_feature_zone(home):
     features = home.get("features") or []
     return "\n".join(render_feature_button(feature) for feature in features)
-
-
-def render_device_image(home):
-    image = home.get("image")
-    if not image or image == "none":
-        return ""
-    return '<img src="%s" alt="%s">' % (attr(image), attr(home["marketing-name"]))
 
 
 def render_page(model):

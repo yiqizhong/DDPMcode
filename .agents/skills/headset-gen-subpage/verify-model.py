@@ -125,7 +125,60 @@ def expected_pages(model, home):
     return pages
 
 
-def verify_model(model):
+def expected_manifests(model, home):
+    """{home.manifest, walkthrough.manifest (optional), each feature-linked <stem>.manifest} —
+    the manifest set reachable from home.manifest. Any other top-level *.manifest in the model
+    dir is an orphan: not validated, not rendered, not reported by anything (FIX 4)."""
+    names = {"home.manifest"}
+    for n, feature in enumerate(home.get("features") or []):
+        link = feature.get("link") if isinstance(feature, dict) else None
+        subpage = render_model.subpage_from_link(link, n)
+        names.add("%s.manifest" % subpage)
+    if os.path.exists(os.path.join(MODEL_ROOT, model, "walkthrough.manifest")):
+        names.add("walkthrough.manifest")
+    return names
+
+
+def check_orphan_manifests(model, home, offending):
+    """Any top-level *.manifest in the model dir not reachable from home.manifest.features[]
+    (and not home.manifest / walkthrough.manifest itself) is orphaned: never validated,
+    rendered, or reported. Runs independent of whether the model's HTML is on disk / committed,
+    so it covers gitignored-HTML fixture models too."""
+    model_dir = os.path.join(MODEL_ROOT, model)
+    expected = expected_manifests(model, home)
+    ok = True
+    for name in sorted(os.listdir(model_dir)):
+        path = os.path.join(model_dir, name)
+        if not os.path.isfile(path) or not name.endswith(".manifest"):
+            continue
+        if name not in expected:
+            print("%s: DRIFT orphan manifest — not reachable from home.features" % name)
+            ok = False
+            offending.add(name)
+    return ok
+
+
+def check_stray_html(model, pages, offending):
+    """Any top-level *.html in the model dir that isn't one of the expected rendered pages
+    (index.html, each feature sub-page, walkthrough.html when applicable) is a stray,
+    hand-written file — the "never hand-write HTML" rule had no mechanical enforcement for
+    new files until this check. Only meaningful where HTML is expected on disk (the caller
+    skips this for gitignored-HTML fixture models, same as the byte-drift check)."""
+    model_dir = os.path.join(MODEL_ROOT, model)
+    expected = {page for page, _module, _argv in pages}
+    ok = True
+    for name in sorted(os.listdir(model_dir)):
+        path = os.path.join(model_dir, name)
+        if not os.path.isfile(path) or not name.endswith(".html"):
+            continue
+        if name not in expected:
+            print("%s: DRIFT stray page — not produced by the pipeline" % name)
+            ok = False
+            offending.add(name)
+    return ok
+
+
+def verify_model(model, manifests_only=False):
     model_dir = os.path.join(MODEL_ROOT, model)
     if not os.path.isdir(model_dir):
         return halt("model folder does not exist: %s" % rel(model_dir))
@@ -137,8 +190,18 @@ def verify_model(model):
     except (ValueError, render_model.RenderHalt) as exc:
         return halt(str(exc))
 
-    ok = True
     offending = set()
+    ok = check_orphan_manifests(model, home, offending)
+
+    if manifests_only:
+        if not ok:
+            print("DRIFT: offending manifest(s): %s" % ", ".join(sorted(offending)), file=sys.stderr)
+            return 1
+        return 0
+
+    if not check_stray_html(model, pages, offending):
+        ok = False
+
     for page, module, argv in pages:
         path = os.path.join(model_dir, page)
         expected, error = rendered_bytes(page, module, argv)
@@ -167,10 +230,15 @@ def verify_model(model):
 
 
 def main(argv):
-    if len(argv) != 2:
-        print("usage: verify-model.py <MODEL>", file=sys.stderr)
+    manifests_only = False
+    args = argv[1:]
+    if "--manifests-only" in args:
+        manifests_only = True
+        args = [a for a in args if a != "--manifests-only"]
+    if len(args) != 1:
+        print("usage: verify-model.py <MODEL> [--manifests-only]", file=sys.stderr)
         return 2
-    return verify_model(argv[1])
+    return verify_model(args[0], manifests_only=manifests_only)
 
 
 if __name__ == "__main__":

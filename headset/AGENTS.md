@@ -191,19 +191,31 @@ Reviewer checklist:
   prop (`slider` min/max/value, `dropdown` options), a missing `label` where one renders (non-sole
   compact rows and non-sole full-width controls — the BUG-002 class), `reveals` on a `toggle` (use `dependents` for
   toggle grey-out), `dependents` on a non-toggle, a `reveals` key matching no option, >6 selector
-  options, a missing/duplicate option value or label, >1 option `selected`, and a `function` slot with
-  no snapshot.
+  options, a missing/duplicate option value or label, >1 option `selected`, a `function` slot with
+  no snapshot, and a component `archetype` with no `headset-shared/components/<archetype>.html`
+  snippet.
+
+- **`verify-model.py <MODEL>` also enforces two mechanical no-orphan / no-stray rules.** An orphan
+  manifest — a `*.manifest` in the model folder that no `home.manifest` feature `link`s to — is
+  never validated, rendered, or reported by anything else, so `verify-model.py` fails it (run with
+  `--manifests-only` to check this without requiring rendered HTML on disk, e.g. for gitignored dev
+  fixtures). A stray page — a hand-written `*.html` in the model folder that the pipeline did not
+  produce — fails the same way, giving "never hand-write HTML" mechanical enforcement for new files,
+  not just drift on expected ones.
 
 - **The deliverable is the rendered HTML on disk, not the manifest — RUN the renderer.** Writing the
   `.manifest` is the halfway point; the task is complete ONLY when
   `python3 .agents/skills/headset-gen-subpage/render-model.py <MODEL>` has been RUN, the page files
-  (`index.html` + every sub-page `.html`) exist in `headset/models/<MODEL>/`, and `verify-model.py`
-  passes. Stopping after the manifest and waiting to be asked for the HTML is an INCOMPLETE task, not a
+  (`index.html` + every sub-page `.html` + `walkthrough.html` when `walkthrough.manifest` exists —
+  render-model.py renders all of it in one run) exist in `headset/models/<MODEL>/`, and
+  `verify-model.py` passes. Stopping after the manifest and waiting to be asked for the HTML is an INCOMPLETE task, not a
   handoff — a manifest with no rendered page is a violation, not a TODO. Run the executor as the final
   step, every time.
 
 - **Slots:** single value → `data-property="<name>"`; region (variant/list) → `data-slot` +
   `data-instruction`. Names map 1:1 to manifest fields. Fill by name, never by guessing.
+  **Constraint:** a `data-slot` element in a frame template MUST be a leaf (no nested `<div>`
+  inside it) — the filler locates the FIRST `</div>` after the slot's open tag as its close.
 - **No hiding for cross-model variant axes:** connection blocks, function lists, and other
   generation-time product/model choices are still presence/absence. Never `display`-hide a
   not-selected variant or pre-embed-and-hide alternate product variants.

@@ -19,10 +19,13 @@ Invoke: `@skills:headset-gen-subpage <MODEL> <SUBPAGE>`
 ## Deterministic executor (REQUIRED — the page is not done until this runs)
 
 The canonical, reproducible generation path is the render scripts:
-`python3 .agents/skills/headset-gen-subpage/render-model.py <MODEL>` builds the whole model, or
-`python3 .agents/skills/headset-gen-subpage/render-subpage.py <MODEL> <SUBPAGE>` renders this
-single sub-page. The Procedure below is the human-readable SPEC those scripts implement and must
-stay in lock-step with them.
+`python3 .agents/skills/headset-gen-subpage/render-model.py <MODEL>` builds the whole model —
+`index.html`, every feature sub-page, AND `walkthrough.html` when
+`headset/models/<MODEL>/walkthrough.manifest` exists (it delegates to
+`shared-gen-walkthrough/render-walkthrough.py` internally; no separate walkthrough render step
+is needed) — or `python3 .agents/skills/headset-gen-subpage/render-subpage.py <MODEL> <SUBPAGE>`
+renders just one sub-page. The Procedure below is the human-readable SPEC those scripts implement
+and must stay in lock-step with them.
 
 **Authoring the `.manifest` is NOT the deliverable — the rendered `.html` on disk is.** Writing the
 manifest is the halfway point: you MUST then RUN the executor so that
@@ -303,6 +306,6 @@ AUTOFIX edits the MANIFEST (or CSS/snippet), never the rendered HTML (D19). Afte
   count) — no hand-embedded panel, no added JS?
 - Output reproducible: would re-running this skill on the manifest produce this exact HTML? (No off-pipeline edits.)
 - **Did you actually RUN the renderer?** `headset/models/$1/$2.html` must exist on disk now — not just the manifest. If you only wrote the manifest, the task is NOT done: run `render-model.py $1`.
-- After generation, run `python3 .agents/skills/headset-gen-subpage/verify-model.py $1`; non-zero means output drifted from the manifest (hand-edited or stale) — regenerate via `render-model.py`, never hand-edit.
+- After generation, run `python3 .agents/skills/headset-gen-subpage/verify-model.py $1`; non-zero means output drifted from the manifest (hand-edited or stale) — regenerate via `render-model.py`, never hand-edit. It also flags an orphan manifest (a `*.manifest` in the model folder not linked from any `home.manifest` feature — pass `--manifests-only` to check this without requiring rendered HTML on disk) and a stray page (a `*.html` in the model folder that the pipeline did not produce).
 - Back link to `index.html` present? Nothing fabricated? `data-slot`/`data-instruction`/`data-property` stripped?
 - Debugging which repo files a render actually touched? `python3 .agents/skills/headset-gen-subpage/trace-render.py <MODEL>` re-renders the model and writes `headset/models/<MODEL>/READ-LOG.md` with every file read.

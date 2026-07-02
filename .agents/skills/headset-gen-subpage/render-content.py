@@ -39,6 +39,11 @@ def _load_module(name, path):
 validator = _load_module("validate_manifest", os.path.join(HERE, "validate-manifest.py"))
 parse_manifest = validator.parse_manifest
 
+_lib = _load_module("render_lib", os.path.join(HERE, "render-lib.py"))
+find_tag_end = _lib.find_tag_end
+_lib_add_class_to_first = _lib.add_class_to_first
+_lib_set_data_property_text = _lib.set_data_property_text
+
 sys.path.insert(0, HERE)
 import archetypes as AR  # noqa: E402
 
@@ -103,15 +108,10 @@ def replace_placeholders(markup, values):
 
 
 def add_class_to_first(markup, existing_class, new_class):
-    pattern = r'class="([^"]*\b%s\b[^"]*)"' % re.escape(existing_class)
-
-    def repl(match):
-        classes = match.group(1).split()
-        if new_class not in classes:
-            classes.append(new_class)
-        return 'class="%s"' % " ".join(classes)
-
-    return re.sub(pattern, repl, markup, count=1)
+    try:
+        return _lib_add_class_to_first(markup, existing_class, new_class)
+    except _lib.RenderHalt as exc:
+        raise RenderHalt(str(exc))
 
 
 def add_checked_to_first_input(markup):
@@ -131,32 +131,17 @@ def fill_element_by_class(markup, class_name, content):
                   markup, count=1, flags=re.S)
 
 
-def find_tag_end(markup, start):
-    quote = None
-    i = start
-    while i < len(markup):
-        ch = markup[i]
-        if quote:
-            if ch == quote:
-                quote = None
-        elif ch in ("'", '"'):
-            quote = ch
-        elif ch == ">":
-            return i
-        i += 1
-    raise ValueError("unterminated tag")
-
-
 def replace_slot_contents(markup, slot_name, content):
-    pos = markup.find('data-slot="%s"' % slot_name)
-    if pos == -1:
+    """Fill a function-frame slot ("function-info" / "components"). These slots are a
+    template invariant of function-frame.html — a missing slot is a template regression,
+    so this HALTs (unified with render-lib.replace_slot_contents; render-content keeps its
+    own `"\n      "` closing indent for its call sites' existing output formatting)."""
+    if markup.find('data-slot="%s"' % slot_name) == -1:
         return markup
-    tag_start = markup.rfind("<", 0, pos)
-    tag_end = find_tag_end(markup, tag_start)
-    close_start = markup.find("</div>", tag_end)
-    if close_start == -1:
-        return markup
-    return markup[:tag_end + 1] + "\n" + content + "\n      " + markup[close_start:]
+    try:
+        return _lib.replace_slot_contents(markup, slot_name, content, closing_indent="\n      ")
+    except _lib.RenderHalt as exc:
+        raise RenderHalt(str(exc))
 
 
 def remove_slot_element(markup, slot_name):
@@ -172,13 +157,12 @@ def remove_slot_element(markup, slot_name):
 
 
 def set_data_property_text(markup, property_name, value):
-    pattern = (
-        r'(<(?P<tag>[a-zA-Z][\w:-]*)\b(?=[^>]*data-property="%s")[^>]*>)'
-        r".*?"
-        r"(</(?P=tag)>)"
-    ) % re.escape(property_name)
-    return re.sub(pattern, lambda m: m.group(1) + text(value) + m.group(3),
-                  markup, count=1, flags=re.S)
+    if 'data-property="%s"' % property_name not in markup:
+        return markup
+    try:
+        return _lib_set_data_property_text(markup, property_name, value)
+    except _lib.RenderHalt as exc:
+        raise RenderHalt(str(exc))
 
 
 def apply_snapshot_overrides(markup, function_entry):
@@ -601,10 +585,38 @@ def render_selector(component, archetype, control_id, path):
     ) % (container_class, "\n".join(segments), panels)
 
 
-def render(manifest_path):
-    manifest = parse_manifest(read_text(manifest_path))
+def render_functions(manifest):
+    """Render an already-parsed subpage manifest dict's `functions[]` into content-area HTML.
+
+    Resets the module-global FALLBACKS list first so state can't leak across pages within
+    one long-lived process (render-model.py renders many pages per process; each of
+    render-subpage.py / render-home.py loads its OWN render_content module instance via
+    importlib, so this only needs to guard against repeat calls within a single instance,
+    e.g. render-model.py calling render_subpage.render_page once per feature sub-page).
+    """
+    del FALLBACKS[:]
     return "\n".join(render_function(fn, "fn%d" % idx)
                      for idx, fn in enumerate(manifest.get("functions") or [], start=1))
+
+
+def render(manifest_path):
+    """Thin CLI wrapper: parse the manifest file, then render it. Prefer `render_functions`
+    when the manifest has already been parsed/validated (avoids re-parsing the same file)."""
+    manifest = parse_manifest(read_text(manifest_path))
+    return render_functions(manifest)
+
+
+def render_page_content(manifest):
+    """Composed-pipeline entry point (called by render-subpage.py / render-home.py): render,
+    then HALT if any lane-2 (LLM-fallback) marker fired. A fallback means a required snippet
+    or archetype was missing — a broken page must never be written with a silent placeholder
+    comment, so the composed render paths fail closed here instead of emitting exit 0."""
+    output = render_functions(manifest)
+    if FALLBACKS:
+        lines = ["lane-2 (LLM fallback) needed for %d item(s):" % len(FALLBACKS)]
+        lines.extend("  - %s" % item for item in FALLBACKS)
+        raise RenderHalt("\n".join(lines))
+    return output
 
 
 def main(argv):
@@ -612,14 +624,16 @@ def main(argv):
         print("usage: render-content.py <subpage.manifest>", file=sys.stderr)
         return 2
     try:
-        sys.stdout.write(render(argv[1]) + "\n")
+        output = render(argv[1])
     except RenderHalt as exc:
         print("HALT: %s" % exc, file=sys.stderr)
         return 1
+    sys.stdout.write(output + "\n")
     if FALLBACKS:
         print("LANE-2 (LLM fallback) needed for %d item(s):" % len(FALLBACKS), file=sys.stderr)
         for item in FALLBACKS:
             print("  - " + item, file=sys.stderr)
+        return 1
     return 0
 
 

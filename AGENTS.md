@@ -123,3 +123,8 @@ This is §9.7.4's "copy, don't create" — the structural defense against markup
   `shared-gen-walkthrough` (multi-step walkthrough / onboarding; styles in `shared/walkthrough.css`,
   per-model instances at `<category>/models/<MODEL>/walkthrough.manifest`). A deliberate, scoped
   exception to category isolation — only for genuine UX shells whose layout is not device-specific.
+- **`.agents/skills/shared-lib/`** — NOT a skill (no `SKILL.md`, same pattern as `headset-shared/`):
+  plain Python helpers shared by validators across categories, e.g. `manifest_parser.py` (the
+  minimal YAML-subset manifest parser). Category validators load it via the existing
+  importlib-by-path pattern. Dependency direction: category skill → shared-lib is fine; shared-lib
+  must never import a category module.

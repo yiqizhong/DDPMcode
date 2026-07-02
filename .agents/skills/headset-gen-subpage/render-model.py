@@ -24,6 +24,10 @@ def load_module(name, path):
 
 render_home = load_module("render_home", os.path.join(HERE, "render-home.py"))
 render_subpage = load_module("render_subpage", os.path.join(HERE, "render-subpage.py"))
+render_walkthrough = load_module(
+    "render_walkthrough",
+    os.path.join(HERE, "..", "shared-gen-walkthrough", "render-walkthrough.py"),
+)
 
 
 def halt(message):
@@ -85,6 +89,17 @@ def render_model(model):
         write_text(output_path, render_subpage.render_page(model, subpage))
         written.append(output_path)
 
+    # A model may also carry a cross-category walkthrough page (shared-gen-walkthrough).
+    # render-model.py is the whole-model executor (SKILL.md "Deterministic executor" /
+    # Definition-of-Done), so it renders walkthrough.html too when the manifest is present —
+    # an operator running just render-model.py + verify-model.py must not need a third,
+    # separately-remembered script for a model whose walkthrough.manifest changed.
+    walkthrough_manifest_path = os.path.join(model_dir, "walkthrough.manifest")
+    if os.path.exists(walkthrough_manifest_path):
+        walkthrough_output = os.path.join(model_dir, "walkthrough.html")
+        write_text(walkthrough_output, render_walkthrough.render_page("headset", model))
+        written.append(walkthrough_output)
+
     return written
 
 
@@ -101,6 +116,7 @@ def main(argv):
         render_home.render_content.RenderHalt,
         render_subpage.RenderHalt,
         render_subpage.render_content.RenderHalt,
+        render_walkthrough.RenderHalt,
     ) as exc:
         print("HALT: %s" % exc, file=sys.stderr)
         return 1

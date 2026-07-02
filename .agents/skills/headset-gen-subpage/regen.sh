@@ -6,7 +6,6 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../../.." && pwd)"
 MODELS_DIR="$ROOT/headset/models"
 RENDER_MODEL="$HERE/render-model.py"
-RENDER_WALKTHROUGH="$ROOT/.agents/skills/shared-gen-walkthrough/render-walkthrough.py"
 VERIFY_ALL="$HERE/verify-all.sh"
 
 FAILURES=0
@@ -72,21 +71,14 @@ for model_dir in "${MODELS[@]}"; do
   model="$(basename "$model_dir")"
   render_log="$TMPDIR/$model.render-model.log"
 
+  # render-model.py renders the whole model, including walkthrough.html when
+  # walkthrough.manifest is present — no separate walkthrough render step needed.
   if ! run_capture "$model render-model" "$render_log" python3 "$RENDER_MODEL" "$model"; then
     echo "REGEN HALT: render-model.py failed for model $model" >&2
     echo "Manifest needing upstream fix:" >&2
     manifest_hint "$model" "$render_log" | sed 's/^/  - /' >&2
     echo "Renderer output above is authoritative; fix the manifest source, then rerun regen.sh." >&2
     exit 1
-  fi
-
-  walkthrough_manifest="$model_dir/walkthrough.manifest"
-  if [ -f "$walkthrough_manifest" ]; then
-    walkthrough_log="$TMPDIR/$model.walkthrough.log"
-    if ! run_capture "$model walkthrough" "$walkthrough_log" \
-      python3 "$RENDER_WALKTHROUGH" headset "$model"; then
-      record_failure "$model walkthrough render failed: headset/models/$model/walkthrough.manifest"
-    fi
   fi
 done
 

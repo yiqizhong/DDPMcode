@@ -30,6 +30,26 @@ REGISTRY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates",
 sys.path.insert(0, REGISTRY)
 from keywords import SNAPSHOT_KEYWORDS
 
+# Every archetype's render path (render-content.py read_component) copies
+# headset-shared/components/<archetype>.html by filename == archetype. Mirrored here so a
+# deleted/renamed snippet is caught at the validation gate, not only as a lane-2 fallback
+# (silently-broken output) at render time.
+COMPONENT_DIR = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "headset-shared", "components")
+)
+
+# The minimal YAML-subset parser is shared across category + cross-category validators;
+# canonical copy lives in shared-lib (not a skill — same pattern as headset-shared/).
+SHARED_LIB = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "shared-lib")
+)
+import importlib.util as _ilu  # noqa: E402
+
+_spec = _ilu.spec_from_file_location("manifest_parser", os.path.join(SHARED_LIB, "manifest_parser.py"))
+_manifest_parser = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_manifest_parser)
+parse_manifest = _manifest_parser.parse_manifest
+
 SUBPAGE_ALLOWED_KEYS = frozenset(("title", "functions"))
 FUNCTION_ALLOWED_KEYS = frozenset((
     "id",
@@ -41,107 +61,6 @@ FUNCTION_ALLOWED_KEYS = frozenset((
 ))
 NESTED_CARD_SLOT_KEYS = frozenset(("title", "info", "components"))
 MAX_NESTED_CARD_DEPTH = 1
-
-
-# ---- minimal YAML-subset parser (block maps, block seqs, scalars, inline {flow}) ----
-
-def _scalar(tok):
-    tok = tok.strip()
-    if tok and tok[0] in "\"'" and tok[-1] == tok[0]:
-        return tok[1:-1]
-    low = tok.lower()
-    if low == "true":
-        return True
-    if low == "false":
-        return False
-    if re.fullmatch(r"-?\d+", tok):
-        return int(tok)
-    if re.fullmatch(r"-?(?:\d+\.\d*|\d*\.\d+)", tok):
-        return float(tok)
-    return tok
-
-
-def _parse_inline_map(text):
-    inner = text.strip()[1:-1]
-    out = {}
-    for part in inner.split(","):
-        part = part.strip()
-        if not part:
-            continue
-        if ":" not in part:
-            raise ValueError("bad inline mapping: " + text)
-        k, v = part.split(":", 1)
-        out[k.strip()] = _scalar(v)
-    return out
-
-
-def _strip_comment(line):
-    if line.lstrip().startswith("#"):
-        return ""
-    return re.sub(r"\s+#.*$", "", line).rstrip()
-
-
-def _tokenize(text):
-    rows = []
-    for raw in text.splitlines():
-        clean = _strip_comment(raw)
-        if not clean.strip():
-            continue
-        indent = len(clean) - len(clean.lstrip(" "))
-        rows.append((indent, clean.strip()))
-    return rows
-
-
-def _parse(rows, i, indent):
-    first = rows[i][1]
-    if first.startswith("- "):
-        seq = []
-        while i < len(rows) and rows[i][0] == indent and rows[i][1].startswith("- "):
-            after = rows[i][1][2:].strip()
-            block = [(indent + 2, after)] if after else []
-            i += 1
-            while i < len(rows) and rows[i][0] > indent:
-                block.append(rows[i])
-                i += 1
-            if not block:
-                seq.append(None)
-            elif block[0][1].startswith("{"):
-                seq.append(_parse_inline_map(block[0][1]))
-            elif ":" in block[0][1] and not block[0][1].startswith("{"):
-                val, _ = _parse(block, 0, indent + 2)
-                seq.append(val)
-            else:
-                seq.append(_scalar(block[0][1]))
-        return seq, i
-    m = {}
-    while i < len(rows) and rows[i][0] == indent and not rows[i][1].startswith("- "):
-        line = rows[i][1]
-        key, _, rest = line.partition(":")
-        key = key.strip()
-        rest = rest.strip()
-        if rest == "":
-            j = i + 1
-            if j < len(rows) and rows[j][0] > indent:
-                child, i = _parse(rows, j, rows[j][0])
-                m[key] = child
-            else:
-                m[key] = None
-                i += 1
-        elif rest.startswith("{"):
-            m[key] = _parse_inline_map(rest)
-            i += 1
-        else:
-            m[key] = _scalar(rest)
-            i += 1
-    return m, i
-
-
-def parse_manifest(text):
-    rows = _tokenize(text)
-    if not rows:
-        return {}
-    val, _ = _parse(rows, 0, rows[0][0])
-    return val
 
 
 def keyword_matches(text, keyword):
@@ -259,6 +178,11 @@ class V:
                 )
                 return
             self.err(where, "unknown archetype %r (allowed: %s)" % (arch, ", ".join(sorted(ALL_ARCHETYPES))))
+            return
+        if not os.path.exists(os.path.join(COMPONENT_DIR, "%s.html" % arch)):
+            self.err(where, "archetype %r has no component snippet headset-shared/components/%s.html "
+                            "(add the snippet, or add the archetype to archetypes.py + its snippet)"
+                     % (arch, arch))
             return
         self.unknown_keys(where, sc, component_allowed_keys(arch))
 

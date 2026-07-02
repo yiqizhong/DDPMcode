@@ -50,15 +50,18 @@ rm -rf "$MODELS_DIR/$TMP_MODEL"
 cp -R "$MODELS_DIR/HS-DEMO" "$MODELS_DIR/$TMP_MODEL"
 printf '<!DOCTYPE html>\n<title>Auxiliary Preview</title>\n' >"$MODELS_DIR/$TMP_MODEL/connection-preview.html"
 
-python3 "$VERIFY" "$TMP_MODEL" >"$TMP_OUT" 2>"$TMP_ERR" || {
+# FIX 4: a hand-written extra .html in the model folder (never produced by the pipeline) is
+# now a mechanically-enforced violation — "never hand-write HTML" — not a silently-ignored
+# auxiliary file (this used to pass; the check that catches it is new).
+if python3 "$VERIFY" "$TMP_MODEL" >"$TMP_OUT" 2>"$TMP_ERR"; then
   cat "$TMP_OUT" "$TMP_ERR" >&2
-  fail "temp model with auxiliary HTML should pass"
-}
-grep -Fq "connection-preview.html: DRIFT" "$TMP_OUT" && {
+  fail "temp model with a stray HTML file should FAIL verify-model"
+fi
+grep -Fq "connection-preview.html: DRIFT stray page" "$TMP_OUT" || {
   cat "$TMP_OUT" "$TMP_ERR" >&2
-  fail "auxiliary HTML should be ignored, not flagged as drift"
+  fail "stray HTML should be flagged as DRIFT stray page"
 }
-echo "PASS auxiliary HTML is ignored"
+echo "PASS stray HTML is flagged as drift"
 
 rm -rf "$MODELS_DIR/$TMP_MODEL"
 cp -R "$MODELS_DIR/HS-DEMO" "$MODELS_DIR/$TMP_MODEL"

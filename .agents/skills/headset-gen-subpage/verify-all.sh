@@ -41,22 +41,32 @@ run_check() {
 subpage_manifests() {
   local model_dir="$1"
   local home_manifest="$model_dir/home.manifest"
+  # Importlib-load render-model.py and call ITS subpage_from_link — the same rule the
+  # renderer itself uses to resolve a feature link to a manifest stem — so there is exactly
+  # one link-validation rule (mirrors how validate-home.py is already loaded below).
   ROOT="$ROOT" MODEL_DIR="$model_dir" HOME_MANIFEST="$home_manifest" SKILL_DIR="$HERE" python3 - <<'PY'
 import importlib.util
 import os
 import sys
 
-root = os.environ["ROOT"]
 model_dir = os.environ["MODEL_DIR"]
 home_manifest = os.environ["HOME_MANIFEST"]
 skill_dir = os.environ["SKILL_DIR"]
 
-spec = importlib.util.spec_from_file_location(
-    "validate_home_for_verify_all",
-    os.path.join(skill_dir, "validate-home.py"),
+
+def load_module(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+validate_home = load_module(
+    "validate_home_for_verify_all", os.path.join(skill_dir, "validate-home.py")
 )
-validate_home = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(validate_home)
+render_model = load_module(
+    "render_model_for_verify_all", os.path.join(skill_dir, "render-model.py")
+)
 
 try:
     with open(home_manifest, "r", encoding="utf-8") as f:
@@ -71,12 +81,14 @@ for index, feature in enumerate(home.get("features") or []):
         print("features[%d] is not a mapping" % index, file=sys.stderr)
         ok = False
         continue
-    link = feature.get("link")
-    if not isinstance(link, str) or not link.endswith(".html") or "/" in link or "\\" in link:
-        print("features[%d].link is not a simple .html target: %r" % (index, link), file=sys.stderr)
+    link = feature.get("link") if isinstance(feature, dict) else None
+    try:
+        subpage = render_model.subpage_from_link(link, index)
+    except render_model.RenderHalt as exc:
+        print(str(exc), file=sys.stderr)
         ok = False
         continue
-    print(os.path.join(model_dir, link[:-5] + ".manifest"))
+    print(os.path.join(model_dir, subpage + ".manifest"))
 
 sys.exit(0 if ok else 1)
 PY
@@ -145,7 +157,12 @@ for model_dir in "${MODELS[@]}"; do
   # fixtures (e.g. FIXTURE, HS-DEMO) gitignore their *.html, so they are absent from
   # a fresh checkout (CI) — skip drift for those; their manifests/coverage still run.
   # Only gitignored HTML is skipped: a merely-uncommitted/new model still drift-checks.
+  # The orphan-manifest check (verify-model.py --manifests-only) is manifest-side only —
+  # it does not need any HTML on disk — so it runs for EVERY model, including gitignored
+  # fixtures; the stray-HTML check rides inside the full drift call below, where HTML is
+  # actually expected on disk.
   if git -C "$ROOT" check-ignore -q "headset/models/$model/index.html" 2>/dev/null; then
+    run_check "$model orphan manifest check" python3 "$VERIFY_MODEL" "$model" --manifests-only
     echo "== $model generated HTML drift =="
     echo "SKIP: $model generated HTML is gitignored — drift not applicable"
     echo
